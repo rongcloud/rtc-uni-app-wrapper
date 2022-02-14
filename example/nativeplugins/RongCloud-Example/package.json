@@ -1,0 +1,39 @@
+{
+  "name": "RCUniFaceBeautifier",
+  "id": "RongCloud-Example",
+  "version": "5.1.15-1",
+  "description": "RTC美颜插件（此插件依赖 RCUniRTC，仅做功能演示。我们在 RCUniRTC 原生层提供了 api，用户可根据自己的需求开发美颜插件）",
+  "_dp_type": "nativeplugin",
+  "_dp_nativeplugin": {
+    "android": {
+      "plugins": [
+        {
+          "type": "module",
+          "name": "RongCloud-Example-RCUniFaceBeautifier",
+          "class": "cn.rongcloud.rtc.uni.beauty.RCUniFaceBeautifierModule"
+        }
+      ],
+      "integrateType": "aar",
+      "compileOptions": {
+        "sourceCompatibility": "1.8",
+        "targetCompatibility": "1.8"
+      },
+      "dependencies": [],
+      "useAndroidX": true
+    },
+    "ios": {
+      "plugins": [
+        {
+          "type": "module",
+          "name": "RongCloud-Example-RCUniFaceBeautifier",
+          "class": "RCUniFaceBeautifier"
+        }
+      ],
+      "frameworks": [
+        "GPUImage.framework"
+      ],
+      "integrateType": "framework",
+      "deploymentTarget": "9.0"
+    }
+  }
+}

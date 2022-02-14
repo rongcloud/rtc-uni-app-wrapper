@@ -1,0 +1,150 @@
+<template>
+	<view>
+		<view class="cell">
+			<view class="title-view">
+				<text>所有音效总开关</text>
+			</view>
+			<view class="button-view">
+				<button @click="pauseAll"><text>暂停</text></button>
+				<button @click="resumeAll"><text>恢复</text></button>
+				<button @click="stopAll"><text>停止</text></button>
+			</view>
+		</view>
+		<view class="cell" v-for="(effect, index) in effects" :key="effect.name">
+			<view class="title-view">
+				<text>{{effect.name}}</text>
+			</view>
+			<view class="volume">
+				<text class="text">音量</text>
+				<slider :key="effect.effectId" :value="effect.volume" show-value min="0" max="100" step="1"
+					backgroundColor="#BEBEBE" activeColor="#465CFF" block-color="#465CFF" block-size="16"
+					@change="e => changeVolume(e, index)"></slider>
+			</view>
+			<view class="volume">
+				<text class="text">循环次数</text>
+				<slider :value="effect.loop" show-value min="0" max="9" step="1" backgroundColor="#BEBEBE"
+					activeColor="#465CFF" block-color="#465CFF" block-size="16" @change="e => changeLoop(e, index)">
+				</slider>
+			</view>
+			<view class="button-view">
+				<button @click="play(index)"><text>播放</text></button>
+				<button @click="pause(index)"><text>暂停</text></button>
+				<button @click="resume(index)"><text>恢复</text></button>
+				<button @click="stop(index)"><text>停止</text></button>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script>
+	import RCRTCEngine from '@/uni_modules/RongCloud-RTCWrapper/lib/RCRTCEngine';
+
+	export default {
+		data() {
+			return {
+				effects: [{
+						name: '反派大笑',
+						volume: 50,
+						src: '../../static/audio/effect_0.mp3',
+						effectId: 8880,
+						loop: 1,
+					},
+					{
+						name: '狗子叫声',
+						volume: 50,
+						src: '../../static/audio/effect_1.mp3',
+						effectId: 8881,
+						loop: 1,
+					},
+					{
+						name: '胜利号角',
+						volume: 50,
+						src: '../../static/audio/effect_2.mp3',
+						effectId: 8882,
+						loop: 1,
+					}
+				]
+			}
+		},
+		onLoad() {
+			// 创建音效文件缓存
+			this.effects.forEach(effect => {
+				// 注意！！！ 需要将本地URL路径转换成平台绝对路径
+				let path = plus.io.convertLocalFileSystemURL(effect.src);
+				RCRTCEngine.createAudioEffect(path, effect.effectId);
+			})
+		},
+		onBackPress() {
+			// 释放音效文件缓存
+			this.effects.forEach(effect => {
+				RCRTCEngine.releaseAudioEffect(effect.effectId);
+			})
+		},
+		methods: {
+			play(index) {
+				let effect = this.effects[index];
+				let { effectId, volume, loop } = effect;
+				RCRTCEngine.playAudioEffect(effectId, volume, loop);
+			},
+			pause(index) {
+				let effect = this.effects[index];
+				let { effectId } = effect;
+				RCRTCEngine.pauseAudioEffect(effectId);
+			},
+			resume(index) {
+				let effect = this.effects[index];
+				let { effectId } = effect;
+				RCRTCEngine.resumeAudioEffect(effectId);
+			},
+			stop(index) {
+				let effect = this.effects[index];
+				let { effectId } = effect;
+				RCRTCEngine.stopAudioEffect(effectId);
+			},
+			pauseAll() {
+				RCRTCEngine.pauseAllAudioEffects();
+			},
+			resumeAll() {
+				RCRTCEngine.resumeAllAudioEffects();
+			},
+			stopAll() {
+				RCRTCEngine.stopAllAudioEffects();
+			},
+			changeVolume(e, index) {
+				let value = e.detail.value;
+				let effect = this.effects[index];
+				effect.volume = value;
+			},
+			changeLoop(e, index) {
+				let value = e.detail.value;
+				let effect = this.effects[index];
+				effect.loop = value;
+			},
+		}
+	}
+</script>
+
+<style scoped>
+	.cell {
+		margin: 10rpx 20rpx;
+		padding: 10rpx;
+		border: 1rpx solid #B2B2B2;
+	}
+
+	.title-view {
+		align-items: center;
+	}
+
+	.text {
+		font-size: 27rpx;
+	}
+
+	.volume {
+		flex: 1;
+	}
+
+	.button-view {
+		flex-direction: row;
+		justify-content: space-around;
+	}
+</style>

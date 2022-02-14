@@ -1,0 +1,149 @@
+<template>
+	<view>
+		<view style="margin: 20rpx;">
+			<view class="item-view">
+				<text class="text">申请加入子房间</text>
+				<view class="uni-input-wrapper">
+					<input class="uni-input" @input="onRoomIdInput" placeholder="请输入子房间 ID"
+						v-model="subRoomId" />
+				</view>
+				<view class="uni-input-wrapper">
+					<input class="uni-input" @input="onUserIdInput" placeholder="请输入子房间中的用户 ID"
+						v-model="subUserId" />
+				</view>
+				<view style="align-items: center; margin: 20rpx;">
+					<button class="request-button" @click="requestClick">
+						<text class="text">申请</text>
+					</button>
+				</view>
+			</view>
+			<view class="item-view">
+				<view>
+					<text class="text">已加入的子房间</text>
+				</view>
+				<text class="text" v-if="joinedSubRooms.length === 0">暂未加入任何子房间</text>
+				<view v-else class="uni-list-cell" style="margin-top: 20rpx;" v-for="roomId in joinedSubRooms"
+					:key="roomId">
+					<text class="text">{{roomId}}</text>
+					<view class="uni-inline-item">
+						<button class="button" @click="leftClick(roomId)"><text class="text">离开</text></button>
+						<button class="button" style="margin-left: 20rpx;" @click="disbandClick(roomId)"><text
+								class="text">离开并解散</text></button>
+					</view>
+				</view>
+			</view>
+			<view style="margin-top: 20rpx;">
+				<text class="text">加入已连麦的子房间：</text>
+				<view v-if="joinableSubRooms.length === 0">
+					<text class="text">暂时没有可以直接加入的子房间</text>
+				</view>
+				<view v-else class="uni-list-cell" v-for="roomId in joinableSubRooms" :key="roomId"
+					style="margin-top: 20rpx;">
+					<text class="text">{{roomId}}</text>
+					<button class="button" @click="joinRoomClick(roomId)"><text class="text">加入</text></button>
+				</view>
+			</view>
+			
+		</view>
+	</view>
+</template>
+
+<script>
+	import RCRTCEngine from '@/uni_modules/RongCloud-RTCWrapper/lib/RCRTCEngine';
+	import {
+		RCRTCCamera,
+		RCRTCViewFitType,
+		RCRTCMediaType,
+		RCRTCVideoFps,
+		RCRTCVideoResolution
+	} from '@/uni_modules/RongCloud-RTCWrapper/lib/RCRTCDefines';
+	export default {
+		data() {
+			return {
+				roomId: '',
+				userId: '',
+				joinedSubRooms: [],
+				joinableSubRooms: [],
+			}
+		},
+		onLoad() {
+			this.joinedSubRooms = this.getGlobalData().joinedSubRooms;
+			this.joinableSubRooms = this.getGlobalData().joinableSubRooms;
+		},
+		methods: {
+			getGlobalData() {
+				return getApp().globalData.hostPageData;
+			},
+			
+			onRoomIdInput(e) {
+				let value = e.detail.value;
+				this.roomId = value;
+			},
+			
+			onUserIdInput(e) {
+				let value = e.detail.value;
+				this.userId = value;
+			},
+			
+			requestClick() {
+				if (this.roomId.trim() == '') {
+					uni.showToast({
+						icon: 'none',
+						title: '子房间 ID 不能为空'
+					});
+					return;
+				}
+				if (this.userId.trim() == '') {
+					uni.showToast({
+						icon: 'none',
+						title: '用户 ID 不能为空'
+					});
+					return;
+				}
+				RCRTCEngine.requestJoinSubRoom(this.roomId, this.userId, true);
+			},
+			leftClick(roomId) {
+				RCRTCEngine.leaveSubRoom(roomId, false);
+			},
+			disbandClick(roomId) {
+				RCRTCEngine.leaveSubRoom(roomId, true);
+				// 自己调用解散不回调 disband,所以在这里手动删除
+				let bandedSubRooms = this.getGlobalData().bandedSubRooms;
+				let bandedSubRoomsIndex = bandedSubRooms.indexOf(roomId);
+				if (bandedSubRoomsIndex != -1) {
+					bandedSubRooms.splice(bandedSubRoomsIndex, 1);
+				}
+			},
+			joinRoomClick(roomId) {
+				RCRTCEngine.joinSubRoom(roomId);
+			},
+		}
+	}
+</script>
+
+<style scoped>
+	.uni-input-wrapper {
+		border: 1rpx solid #888888;
+		margin-top: 10rpx;
+		height: 80rpx;
+	}
+
+	.text {
+		font-size: 28rpx;
+	}
+
+	.button {
+		height: 80rpx;
+	}
+
+	.item-view {
+		margin-top: 20rpx;
+		padding-bottom: 20rpx;
+		border-bottom: 1rpx solid #000000;
+	}
+
+	.request-button {
+		width: 160rpx;
+		height: 80rpx;
+	}
+</style>

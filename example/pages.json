@@ -1,0 +1,115 @@
+{
+	"pages": [
+		//pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+		{
+			"path": "pages/connect",
+			"style": {
+				"navigationBarTitleText": "测试专用DEMO"
+			}
+		},
+		{
+			"path": "pages/meeting/meeting",
+			"style": {
+				"navigationBarTitleText": "会议模式",
+				"app-plus": {
+					"popGesture": "none"
+				}
+			}
+		},
+		{
+			"path": "pages/host/host",
+			"style": {
+				"navigationBarTitleText": "主播模式",
+				"app-plus": {
+					"popGesture": "none"
+				}
+			}
+		},
+		{
+			"path": "pages/audience/audience",
+			"style": {
+				"navigationBarTitleText": "观众模式",
+				"app-plus": {
+					"popGesture": "none",
+					"titleNView": {
+						"buttons": [ //原生标题栏按钮配置,
+							{ //原生标题栏增加分享按钮，点击事件可通过页面的 onNavigationBarButtonTap 函数进行监听
+								"text": "💬",
+								"fontSize": "14"
+							}
+						],
+						"backButton": { //自定义 backButton
+							"background": "#FFFFFF"
+						}
+					}
+				}
+			}
+		},
+		{
+			"path": "pages/host/liveMixPanel",
+			"style": {
+				"navigationBarTitleText": "合流布局面板",
+				"enablePullDownRefresh": false
+			}
+		},
+		{
+			"path": "pages/host/customLayout",
+			"style": {
+				"navigationBarTitleText": "自定义视频布局",
+				"enablePullDownRefresh": false
+			}
+
+		},
+		{
+			"path": "pages/host/cdnConfig",
+			"style": {
+				"navigationBarTitleText": "配置CDN",
+				"enablePullDownRefresh": false
+			}
+		},
+		{
+			"path": "pages/messagePanel",
+			"style": {
+				"navigationBarTitleText": "消息面板",
+				"enablePullDownRefresh": false
+			}
+		},
+		{
+			"path": "pages/meeting/audioEffect",
+			"style": {
+				"navigationBarTitleText": "音效面板",
+				"enablePullDownRefresh": false
+			}
+		},
+		{
+			"path": "pages/meeting/audioMix",
+			"style": {
+				"navigationBarTitleText": "混音面板",
+				"enablePullDownRefresh": false
+			}
+		},
+		{
+			"path": "pages/host/joinSubRoom",
+			"style": {
+				"navigationBarTitleText": "跨房间连麦",
+				"enablePullDownRefresh": false
+			}
+		}
+	],
+	"globalStyle": {
+		"navigationBarTextStyle": "white",
+		"navigationBarTitleText": "RTC-RN-TEST-DEMO",
+		"navigationBarBackgroundColor": "#007AFF",
+		"backgroundColor": "#F8F8F8",
+		"navigationBarShadow": {
+			"colorType": "grey"
+		},
+		"app-plus": {
+			"titleNView": {
+				"backButton": { //自定义 backButton
+					"background": "#FFFFFF"
+				}
+			}
+		}
+	}
+}

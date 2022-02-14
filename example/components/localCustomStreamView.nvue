@@ -1,0 +1,306 @@
+<template>
+	<view>
+		<view class="uni-row" style="margin-top: 10rpx;">
+			<view style="flex: 1; background-color: #cc66ff;">
+				<RCRTCView class="localVideoView" ref="videoView" :fitType="currentFitType" :mirror="mirror">
+				</RCRTCView>
+				<view class="videoTopView">
+					<text class="text whiteColor">{{tag}}</text>
+					<button class="fitButton" plain="true" @click="showFitTypeList">
+						<text class="text whiteColor">{{fitTypeTitles[currentFitTypeIndex]}}</text>
+					</button>
+				</view>
+			</view>
+			<view class="rightControlArea">
+				<text class="text">自定义流操作</text>
+				<text class="text" style="margin-top: 10rpx;">已选文件：</text>
+				<view>
+					<text class="text">{{fileName}}</text>
+				</view>
+				<view class="uni-row">
+					<button @click="selectFileClick" style="margin-top: 10rpx; width: 140rpx; height: 50rpx;">
+						<text class="text">选择文件</text>
+					</button>
+					<label @click="publishCutomStreamClick" class="radio" style="margin-left: 10rpx;">
+						<radio :checked="isPublish" :disabled="true" />
+						<text class="text">发布</text>
+					</label>
+				</view>
+				<view class="uni-row">
+					<button @click="showFpsList" class="dropdownButton" style="margin-top: 10rpx;">
+						<text class="text">{{fpsTitles[currentFps]}}</text>
+					</button>
+					<button @click="showResolutionList(false)" class="dropdownButton"
+						style="margin-top: 10rpx; margin-left: 30rpx;">
+						<text class="text">{{resolutionTitles[currentResolution]}}</text>
+					</button>
+				</view>
+				<view class="uni-inline-item" style="margin-top: 10rpx;">
+					<text class="text">码率下限：</text>
+					<button @click="showMinVideoKbpsList" class="dropdownButton">
+						<text class="text">{{minVideoKbpsTitles[currentMinVideoKbpsIndex]}}</text>
+					</button>
+				</view>
+				<view class="uni-inline-item" style="margin-top: 10rpx;">
+					<text class="text">码率上限：</text>
+					<button @click="showMaxVideoKbpsList" class="dropdownButton">
+						<text class="text">{{maxVideoKbpsTitles[currentMaxVideoKbpsIndex]}}</text>
+					</button>
+				</view>
+			</view>
+		</view>
+		<fuiDropdownList :options="fitTypeTitles" ref="fitTypeList" :isCheckbox="false" @click="fitTypeItemClick">
+		</fuiDropdownList>
+		<fuiDropdownList :options="fpsTitles" ref="fpsList" :isCheckbox="false" @click="fpsItemClick">
+		</fuiDropdownList>
+		<fuiDropdownList :options="resolutionTitles" ref="resolutionList" :height="600" :isCheckbox="false"
+			@click="resolutionItemClick">
+		</fuiDropdownList>
+		<fuiDropdownList :options="maxVideoKbpsTitles" ref="maxVideoKbpsList" :height="600" :isCheckbox="false"
+			@click="maxVideoKbpsItemClick">
+		</fuiDropdownList>
+		<fuiDropdownList :options="minVideoKbpsTitles" ref="minVideoKbpsList" :height="600" :isCheckbox="false"
+			@click="minVideoKbpsItemClick">
+		</fuiDropdownList>
+	</view>
+</template>
+
+<script>
+	import * as Constants from '@/common/constants.js';
+	import fuiDropdownList from "@/components/fui-dropdown-list/fui-dropdown-list";
+
+	import RCRTCView from '@/uni_modules/RongCloud-RTCWrapper/components/RCRTCView';
+
+	import {
+		RCRTCCamera,
+		RCRTCViewFitType,
+		RCRTCMediaType,
+		RCRTCVideoFps,
+		RCRTCVideoResolution
+	} from '@/uni_modules/RongCloud-RTCWrapper/lib/RCRTCDefines';
+
+	export default {
+		name: "localCustomStreamView",
+		components: {
+			RCRTCView,
+			fuiDropdownList,
+		},
+		props: {
+			tag: {
+				type: String,
+				required: true,
+			},
+			isPublish: {
+				type: Boolean,
+				required: true,
+				default: false,
+			},
+			changeFile: {
+				type: () => {},
+				required: true,
+			},
+			publishClick: {
+				type: () => {},
+				required: true,
+			},
+			changeVideoConfig: {
+				type: () => {},
+				required: true,
+			}
+		},
+		data() {
+			return {
+				fitTypes: Constants.fitTypes,
+				fitTypeTitles: [],
+				currentFitTypeIndex: 0,
+
+				fpsTitles: [],
+				currentFps: RCRTCVideoFps.Fps30,
+
+				resolutionTitles: [],
+
+				maxVideoKbps: Constants.maxVideoKbps,
+				minVideoKbps: Constants.minVideoKbps,
+				maxVideoKbpsTitles: [],
+				minVideoKbpsTitles: [],
+				currentMaxVideoKbpsIndex: 1,
+				currentMinVideoKbpsIndex: 1,
+				currentResolution: RCRTCVideoResolution.Resolution_720x1280,
+
+				isCreateCustomStream: false,
+				isPublishCustomStream: false,
+				filePath: '',
+				fileName: '',
+			};
+		},
+		computed: {
+			currentFitType: function() {
+				return this.fitTypes[this.currentFitTypeIndex].value;
+			},
+		},
+		created() {
+			this.fitTypeTitles = this.fitTypes.map(item => item.label);
+
+			this.fpsTitles = Object.keys(RCRTCVideoFps).filter((item) => {
+				return isNaN(Number(item));
+			}).map((item, index) => {
+				let temp = item.replace('Fps', '');
+				return temp + ' FPS';
+			});
+
+			this.resolutionTitles = Object.keys(RCRTCVideoResolution).filter((item) => {
+				return isNaN(Number(item));
+			}).map((item, index) => {
+				let temp = item.replace('Resolution_', '');
+				return temp;
+			});
+
+			this.maxVideoKbpsTitles = this.maxVideoKbps.map(item => item + 'kbps');
+			this.minVideoKbpsTitles = this.minVideoKbps.map(item => item + 'kbps');
+		},
+		methods: {
+			showFitTypeList() {
+				this.$refs.fitTypeList.show();
+			},
+			showFpsList() {
+				this.$refs.fpsList.show();
+			},
+			showResolutionList(isTiny) {
+				this.isShowTiny = isTiny;
+				this.$refs.resolutionList.show();
+			},
+			showMaxVideoKbpsList() {
+				this.$refs.maxVideoKbpsList.show();
+			},
+			showMinVideoKbpsList() {
+				this.$refs.minVideoKbpsList.show();
+			},
+			fitTypeItemClick(e) {
+				this.currentFitTypeIndex = e.index;
+			},
+			fpsItemClick(e) {
+				this.currentFps = e.index;
+				this.setVideoConfig();
+			},
+			resolutionItemClick(e) {
+				this.currentResolution = e.index;
+				this.setVideoConfig();
+			},
+			minVideoKbpsItemClick(e) {
+				this.currentMinVideoKbpsIndex = e.index;
+				this.setVideoConfig();
+			},
+			maxVideoKbpsItemClick(e) {
+				this.currentMaxVideoKbpsIndex = e.index;
+				this.setVideoConfig();
+			},
+
+			selectFileClick() {
+				uni.chooseVideo({
+					sourceType: ['album'],
+					success: (res) => {
+						this.changeFile();
+
+						this.filePath = res.tempFilePath;
+						this.fileName = this.filePath.split('/').pop();
+					}
+				});
+			},
+
+			publishCutomStreamClick() {
+				if (this.filePath.length === 0) {
+					uni.showToast({
+						icon: 'none',
+						title: '请先选择文件',
+					})
+					return;
+				}
+				this.publishClick(this.filePath);
+			},
+
+			setVideoConfig() {
+				let minBitrate = this.minVideoKbps[this.currentMinVideoKbpsIndex];
+				let maxBitrate = this.maxVideoKbps[this.currentMaxVideoKbpsIndex];
+				let fps = this.currentFps;
+				let resolution = this.currentResolution;
+				this.changeVideoConfig({ minBitrate, maxBitrate, fps, resolution });
+			},
+
+			getVideoViewRef() {
+				return this.$refs.videoView.getNativeViewRef();
+			}
+		},
+	}
+</script>
+
+<style scoped>
+	.setting-view {
+		display: flex;
+		position: fixed;
+		flex-direction: row;
+		justify-content: flex-end;
+		margin-bottom: 10rpx;
+		padding: 10rpx;
+		background-color: #007AFF;
+		height: 80rpx;
+		left: 0;
+		right: 0;
+	}
+
+	.setting-button {
+		margin-left: 20rpx;
+		opacity: 1;
+	}
+
+	.setting-button-disable {
+		opacity: 0.3;
+	}
+
+	.text {
+		font-size: 27rpx;
+	}
+
+	.whiteColor {
+		color: #FFFFFF
+	}
+
+	.radio {
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.localVideoView {
+		flex: 1;
+		height: 400rpx;
+	}
+
+	.videoTopView {
+		position: absolute;
+		left: 10rpx;
+		top: 10rpx;
+		align-items: flex-start;
+	}
+
+	.rightControlArea {
+		flex: 1;
+		margin-left: 10rpx;
+	}
+
+	.dropdownButton {
+		width: 140rpx;
+		height: 50rpx;
+	}
+
+	.fitButton {
+		margin-top: 10rpx;
+	}
+
+	.tinySetup {
+		margin: 10rpx;
+		border-width: 1rpx;
+		border-color: #465CFF;
+		justify-content: space-around;
+		padding-top: 20rpx;
+		padding-bottom: 20rpx;
+	}
+</style>

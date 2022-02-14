@@ -1,0 +1,518 @@
+<template>
+	<view style="padding: 10rpx;">
+		<text>合流布局模式</text>
+		<view class="uni-inline-item" style="margin-top: 10rpx;">
+			<view class="uni-inline-item">
+				<label class="uni-inline-item" style="margin-left: 20rpx;" v-for="(item, index) in layoutModes"
+					:key="item.value" @click="changeLayoutMode(item.value)">
+					<radio :value="item.value" :checked="item.value === currentLayoutMode" :disabled="true" />
+					<text class="text">{{item.label}}</text>
+				</label>
+			</view>
+		</view>
+		<view style="margin-top: 20rpx;">
+			<text>合流裁剪模式</text>
+			<view class="uni-inline-item" style="margin-top: 10rpx;">
+				<view class="uni-inline-item">
+					<label class="uni-inline-item" style="margin-left: 20rpx;" v-for="(item, index) in renderModes"
+						:key="item.value" @click="changeRenderMode(item.value)">
+						<radio :value="item.value" :checked="item.value === currentRenderMode" :disabled="true" />
+						<text class="text">{{item.label}}</text>
+					</label>
+				</view>
+			</view>
+		</view>
+		<button class="button" @click="showVideoPopup(false)"><text>视频设置</text></button>
+		<button class="button" @click="showVideoPopup(true)"><text>小流视频设置</text></button>
+		<button class="button" @click="toCustomLayout"><text>视频自定义布局</text></button>
+		<button class="button" @click="showAudioPopup"><text>音频设置</text></button>
+		<button class="button" @click="showAudioMixPopup"><text>音频自定义合流</text></button>
+
+		<uni-popup ref="videoPopup" type="center">
+			<view class="popup-content">
+				<text class="popup-title">{{videoPopupTitle}}</text>
+				<view style="display: flex;">
+					<view class="popup-inline-item">
+						<text class="text">码率：</text>
+						<button @click="showVideoBitrateList" class="dropdownButton">
+							<text class="text">{{bitrateTitles[currentVideoParams.bitrate]}}</text>
+						</button>
+					</view>
+					<view class="popup-inline-item">
+						<text class="text">帧率：</text>
+						<button @click="showFpsList" class="dropdownButton">
+							<text class="text">{{fpsTitles[currentVideoParams.fps]}}</text>
+						</button>
+					</view>
+					<view class="popup-inline-item">
+						<text class="text">分辨率：</text>
+						<button @click="showResolutionList" class="dropdownButton">
+							<text class="text">{{resolutionTitles[currentVideoParams.resolution]}}</text>
+						</button>
+					</view>
+				</view>
+				<button @click="closeVideoPopup">
+					<text>关闭</text>
+				</button>
+			</view>
+		</uni-popup>
+		<uni-popup ref="audioPopup">
+			<view class="popup-content">
+				<text class="popup-title">音频设置</text>
+				<view class="popup-inline-item">
+					<text class="text">码率：</text>
+					<button @click="showAudioBitrateList" class="dropdownButton">
+						<text class="text">{{audioBitrateTitles[currentAudioBitrate]}}</text>
+					</button>
+				</view>
+			</view>
+		</uni-popup>
+		<uni-popup ref="audioMixPopup">
+			<uni-popup-dialog title="参与音频合流的用户" @confirm="audioMixConfirm">
+				<view class="popup-content  audio-popup-content">
+					<view class="uni-list">
+						<checkbox-group @change="audioMixCheckboxChange">
+							<label class="uni-list-cell uni-list-cell-pd" v-for="user in users" :key="user.userId">
+								<view>
+									<checkbox :value="user" :checked="user.checked" />
+								</view>
+								<view>{{user.userId}}</view>
+							</label>
+						</checkbox-group>
+					</view>
+				</view>
+			</uni-popup-dialog>
+		</uni-popup>
+		<fuiDropdownList :options="fpsTitles" ref="fpsList" :isCheckbox="false" @click="fpsItemClick">
+		</fuiDropdownList>
+		<fuiDropdownList :options="bitrateTitles" ref="videoBitrateList" :isCheckbox="false"
+			@click="videoBitrateItemClick">
+		</fuiDropdownList>
+		<fuiDropdownList :options="resolutionTitles" ref="resolutionList" :height="600" :isCheckbox="false"
+			@click="resolutionItemClick">
+		</fuiDropdownList>
+		<fuiDropdownList :options="audioBitrateTitles" ref="audioBitrateList" :isCheckbox="false"
+			@click="audioBitrateItemClick"></fuiDropdownList>
+	</view>
+</template>
+
+<script>
+	import {
+		RCRTCLiveMixLayoutMode,
+		RCRTCLiveMixRenderMode,
+		RCRTCMediaType,
+		RCRTCVideoFps,
+		RCRTCVideoResolution,
+		RCRTCAudioSampleRate,
+		RCRTCEngineEventsName,
+		RCRTCStatsEventsName,
+	} from '@/uni_modules/RongCloud-RTCWrapper/lib/RCRTCDefines';
+	
+	import * as Constants from '../../common/constants.js';
+	import RCRTCEngine from '@/uni_modules/RongCloud-RTCWrapper/lib/RCRTCEngine';
+	import fuiDropdownList from "@/components/fui-dropdown-list/fui-dropdown-list";
+
+	export default {
+		components: {
+			fuiDropdownList,
+		},
+		data() {
+			return {
+				users: [],
+				layoutModes: [{
+						label: '自定义',
+						value: RCRTCLiveMixLayoutMode.Custom
+					}, {
+						label: '悬浮',
+						value: RCRTCLiveMixLayoutMode.Suspension
+					},
+					{
+						label: '自适应',
+						value: RCRTCLiveMixLayoutMode.Adaptive
+					}
+				],
+				renderModes: [{
+						label: '裁剪',
+						value: RCRTCLiveMixRenderMode.Crop
+					},
+					{
+						label: '填充',
+						value: RCRTCLiveMixRenderMode.Whole
+					}
+				],
+				videoBitrates: Constants.maxVideoKbps,
+				tinyVideoBitrate: Constants.tinyMaxVideoKbps,
+				resolutionTitles: [],
+				videoBitrateTitles: [],
+				tinyVideoBitrateTitles: [],
+				fpsTitles: [],
+				isShowTiny: false,
+				videoParams: {},
+				tinyVideoParams: {},
+				audioBitrates: Constants.audioKbps,
+				audioBitrateTitles: [],
+				// 参与直播的远端用户
+				users: [],
+				// 选中的参与音频合流的用户
+				selectedAudioMixUsers: [],
+				currentAudioBitrate: 0,
+				currentLayoutMode: RCRTCLiveMixLayoutMode.Suspension,
+				currentRenderMode: RCRTCLiveMixRenderMode.Crop,
+				// 临时保存数据, 回调成功后赋值到界面使用的data中
+				tempLayoutMode: RCRTCLiveMixLayoutMode.Suspension,
+				tempRenderMode: RCRTCLiveMixRenderMode.Crop,
+				tempCustomLayouts: [],
+			}
+		},
+		computed: {
+			currentVideoParams: function() {
+				return this.isShowTiny ? this.tinyVideoParams : this.videoParams;
+			},
+			bitrateTitles: function() {
+				return this.isShowTiny ? this.tinyVideoBitrateTitles : this.videoBitrateTitles;
+			},
+			videoPopupTitle: function() {
+				return (this.isShowTiny ? '小流' : '') + '视频设置';
+			},
+		},
+		onLoad(option) {
+			this.fpsTitles = Object.keys(RCRTCVideoFps).filter((item) => {
+				return isNaN(Number(item));
+			}).map((item, index) => {
+				let temp = item.replace('Fps', '');
+				return temp + ' FPS';
+			});
+
+			this.resolutionTitles = Object.keys(RCRTCVideoResolution).filter((item) => {
+				return isNaN(Number(item));
+			}).map((item, index) => {
+				let temp = item.replace('Resolution_', '');
+				return temp;
+			});
+
+			this.audioBitrateTitles = this.audioBitrates.map(item => item + 'kbps');
+			this.videoBitrateTitles = this.videoBitrates.map(item => item + 'kbps');
+			this.tinyVideoBitrateTitles = this.tinyVideoBitrate.map(item => item + 'kbps');
+			this.videoParams = this.getVideoParams(false);
+			this.tinyVideoParams = this.getVideoParams(true);
+			this.users = this.getGlobalData().users.filter(user => user.userId != this.getGlobalLocalUserId()).map(
+			user => {
+				return {
+					userId: user.userId,
+					checked: false
+				}
+			});
+			// 初始化设置
+			let layoutMode = this.getGlobalLayoutMode();
+			if (layoutMode) {
+				this.currentLayoutMode = layoutMode;
+			}
+
+			// 监听提交自定义布局事件
+			uni.$on('changeLiveMixCustomLayout', this.changeLiveMixCustomLayoutCallback.bind(this));
+			uni.$on(RCRTCEngineEventsName.OnLiveMixCustomLayoutsSet, this.onLiveMixCustomLayoutsSetCallback.bind(this));
+			uni.$on(RCRTCEngineEventsName.OnLiveMixLayoutModeSet, this.onLiveMixLayoutModeSetCallback.bind(this));
+			uni.$on(RCRTCEngineEventsName.OnLiveMixRenderModeSet, this.onLiveMixRenderModeSetCallback.bind(this));
+		},
+		onUnload() {
+			uni.$off('changeLiveMixCustomLayout');
+			uni.$off(RCRTCEngineEventsName.OnLiveMixCustomLayoutsSet);
+			uni.$off(RCRTCEngineEventsName.OnLiveMixLayoutModeSet);
+			uni.$off(RCRTCEngineEventsName.OnLiveMixRenderModeSet);
+		},
+		methods: {
+			getGlobalData() {
+				return getApp().globalData.hostPageData;
+			},
+			getGlobalLocalUserId() {
+				return getApp().globalData.localUserId;
+			},
+			getGlobalVideoParams(tiny) {
+				return tiny ? this.getGlobalData().liveMixTinyVideoParams : this.getGlobalData().liveMixVideoParams;
+			},
+			updateGlobalVideoParams() {
+				if (this.isShowTiny) {
+					this.getGlobalData().liveMixTinyVideoParams = this.currentVideoParams;
+				} else {
+					this.getGlobalData().liveMixVideoParams = this.currentVideoParams;
+				}
+			},
+			getGlobalLayoutMode() {
+				return this.getGlobalData().liveMixLayoutMode;
+			},
+			setGlobalLayoutMode(mode) {
+				this.getGlobalData().liveMixLayoutMode = mode;
+			},
+			getGlobalRenderMode() {
+				return this.getGlobalData().liveMixRenderMode;
+			},
+			setGlobalRenderMode(mode) {
+				this.getGlobalData().liveMixRenderMode = mode;
+			},
+			getGlobalCustomLayouts() {
+				let layouts = getApp().globalData.hostPageData.customLayouts;
+				return JSON.parse(JSON.stringify(layouts));
+			},
+			setGlobalCustomLayouts(layouts) {
+				getApp().globalData.hostPageData.customLayouts = layouts;
+			},
+			getVideoParams(tiny) {
+				let params = this.getGlobalVideoParams(tiny);
+				if (params == null) {
+					// 视频设置默认值
+					params = this.getDefaultVideoParams(tiny);
+				}
+				return params;
+			},
+			getDefaultVideoParams(tiny) {
+				return tiny ? {
+					bitrate: 0,
+					fps: RCRTCVideoFps.Fps15,
+					resolution: RCRTCVideoResolution.Resolution_180x320
+				} : {
+					bitrate: 0,
+					fps: RCRTCVideoFps.Fps30,
+					resolution: RCRTCVideoResolution.Resolution_720x1280
+				};
+			},
+			changeLayoutMode(value) {
+				if (value === 0) {
+					this.toCustomLayout();
+				} else {
+					this.tempLayoutMode = value;
+					let code = RCRTCEngine.setLiveMixLayoutMode(value);
+					if (code === 0) {
+						console.log('setLiveMixLayoutMode 调用成功');
+					}
+					uni.showLoading({
+						title: '加载中...',
+					});
+				}
+			},
+			changeRenderMode(value) {
+				this.tempRenderMode = value;
+				let code = RCRTCEngine.setLiveMixRenderMode(value);
+				if (code === 0) {
+					console.log('setLiveMixRenderMode 调用成功');
+				}
+				uni.showLoading({
+					title: '加载中...',
+				});
+			},
+			toCustomLayout() {
+				uni.navigateTo({
+					url: `./customLayout`
+				})
+			},
+			showVideoPopup(tiny) {
+				this.isShowTiny = tiny;
+				this.$refs.videoPopup.open('center');
+			},
+			closeVideoPopup() {
+				this.$refs.videoPopup.close();
+			},
+			showAudioPopup() {
+				this.$refs.audioPopup.open('center');
+			},
+			showAudioMixPopup() {
+				this.$refs.audioMixPopup.open('center');
+			},
+			showResolutionList() {
+				this.$refs.resolutionList.show();
+			},
+			showFpsList() {
+				this.$refs.fpsList.show();
+			},
+			showVideoBitrateList() {
+				this.$refs.videoBitrateList.show();
+			},
+			showAudioBitrateList() {
+				this.$refs.audioBitrateList.show();
+			},
+			// 视频 fps
+			fpsItemClick(e) {
+				this.currentVideoParams.fps = e.index;
+				RCRTCEngine.setLiveMixVideoFps(e.index, this.isShowTiny);
+				this.updateGlobalVideoParams();
+			},
+			// 视频 码率
+			videoBitrateItemClick(e) {
+				this.currentVideoParams.bitrate = e.index;
+				RCRTCEngine.setLiveMixVideoBitrate(this.videoBitrates[e.index], this.isShowTiny);
+				this.updateGlobalVideoParams();
+			},
+			// 视频 分辨率
+			resolutionItemClick(e) {
+				this.currentVideoParams.resolution = e.index;
+				RCRTCEngine.setLiveMixVideoResolution(e.index, this.isShowTiny);
+				this.updateGlobalVideoParams();
+			},
+			// 音频码率
+			audioBitrateItemClick(e) {
+				this.currentAudioBitrate = e.index;
+				let code = RCRTCEngine.setLiveMixAudioBitrate(this.audioBitrates[e.index]);
+				if (code === 0) {
+					uni.showToast({
+						icon: 'none',
+						title: '音频码率设置成功',
+						duration: 2000
+					});
+				} else {
+					uni.showToast({
+						icon: 'none',
+						title: `音频码率设置失败code:${code}`,
+						duration: 2000
+					});
+				}
+			},
+			// 音频合流用户多选框
+			audioMixCheckboxChange(e) {
+				console.log(e);
+				this.selectedAudioMixUsers = e.detail.value;
+			},
+			// 确认设置音频合流的用户
+			audioMixConfirm() {
+				//保存选中的值
+				this.users.forEach(user => {
+					// 判断当前用户是否被选中， 然后设置用户的状态
+					let findIndex = this.selectedAudioMixUsers.findIndex(sUser => sUser.userId === user.userId);
+					user.checked = findIndex != -1;
+				});
+				//设置 合流
+				let userIds = this.selectedAudioMixUsers.map(user => user.userId);
+				let code = RCRTCEngine.setLiveMixCustomAudios(userIds);
+				// 详细 code值 可以参考官网文档的状态码
+				if (code === 0) {
+					uni.showToast({
+						icon: 'none',
+						title: '音频合流设置成功',
+						duration: 2000
+					});
+				} else {
+					uni.showToast({
+						icon: 'none',
+						title: `音频合流设置失败code:${code}`,
+						duration: 2000
+					});
+				}
+			},
+			changeLiveMixCustomLayoutCallback(layouts) {
+				console.log('changeLiveMixCustomLayout', layouts);
+				uni.showLoading({
+					title: '加载中...'
+				});
+				if (layouts.length > 0) {
+					this.tempLayoutMode = RCRTCLiveMixLayoutMode.Custom;
+					// 设置 自定义布局
+					RCRTCEngine.setLiveMixLayoutMode(RCRTCLiveMixLayoutMode.Custom);
+					RCRTCEngine.setLiveMixCustomLayouts(layouts);
+				} else {
+					this.tempLayoutMode = RCRTCLiveMixLayoutMode.Suspension;
+					RCRTCEngine.setLiveMixLayoutMode(RCRTCLiveMixLayoutMode.Suspension);
+				}
+				this.tempCustomLayouts = layouts;
+
+			},
+			onLiveMixCustomLayoutsSetCallback(res) {
+				let {
+					code,
+					message
+				} = res;
+				if (code === 0) {
+					// 保存数据到全局，二次打开自定义布局界面回显使用
+					this.setGlobalCustomLayouts(this.tempCustomLayouts);
+					uni.showToast({
+						icon: 'none',
+						title: '自定义布局设置成功',
+					});
+				} else {
+					uni.showToast({
+						icon: 'none',
+						title: `自定义布局设置失败：${code} - ${message}`
+					});
+				}
+			},
+			onLiveMixLayoutModeSetCallback(res) {
+				uni.hideLoading();
+				let {
+					code,
+					message
+				} = res;
+				if (code === 0) {
+					this.currentLayoutMode = this.tempLayoutMode;
+					this.setGlobalLayoutMode(this.currentLayoutMode);
+					if (this.currentLayoutMode != RCRTCLiveMixLayoutMode.Custom) {
+						// 其他模式设置成功后清空保存的自定义布局数据
+						this.setGlobalCustomLayouts([]);
+					}
+					uni.showToast({
+						icon: 'none',
+						title: `合流布局模式设置成功`
+					});
+				} else {
+					uni.showToast({
+						icon: 'none',
+						title: `合流布局模式设置失败：${code} - ${message}`
+					});
+				}
+			},
+			onLiveMixRenderModeSetCallback(res) {
+				uni.hideLoading();
+				let {
+					code,
+					message
+				} = res;
+				if (code === 0) {
+					this.currentRenderMode = this.tempRenderMode;
+					this.setGlobalRenderMode(this.currentRenderMode);
+					uni.showToast({
+						icon: 'none',
+						title: `合流裁剪模式设置成功`
+					});
+				} else {
+					uni.showToast({
+						icon: 'none',
+						title: `合流裁剪模式设置失败：${code} - ${message}`
+					});
+				}
+			}
+		}
+	}
+</script>
+
+<style scoped>
+	.text {
+		font-size: 27rpx;
+	}
+
+	.popup-inline-item {
+		flex-direction: row;
+		align-items: center;
+		margin-bottom: 40rpx;
+	}
+
+	.popup-title {
+		font-size: 38rpx;
+		color: #E43D33;
+		margin-bottom: 40rpx;
+		text-align: center;
+	}
+
+	.popup-content {
+		margin: 40rpx;
+		width: 600rpx;
+		background-color: #FFFFFF;
+		justify-content: center;
+		padding: 40rpx;
+	}
+
+	.audio-popup-content {
+		margin: 0;
+		padding: 0;
+	}
+
+	.button {
+		margin-top: 20rpx;
+		height: 80rpx;
+	}
+</style>

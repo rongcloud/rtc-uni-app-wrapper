@@ -1,0 +1,254 @@
+<template>
+	<view>
+		<view class="uni-row" style="margin-top: 10rpx;">
+			<view style="flex: 1; background-color: #cc66ff;">
+				<RCRTCView class="videoView" ref="videoView" :fitType="currentFitType">
+				</RCRTCView>
+				<view class="videoTopView">
+					<text class="text whiteColor">{{tag}}</text>
+					<button class="fitButton" plain="true" @click="showFitTypeList">
+						<text class="text whiteColor">{{fitTypeTitles[currentFitTypeIndex]}}</text>
+					</button>
+				</view>
+				<button class="tinyButton" plain="true" @click="changeTiny" v-if="isSubscribedVideo">
+					<text class="text whiteColor">{{isTiny ? '切大流' : '切小流'}}</text>
+				</button>
+			</view>
+			<view class="rightControlArea">
+				<view class="uni-row">
+					<!-- 由于 radio 设置了 disable无效 所以使用了 fui-radio -->
+					<label @click="subscribeAudio" class="radio">
+						<radio :checked="isSubscribedAudio" :disabled="true" />
+						<text class="text" :class="{disableText: !isPublishAudio}">订阅音频</text>
+					</label>
+					<label @click="subscribeVideo" class="radio" style="margin-left: 10rpx;">
+						<radio :checked="isSubscribedVideo" :disabled="true" />
+						<text class="text" :class="{disableText: !isPublishVideo}">订阅视频</text>
+					</label>
+				</view>
+				<view style="margin-top: 20rpx;" v-if="videoStats != null">
+					<text class="text">{{`视频码率 ${videoStats.bitrate}kbps`}}</text>
+					<text class="text">{{`视频帧率 ${videoStats.fps}fps`}}</text>
+					<text class="text">{{`视频分辨率${videoStats.height}x${videoStats.width}`}}</text>
+					<text class="text">{{`视频丢包率${videoStats.packageLostRate}`}}</text>
+				</view>
+			</view>
+		</view>
+		<fui-dropdown-list :options="fitTypeTitles" ref="fitTypeList" :isCheckbox="false" @click="fitTypeItemClick">
+		</fui-dropdown-list>
+	</view>
+</template>
+
+<script>
+	import RCRTCView from '@/uni_modules/RongCloud-RTCWrapper/components/RCRTCView';
+	import RCRTCEngine from '@/uni_modules/RongCloud-RTCWrapper/lib/RCRTCEngine';
+	import {
+		RCRTCCamera,
+		RCRTCViewFitType,
+		RCRTCMediaType,
+		RCRTCVideoFps,
+		RCRTCVideoResolution
+	} from '@/uni_modules/RongCloud-RTCWrapper/lib/RCRTCDefines';
+	import * as Constants from '../common/constants.js';
+	export default {
+		name: "remoteCustomAnchorView",
+		components: {
+			RCRTCView,
+		},
+		props: {
+			userId: {
+				type: String,
+				required: true,
+				default: '',
+			},
+			tag: {
+				type: String,
+				required: true,
+				default: '',
+			},
+			isPublishVideo: {
+				type: Boolean,
+				required: true,
+				default: false,
+			},
+			isPublishAudio: {
+				type: Boolean,
+				required: true,
+				default: false,
+			},
+			isSubscribedVideo: {
+				type: Boolean,
+				required: true,
+				default: false,
+			},
+			isSubscribedAudio: {
+				type: Boolean,
+				required: true,
+				default: false,
+			},
+			videoStats: {
+				default: {
+					bitrate: 0,
+					fps: 0,
+					width: 0,
+					height: 0,
+					packageLostRate: 0,
+				}
+			},
+		},
+		// watch: {
+		// 	isPublishVideo: {
+		// 		handler(newVal, oldVal) {
+		// 			if (!newVal) {
+
+		// 			}
+		// 		},
+		// 		immediate: true
+		// 	},
+		// },
+		computed: {
+			currentFitType: function() {
+				return this.fitTypes[this.currentFitTypeIndex].value;
+			},
+		},
+		data() {
+			return {
+				fitTypes: Constants.fitTypes,
+				currentFitTypeIndex: 0,
+				fitTypeTitles: [],
+				isTiny: false,
+			};
+		},
+		created() {
+			this.fitTypeTitles = this.fitTypes.map(item => item.label);
+		},
+		methods: {
+			onBackPress() {
+				if (this.isSubscribedAudio) {
+					this.subscribeAudio();
+				}
+				if (this.isSubscribedVideo) {
+					this.subscribeVideo();
+				}
+			},
+			subscribeAudio() {
+				if (!this.isPublishAudio) return;
+				let code = -1;
+				if (this.isSubscribedAudio) {
+					code = this.unSubscribe(RCRTCMediaType.Audio);
+				} else {
+					code = this.subscribe(RCRTCMediaType.Audio);
+				}
+				if (code != 0) {
+					uni.showToast({
+						icon: 'none',
+						title: `订阅/取消订阅音频失败：${code}`,
+					});
+				}
+			},
+			subscribeVideo() {
+				if (!this.isPublishVideo) return;
+				let code = -1;
+				if (this.isSubscribedVideo) {
+					code = this.unSubscribe(RCRTCMediaType.Video);
+				} else {
+					code = this.subscribe(RCRTCMediaType.Video);
+				}
+				if (code != 0) {
+					uni.showToast({
+						icon: 'none',
+						title: `订阅/取消订阅视频接口调用失败：${code}`,
+					});
+				}
+			},
+			changeTiny() {
+				this.isTiny = !this.isTiny;
+				this.subscribe(RCRTCMediaType.Video);
+			},
+			subscribe(mediaType) {
+				uni.showLoading({
+					title: '加载中...'
+				});
+				let code = RCRTCEngine.subscribeCustomStream(this.userId, this.tag, mediaType, this.isTiny);
+				if (mediaType === RCRTCMediaType.Video && code === 0) {
+					this.setRemoteView();
+				}
+				return code;
+			},
+			unSubscribe(mediaType) {
+				uni.showLoading({
+					title: '加载中...'
+				});
+				let code = RCRTCEngine.unsubscribeCustomStream(this.userId, this.tag, mediaType);
+				if (mediaType === RCRTCMediaType.Video && code === 0) {
+					this.removeRemoteView();
+				}
+				return code;
+			},
+			setRemoteView() {
+				let ref = this.$refs.videoView.getNativeViewRef();
+				RCRTCEngine.setRemoteCustomStreamView(this.userId, this.tag, ref, (code) => {
+					console.log(`setRemoteCustomStreamView ${code}`);
+				});
+			},
+			removeRemoteView() {
+				let ref = this.$refs.videoView.getNativeViewRef()
+				RCRTCEngine.removeRemoteCustomStreamView(this.userId, this.tag, (code) => {
+					console.log(`removeRemoteCustomStreamView ${code}`);
+				});
+			},
+			showFitTypeList() {
+				this.$refs.fitTypeList.show();
+			},
+			fitTypeItemClick(e) {
+				this.currentFitTypeIndex = e.index;
+			},
+		}
+	}
+</script>
+
+<style scoped>
+	.videoView {
+		flex: 1;
+		height: 400rpx;
+	}
+
+	.rightControlArea {
+		flex: 1;
+		margin-left: 10rpx;
+	}
+
+	.radio {
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.videoTopView {
+		position: absolute;
+		left: 10rpx;
+		top: 10rpx;
+		align-items: flex-start;
+	}
+
+	.fitButton {
+		margin-top: 10rpx;
+	}
+
+	.whiteColor {
+		color: #FFFFFF
+	}
+
+	.text {
+		font-size: 27rpx;
+	}
+
+	.disableText {
+		color: #ACA899;
+	}
+
+	.tinyButton {
+		position: absolute;
+		bottom: 10rpx;
+		left: 10rpx;
+	}
+</style>

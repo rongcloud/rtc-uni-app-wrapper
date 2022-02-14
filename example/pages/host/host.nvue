@@ -1,0 +1,1352 @@
+<template>
+	<view>
+		<view class="setting-view">
+			<button class="setting-button" @click="subRoomClick">
+				<image style="width: 16px; height: 16px;" src="@/static/img/sub_room.png"></image>
+			</button>
+			<button class="setting-button" :class="{ 'setting-button-disable': !publishVideo }" @click="cdnClick">
+				<image style="width: 16px; height: 16px;" src="@/static/img/cdn.png"></image>
+			</button>
+			<button class="setting-button" :class="{ 'setting-button-disable': !isPublish }" @click="layoutClick">
+				<image style="width: 16px; height: 16px;" src="@/static/img/layout.png"></image>
+			</button>
+			<button class="setting-button" @click="messageClick">
+				<image style="width: 16px; height: 16px;" src="@/static/img/message.png"></image>
+			</button>
+		</view>
+		<view class="uni-row" style="margin-top: 90rpx;">
+			<view style="flex: 1; background-color: #007AFF;">
+				<RCRTCView class="localVideoView" ref="localVideoView" :fitType="currentFitType" :mirror="mirror">
+				</RCRTCView>
+				<view class="videoTopView">
+					<text class="text whiteColor">{{localUserId}}</text>
+					<button class="fitButton" plain="true" @click="showFitTypeList">
+						<text class="text whiteColor">{{fitTypeTitles[currentFitTypeIndex]}}</text>
+					</button>
+				</view>
+			</view>
+			<view class="rightControlArea">
+				<view class="uni-row">
+					<label @click="changeAudio" class="radio">
+						<radio :checked="enableAudio" :disabled="true" />
+						<text class="text">采集音频</text>
+					</label>
+					<label @click="changeCamera" class="radio" style="margin-left: 10rpx;">
+						<radio :checked="enableCamera" :disabled="true" />
+						<text class="text">采集视频</text>
+					</label>
+				</view>
+				<view class="uni-row" style="margin-top: 10rpx;">
+					<label @click="changePublishAudio" class="radio">
+						<radio :checked="publishAudio" :disabled="true" />
+						<text class="text">发布音频</text>
+					</label>
+					<label @click="changePublishVideo" class="radio" style="margin-left: 10rpx;">
+						<radio :checked="publishVideo" :disabled="true" />
+						<text class="text">发布视频</text>
+					</label>
+				</view>
+				<view class="uni-row" style="margin-top: 10rpx;">
+					<label @click="changeFrontCamera" class="radio">
+						<radio :checked="frontCamera" />
+						<text class="text">前置摄像</text>
+					</label>
+					<label @click="changeMirror" class="radio" style="margin-left: 10rpx;">
+						<radio :checked="mirror" />
+						<text class="text">本地镜像</text>
+					</label>
+				</view>
+				<button @click="changeSpeaker" style="margin-top: 10rpx; width: 140rpx; height: 50rpx;">
+					<text class="text">{{speaker ? '扬声器' : '听筒'}}</text>
+				</button>
+				<view class="uni-row">
+					<button @click="showFpsList" class="dropdownButton" style="margin-top: 10rpx;">
+						<text class="text">{{fpsTitles[currentFps]}}</text>
+					</button>
+					<button @click="showResolutionList(false)" class="dropdownButton"
+						style="margin-top: 10rpx; margin-left: 30rpx;">
+						<text class="text">{{resolutionTitles[currentResolution]}}</text>
+					</button>
+				</view>
+				<view class="uni-inline-item" style="margin-top: 10rpx;">
+					<text class="text">码率下限：</text>
+					<button @click="showMinVideoKbpsList" class="dropdownButton">
+						<text class="text">{{minVideoKbpsTitles[currentMinVideoKbpsIndex]}}</text>
+					</button>
+				</view>
+				<view class="uni-inline-item" style="margin-top: 10rpx;">
+					<text class="text">码率上限：</text>
+					<button @click="showMaxVideoKbpsList" class="dropdownButton">
+						<text class="text">{{maxVideoKbpsTitles[currentMaxVideoKbpsIndex]}}</text>
+					</button>
+				</view>
+			</view>
+		</view>
+		<!-- 自定义流 -->
+		<localCustomStreamView ref="customStreamView" :tag="getCustomTag()" :changeFile="changeFile"
+			:publishClick="publishCustomStreamClick" :isPublish="isPublishCustomStream"
+			:changeVideoConfig="setCustomVideoConfig"></localCustomStreamView>
+		<view class="uni-inline-item tinySetup" v-if="enableTinyStream">
+			<text class="text">小流设置</text>
+			<view style="align-items: center;">
+				<button @click="showResolutionList(true)">
+					<text class="text">{{resolutionTitles[currentTinyResolution]}}</text>
+				</button>
+				<view class="uni-inline-item">
+					<view class="uni-inline-item" style="margin-top: 10rpx;">
+						<text class="text">码率下限：</text>
+						<button @click="showTinyMinVideoKbpsList" class="dropdownButton">
+							<text class="text">{{tinyMinVideoKbpsTitles[currentTinyMinVideoKbpsIndex]}}</text>
+						</button>
+					</view>
+					<view class="uni-inline-item" style="margin-top: 10rpx; margin-left: 10rpx;">
+						<text class="text">码率上限：</text>
+						<button @click="showTinyMaxVideoKbpsList" class="dropdownButton">
+							<text class="text">{{tinyMaxVideoKbpsTitles[currentTinyMaxVideoKbpsIndex]}}</text>
+						</button>
+					</view>
+				</view>
+			</view>
+		</view>
+		<stats-view :networkStats="networkStats" :localAudioStats="localAudioStats" :localVideoStats="localVideoStats"
+			:localTinyVideoStats="localTinyVideoStats"></stats-view>
+		<view v-for="(user,index) in remotePublishers" :key="index">
+			<remote-anchor-view :key="user.userId" :ref="user.userId" v-bind="user"></remote-anchor-view>
+		</view>
+		<view v-for="(user,index) in remoteCustomPublishers" :key="index">
+			<remote-custom-anchor-view :key="user.tag" :ref="user.tag" :userId="user.userId" :tag="user.tag"
+				v-bind="user.custom"></remote-custom-anchor-view>
+		</view>
+		<fuiDropdownList :options="resolutionTitles" ref="resolutionList" :height="600" :isCheckbox="false"
+			@click="resolutionItemClick">
+		</fuiDropdownList>
+		<fuiDropdownList :options="fpsTitles" ref="fpsList" :isCheckbox="false" @click="fpsItemClick">
+		</fuiDropdownList>
+		<fuiDropdownList :options="maxVideoKbpsTitles" ref="maxVideoKbpsList" :height="600" :isCheckbox="false"
+			@click="maxVideoKbpsItemClick">
+		</fuiDropdownList>
+		<fuiDropdownList :options="minVideoKbpsTitles" ref="minVideoKbpsList" :height="600" :isCheckbox="false"
+			@click="minVideoKbpsItemClick">
+		</fuiDropdownList>
+		<fuiDropdownList :options="tinyMaxVideoKbpsTitles" ref="tinyMaxVideoKbpsList" :isCheckbox="false"
+			@click="tinyMaxVideoKbpsItemClick">
+		</fuiDropdownList>
+		<fuiDropdownList :options="tinyMinVideoKbpsTitles" ref="tinyMinVideoKbpsList" :isCheckbox="false"
+			@click="tinyMinVideoKbpsItemClick">
+		</fuiDropdownList>
+		<fuiDropdownList :options="fitTypeTitles" ref="fitTypeList" :isCheckbox="false" @click="fitTypeItemClick">
+		</fuiDropdownList>
+		<fuiDropdownList :options="menus" ref="menus" :isCheckbox="false" @click="menusItemClick"></fuiDropdownList>
+	</view>
+</template>
+
+<script>
+	import RCRTCEngine from '@/uni_modules/RongCloud-RTCWrapper/lib/RCRTCEngine';
+	import RCRTCView from '@/uni_modules/RongCloud-RTCWrapper/components/RCRTCView';
+	
+	import {
+		RCRTCCamera,
+		RCRTCViewFitType,
+		RCRTCMediaType,
+		RCRTCVideoFps,
+		RCRTCVideoResolution,
+		RCRTCEngineEventsName,
+		RCRTCStatsEventsName
+	} from '@/uni_modules/RongCloud-RTCWrapper/lib/RCRTCDefines';
+
+	import localCustomStreamView from '@/components/localCustomStreamView';
+	import statsView from "@/components/statsView";
+	import remoteAnchorView from "@/components/remoteAnchorView";
+	import remoteCustomAnchorView from "@/components/remoteCustomAnchorView";
+	import * as Constants from '@/common/constants.js';
+
+	import fuiDropdownList from "@/components/fui-dropdown-list/fui-dropdown-list";
+	import permision from "@/js_sdk/wa-permission/permission.js"
+
+	const Platform = uni.getSystemInfoSync().platform;
+
+	export default {
+		components: {
+			RCRTCView,
+			localCustomStreamView,
+			statsView,
+			remoteAnchorView,
+			remoteCustomAnchorView,
+			fuiDropdownList,
+		},
+
+		data() {
+			return {
+				localUserId: '',
+				roomId: '',
+				enableTinyStream: false,
+
+				joinRoomSuccess: false,
+				enableCamera: false,
+				enableAudio: false,
+				publishAudio: false,
+				publishVideo: false,
+				frontCamera: true,
+				mirror: true,
+				speaker: false,
+				isShowTiny: false,
+
+				usersInfo: [],
+				fpsTitles: [],
+				resolutionTitles: [],
+				fitTypeTitles: [],
+				maxVideoKbpsTitles: [],
+				minVideoKbpsTitles: [],
+				tinyMaxVideoKbpsTitles: [],
+				tinyMinVideoKbpsTitles: [],
+
+				maxVideoKbps: Constants.maxVideoKbps,
+				minVideoKbps: Constants.minVideoKbps,
+				tinyMaxVideoKbps: Constants.tinyMaxVideoKbps,
+				tinyMinVideoKbps: Constants.tinyMinVideoKbps,
+				fitTypes: Constants.fitTypes,
+
+				currentResolution: RCRTCVideoResolution.Resolution_720x1280,
+				currentTinyResolution: RCRTCVideoResolution.Resolution_180x320,
+				currentFps: RCRTCVideoFps.Fps30,
+				currentFitTypeIndex: 0,
+				currentMaxVideoKbpsIndex: 1,
+				currentMinVideoKbpsIndex: 1,
+				currentTinyMaxVideoKbpsIndex: 1,
+				currentTinyMinVideoKbpsIndex: 1,
+
+				networkStats: null,
+				localAudioStats: null,
+				localVideoStats: null,
+				localTinyVideoStats: null,
+
+				// remotePublishers: [],
+				// remoteCustomPublishers: [],
+				isShowMenu: false,
+
+				isCreateCustomStream: false,
+				isPublishCustomStream: false,
+				filePath: '',
+				fileName: '',
+			}
+		},
+
+		computed: {
+			currentFitType: function() {
+				return this.fitTypes[this.currentFitTypeIndex].value;
+			},
+			isPublish: function() {
+				return this.publishAudio || this.publishVideo;
+			},
+			remotePublishers: function() {
+				return this.usersInfo.filter(({ userId, tag }) => userId != this.localUserId);
+			},
+			remoteCustomPublishers: function() {
+				return this.usersInfo.filter(({ userId, tag }) => {
+					return userId != this.localUserId && tag != null;
+				});
+			},
+		},
+
+		watch: {
+			usersInfo(newVal) {
+			  this.getGlobalData().users = newVal;
+			},
+		},
+
+		onLoad(option) {
+			this.localUserId = option.userId;
+			this.roomId = option.roomId;
+			this.inintialGlobalData();
+
+			// 添加监听
+			this.addListeners();
+			uni.setNavigationBarTitle({
+				title: `主播房间号:${this.roomId}`
+			});
+			// 是否开启小流
+			this.enableTinyStream = option.enableTinyStream === 'true';
+
+			this.fpsTitles = Object.keys(RCRTCVideoFps).filter((item) => {
+				return isNaN(Number(item));
+			}).map((item, index) => {
+				let temp = item.replace('Fps', '');
+				return temp + ' FPS';
+			});
+
+			this.resolutionTitles = Object.keys(RCRTCVideoResolution).filter((item) => {
+				return isNaN(Number(item));
+			}).map((item, index) => {
+				let temp = item.replace('Resolution_', '');
+				return temp;
+			});
+			this.maxVideoKbpsTitles = this.maxVideoKbps.map(item => item + 'kbps');
+			this.minVideoKbpsTitles = this.minVideoKbps.map(item => item + 'kbps');
+			this.tinyMaxVideoKbpsTitles = this.tinyMaxVideoKbps.map(item => item + 'kbps');
+			this.tinyMinVideoKbpsTitles = this.tinyMinVideoKbps.map(item => item + 'kbps');
+
+			this.fitTypeTitles = this.fitTypes.map(item => item.label);
+			// 加入房间
+			this.joinRoom(option.roomId, JSON.parse(option.roomSetup));
+		},
+
+		onUnload() {
+			this.removeListeners();
+			this.destoryGlobalData();
+		},
+
+		onBackPress() {
+			/* 注意
+			 * 此方法在页面点击返回按钮时调用，调用时机比 onUnload 早。
+			 * 可以在这里处理需要调用原生才能实现的功能，
+			 * 因为在 onUnload 中会遇到无法调用原生功能的情况。
+			 * */
+			RCRTCEngine.leaveRoom();
+		},
+
+		onNavigationBarButtonTap(e) {
+			console.log(e);
+			// e的返回格式为json对象：{"text":"测试","index":0}
+			if (e.type === "menu") {
+				this.$refs.menus.show();
+			}
+		},
+
+		methods: {
+			inintialGlobalData() {
+				getApp().globalData.hostPageData = {
+					// 用户列表 元素为 {userId, tag}
+					users: [],
+					// 当前的合流裁剪模式
+					currentRenderMode: 0,
+					// 当前的合流布局模式
+					currentLayoutMode: 0,
+					// 自定义合流布局列表 数组元素为 {id, x, y, width, height}
+					customLayouts: [],
+					// 合流视频设置参数
+					liveMixVideoParams: null,
+					liveMixTinyVideoParams: null,
+					// 已加入并连麦的子房间
+					joinedSubRooms: [],
+					// 连麦的子房间
+					joinableSubRooms: [],
+					bandedSubRooms: [],
+				};
+			},
+			getGlobalData() {
+				return getApp().globalData.hostPageData;
+			},
+			destoryGlobalData() {
+				getApp().globalData.hostPageData = null;
+			},
+			// 全局保存的所有直播用户
+			getGlobalUsers() {
+				return this.getGlobalData().users;
+			},
+			addListeners() {
+				// 本地用户加入房间回调
+				uni.$on(RCRTCEngineEventsName.OnRoomJoined, this.onRoomJoinedCallback.bind(this));
+				// 本地用户离开房间回调
+				uni.$on(RCRTCEngineEventsName.OnRoomLeft, this.onRoomLeftCallback.bind(this));
+				// 本地用户开关相机回调
+				uni.$on(RCRTCEngineEventsName.OnEnableCamera, this.onEnableCameraCallback.bind(this));
+				// 本地用户发布资源回调
+				uni.$on(RCRTCEngineEventsName.OnPublished, this.onPublishedCallback.bind(this));
+				// 本地用户取消发布资源回调
+				uni.$on(RCRTCEngineEventsName.OnUnpublished, this.onUnpublishedCallback.bind(this));
+				// 远端用户加入房间操作回调
+				uni.$on(RCRTCEngineEventsName.OnUserJoined, this.onUserJoinedCallback.bind(this));
+				// 远端用户离开房间操作回调
+				uni.$on(RCRTCEngineEventsName.OnUserLeft, this.onUserLeftCallback.bind(this));
+				// 远端用户离线回调
+				uni.$on(RCRTCEngineEventsName.OnUserOffline, this.onUserOfflineCallback.bind(this));
+				// 远端用户发布资源操作回调
+				uni.$on(RCRTCEngineEventsName.OnRemotePublished, this.onRemotePublishedCallback.bind(this));
+				// 远端用户取消发布资源操作回调
+				uni.$on(RCRTCEngineEventsName.OnRemoteUnpublished, this.onRemoteUnpublishedCallback.bind(this));
+				uni.$on(RCRTCEngineEventsName.OnSubscribed, this.onSubscribedCallback.bind(this));
+				uni.$on(RCRTCEngineEventsName.OnUnsubscribed, this.onUnsubscribedCallback.bind(this));
+
+				/* 自定义流相关回调 */
+				uni.$on(RCRTCEngineEventsName.OnCustomStreamPublished, this.onCustomStreamPublishedCallback.bind(this));
+				uni.$on(RCRTCEngineEventsName.OnCustomStreamUnpublished, this.onCustomStreamUnpublishedCallback.bind(
+					this));
+				uni.$on(RCRTCEngineEventsName.OnRemoteCustomStreamPublished, this.onRemoteCustomStreamPublishedCallback
+					.bind(this));
+				uni.$on(RCRTCEngineEventsName.OnRemoteCustomStreamUnpublished, this.onRemoteCustomStreamUnpublishedCallback
+					.bind(this));
+				uni.$on(RCRTCEngineEventsName.OnCustomStreamSubscribed, this.onCustomStreamSubscribedCallback
+					.bind(this));
+				uni.$on(RCRTCEngineEventsName.OnCustomStreamUnsubscribed, this.onCustomStreamUnsubscribedCallback
+					.bind(this));
+				uni.$on(RCRTCEngineEventsName.OnCustomStreamPublishFinished, this.onCustomStreamPublishFinishedCallback
+					.bind(this));
+
+				/* 子房间相关回调 */
+				uni.$on(RCRTCEngineEventsName.OnJoinSubRoomRequested, this.onJoinSubRoomRequestedCallback.bind(this));
+				uni.$on(RCRTCEngineEventsName.OnJoinSubRoomRequestResponded, this.onJoinSubRoomRequestRespondedCallback
+					.bind(this));
+				uni.$on(RCRTCEngineEventsName.OnJoinSubRoomRequestReceived, this.onJoinSubRoomRequestReceivedCallback.bind(
+					this));
+				uni.$on(RCRTCEngineEventsName.OnCancelJoinSubRoomRequestReceived, this
+					.onCancelJoinSubRoomRequestReceivedCallback.bind(this));
+				uni.$on(RCRTCEngineEventsName.OnJoinSubRoomRequestResponseReceived, this
+					.onJoinSubRoomRequestResponseReceivedCallback.bind(this));
+				uni.$on(RCRTCEngineEventsName.OnSubRoomJoined, this.onSubRoomJoinedCallback.bind(this));
+				uni.$on(RCRTCEngineEventsName.OnSubRoomLeft, this.onSubRoomLeftCallback.bind(this));
+				uni.$on(RCRTCEngineEventsName.OnSubRoomBanded, this.onSubRoomBandedCallback.bind(this));
+				uni.$on(RCRTCEngineEventsName.OnSubRoomDisband, this.onSubRoomDisbandCallback.bind(this));
+
+				// 状态回调监听 请注意，下面是状态监听的枚举值 RCRTCStatsEventsName
+				uni.$on(RCRTCStatsEventsName.OnNetworkStats, this.onNetworkStatsCallback.bind(this));
+				uni.$on(RCRTCStatsEventsName.OnLocalAudioStats, this.onLocalAudioStatsCallback.bind(this));
+				uni.$on(RCRTCStatsEventsName.OnLocalVideoStats, this.onLocalVideoStatsCallback.bind(this));
+				uni.$on(RCRTCStatsEventsName.OnRemoteVideoStats, this.onRemoteVideoStatsCallback.bind(this));
+				uni.$on(RCRTCStatsEventsName.OnRemoteCustomVideoStats, this.onRemoteCustomVideoStatsCallback.bind(this));
+			},
+
+			removeListeners() {
+				uni.$off(RCRTCEngineEventsName.OnRoomJoined);
+				uni.$off(RCRTCEngineEventsName.OnRoomLeft);
+				uni.$off(RCRTCEngineEventsName.OnEnableCamera);
+				uni.$off(RCRTCEngineEventsName.OnPublished);
+				uni.$off(RCRTCEngineEventsName.OnUnpublished);
+				uni.$off(RCRTCEngineEventsName.OnUserJoined);
+				uni.$off(RCRTCEngineEventsName.OnUserLeft);
+				uni.$off(RCRTCEngineEventsName.OnUserOffline);
+				uni.$off(RCRTCEngineEventsName.OnRemotePublished);
+				uni.$off(RCRTCEngineEventsName.OnRemoteUnpublished);
+				uni.$off(RCRTCEngineEventsName.OnSubscribed);
+				uni.$off(RCRTCEngineEventsName.OnUnsubscribed);
+
+				uni.$off(RCRTCEngineEventsName.OnCustomStreamPublished);
+				uni.$off(RCRTCEngineEventsName.OnCustomStreamUnpublished);
+				uni.$off(RCRTCEngineEventsName.OnRemoteCustomStreamPublished);
+				uni.$off(RCRTCEngineEventsName.OnRemoteCustomStreamUnpublished);
+				uni.$off(RCRTCEngineEventsName.OnCustomStreamSubscribed);
+				uni.$off(RCRTCEngineEventsName.OnCustomStreamUnsubscribed);
+				uni.$off(RCRTCEngineEventsName.OnCustomStreamPublishFinished);
+
+				uni.$off(RCRTCEngineEventsName.OnJoinSubRoomRequested);
+				uni.$off(RCRTCEngineEventsName.OnJoinSubRoomRequestReceived);
+				uni.$off(RCRTCEngineEventsName.OnCancelJoinSubRoomRequestReceived);
+				uni.$off(RCRTCEngineEventsName.OnJoinSubRoomRequestResponseReceived);
+				uni.$off(RCRTCEngineEventsName.OnSubRoomJoined);
+				uni.$off(RCRTCEngineEventsName.OnSubRoomBanded);
+				uni.$off(RCRTCEngineEventsName.OnSubRoomDisband);
+				uni.$off(RCRTCStatsEventsName.OnNetworkStats);
+				uni.$off(RCRTCStatsEventsName.OnLocalAudioStats);
+				uni.$off(RCRTCStatsEventsName.OnLocalVideoStats);
+				uni.$off(RCRTCStatsEventsName.OnRemoteVideoStats);
+				uni.$off(RCRTCStatsEventsName.OnRemoteCustomVideoStats);
+			},
+
+			joinRoom(roomId, roomSetup) {
+				uni.showLoading({
+					title: '加入房间中...'
+				});
+				// 这个返回值只代表 joinRoom 接口调用成功
+				let code = RCRTCEngine.joinRoom(roomId, roomSetup);
+				if (code === 0) {
+					console.log('joinRoom 接口调用成功');
+				} else {
+					console.log('joinRoom 接口调用失败');
+				}
+			},
+			// 初始配置
+			initialConfig() {
+				RCRTCEngine.enableSpeaker(this.speaker);
+				let videoConfig = {
+					fps: this.currentFps,
+					resolution: this.currentResolution,
+					mirror: this.mirror,
+					minBitrate: this.minVideoKbps[this.currentMinVideoKbpsIndex],
+					maxBitrate: this.maxVideoKbps[this.currentMaxVideoKbpsIndex],
+				};
+				RCRTCEngine.setVideoConfig(videoConfig, false);
+				if (this.enableTinyStream) {
+					let tinyVideoConfig = {
+						fps: this.currentFps,
+						resolution: this.currentTinyResolution,
+						mirror: this.mirror,
+						minBitrate: this.tinyMinVideoKbps[this.currentTinyMinVideoKbpsIndex],
+						maxBitrate: this.tinyMaxVideoKbps[this.currentTinyMaxVideoKbpsIndex],
+					};
+					RCRTCEngine.setVideoConfig(tinyVideoConfig, true);
+				}
+			},
+			async changeAudio(event) {
+				if (!this.enableAudio) {
+					if (Platform === 'android') {
+						let res = await this.requestAndroidPermission('android.permission.RECORD_AUDIO');
+						if (res != 1) {
+							return;
+						}
+					}
+				}
+				let code = RCRTCEngine.enableMicrophone(!this.enableAudio);
+				let tempStr = (!this.enableAudio ? '打开' : '关闭') + '麦克风';
+				if (code === 0) {
+					this.enableAudio = !this.enableAudio;
+					console.log(tempStr, '成功');
+				} else {
+					console.log(tempStr + '失败：', code);
+				}
+			},
+			async changeCamera(event) {
+				if (!this.enableCamera) {
+					if (Platform === 'android') {
+						let res = await this.requestAndroidPermission('android.permission.CAMERA');
+						if (res != 1) {
+							return;
+						}
+					}
+				}
+				uni.showLoading({
+					title: '加载中...'
+				});
+				RCRTCEngine.enableCamera(!this.enableCamera, this.frontCamera ? RCRTCCamera.Front : RCRTCCamera.Back);
+			},
+			setupLocalView() {
+				if (this.enableCamera) {
+					RCRTCEngine.setLocalView(this.$refs.localVideoView.getNativeViewRef(), (code) => {
+						console.log('setLocalView code: ', code);
+						if (code === 0) {
+							console.log('setLocalView success');
+						}
+					});
+				} else {
+					RCRTCEngine.removeLocalView((code) => {
+						console.log('removeLocalView code: ', code);
+						if (code === 0) {
+							console.log('removeLocalView success');
+						}
+					});
+				}
+			},
+			changeFrontCamera(event) {
+				this.frontCamera = !this.frontCamera;
+				let code = RCRTCEngine.switchCamera();
+				console.log('changeFrontCamera code = ', code);
+			},
+			changePublishAudio() {
+				if (this.publishAudio) {
+					RCRTCEngine.unpublish(RCRTCMediaType.Audio);
+				} else {
+					RCRTCEngine.publish(RCRTCMediaType.Audio);
+				}
+				uni.showLoading({
+					title: '加载中...',
+				});
+			},
+			changePublishVideo() {
+				if (this.publishVideo) {
+					RCRTCEngine.unpublish(RCRTCMediaType.Video);
+				} else {
+					RCRTCEngine.publish(RCRTCMediaType.Video);
+				}
+				uni.showLoading({
+					title: '加载中...',
+				});
+			},
+			changeMirror() {
+				this.mirror = !this.mirror;
+			},
+			changeSpeaker() {
+				this.speaker = !this.speaker;
+				RCRTCEngine.enableSpeaker(this.speaker);
+			},
+			showFpsList() {
+				this.$refs.fpsList.show();
+			},
+			fpsItemClick(e) {
+				this.currentFps = e.index;
+				this.setVideoConfig(false);
+			},
+			resolutionItemClick(e) {
+				if (this.isShowTiny) {
+					this.currentTinyResolution = e.index;
+					this.setVideoConfig(true);
+				} else {
+					this.currentResolution = e.index;
+					this.setVideoConfig(false);
+				}
+			},
+			showResolutionList(isTiny) {
+				this.isShowTiny = isTiny;
+				this.$refs.resolutionList.show();
+			},
+			showMaxVideoKbpsList() {
+				this.$refs.maxVideoKbpsList.show();
+			},
+			showMinVideoKbpsList() {
+				this.$refs.minVideoKbpsList.show();
+			},
+			showTinyMaxVideoKbpsList() {
+				this.$refs.tinyMaxVideoKbpsList.show();
+			},
+			showTinyMinVideoKbpsList() {
+				this.$refs.tinyMinVideoKbpsList.show();
+			},
+			showFitTypeList() {
+				this.$refs.fitTypeList.show();
+			},
+			minVideoKbpsItemClick(e) {
+				this.currentMinVideoKbpsIndex = e.index;
+				this.setVideoConfig(false);
+			},
+			maxVideoKbpsItemClick(e) {
+				this.currentMaxVideoKbpsIndex = e.index;
+				this.setVideoConfig(false);
+			},
+			tinyMaxVideoKbpsItemClick(e) {
+				this.currentTinyMaxVideoKbpsIndex = e.index;
+				this.setVideoConfig(true);
+			},
+			tinyMinVideoKbpsItemClick(e) {
+				this.currentTinyMinVideoKbpsIndex = e.index;
+				this.setVideoConfig(true);
+			},
+			fitTypeItemClick(e) {
+				this.currentFitTypeIndex = e.index;
+			},
+
+			/* 自定义流相关方法 */
+
+			changeFile() {
+				console.log('changeFile');
+				this.isCreateCustomStream = false;
+				this.isPublishCustomStream = false;
+			},
+			publishCustomStreamClick(filePath) {
+				let path = filePath;
+				// if (Platform === 'android') {
+				// 	path = path.replace('file://', '');
+				// }
+				// if (!this.isCreateCustomStream) {
+
+				// }
+				uni.showLoading({
+					title: '加载中...',
+				});
+				if (this.isPublishCustomStream) {
+					let publishCode = RCRTCEngine.unpublishCustomStream(this.getCustomTag());
+					if (publishCode === 0) {
+						console.log('接口调用成功');
+					}
+				} else {
+					let code = RCRTCEngine.createCustomStreamFromFile(path, this.getCustomTag(), false, true);
+					if (code === 0) {
+						console.log('创建自定义流成功');
+						this.isCreateCustomStream = true;
+					} else {
+						uni.showToast({
+							icon: 'none',
+							title: `创建自定义流失败: ${code}`
+						})
+						return;
+					}
+					let publishCode = RCRTCEngine.publishCustomStream(this.getCustomTag());
+					if (publishCode === 0) {
+						console.log('接口调用成功');
+					}
+				}
+			},
+			setCustomVideoView() {
+				// 调用自组建的方法，获取组件内部的原生窗口 ref
+				let ref = this.$refs.customStreamView.getVideoViewRef();
+				RCRTCEngine.setLocalCustomStreamView(this.getCustomTag(), ref, code => {
+					if (code === 0) {
+						console.log('设置customVideoView成功');
+					} else {
+						uni.showToast({
+							icon: 'none',
+							title: `设置videoView失败: ${code}`
+						});
+					}
+				})
+			},
+			removeCustomVideoView() {
+				let ref = this.$refs.customStreamView.getVideoViewRef();
+				RCRTCEngine.removeLocalCustomStreamView(this.getCustomTag(), code => {
+					if (code === 0) {
+						console.log('移除customVideoView成功');
+					} else {
+						uni.showToast({
+							icon: 'none',
+							title: `移除videoView失败: ${code}`
+						});
+					}
+				})
+			},
+			getCustomTag() {
+				return this.localUserId.replace('_', '') + 'Custom';
+			},
+			setCustomVideoConfig(config) {
+				console.log(config);
+				RCRTCEngine.setCustomStreamVideoConfig(this.getCustomTag(), config);
+			},
+
+			/* 菜单栏操作 */
+			subRoomClick() {
+				uni.navigateTo({
+					url: `./joinSubRoom`
+				});
+			},
+
+			cdnClick() {
+				uni.navigateTo({
+					url: `./cdnConfig`
+				});
+			},
+			messageClick() {
+				// 聊天室
+				uni.navigateTo({
+					url: `../messagePanel?host=${true}&roomId=${this.roomId}`
+				});
+			},
+			layoutClick() {
+				if (!this.publishAudio) {
+					uni.showToast({
+						icon: 'none',
+						title: '需要先发布音频',
+						duration: 2000
+					});
+					return;
+				}
+				// 合流布局
+				uni.navigateTo({
+					url: `./liveMixPanel`
+				});
+			},
+
+			changeLocalPulishState(type, enable) {
+				switch (type) {
+					case RCRTCMediaType.Video:
+						this.publishVideo = enable;
+						break;
+					case RCRTCMediaType.Audio:
+						this.publishAudio = enable;
+						break;
+					case RCRTCMediaType.AudioVideo:
+						this.publishAudio = enable;
+						this.publishVideo = enable;
+						break;
+				}
+			},
+			setVideoConfig(tiny) {
+				let config;
+				if (tiny) {
+					config = {
+						fps: this.currentFps,
+						resolution: this.currentTinyResolution,
+						mirror: this.mirror,
+						minBitrate: this.tinyMinVideoKbps[this.currentTinyMinVideoKbpsIndex],
+						maxBitrate: this.tinyMaxVideoKbps[this.currentTinyMaxVideoKbpsIndex],
+					};
+				} else {
+					config = {
+						fps: this.currentFps,
+						resolution: this.currentResolution,
+						mirror: this.mirror,
+						minBitrate: this.minVideoKbps[this.currentMinVideoKbpsIndex],
+						maxBitrate: this.maxVideoKbps[this.currentMaxVideoKbpsIndex],
+					};
+				}
+				RCRTCEngine.setVideoConfig(config, this.isShowTiny);
+			},
+
+			updateJoinableSubRooms() {
+				let joinableSubRooms = this.getGlobalData().joinableSubRooms;
+				// 提前清空，下面重新组装 (通过splice直接修改原数组)
+				joinableSubRooms.splice(0, joinableSubRooms.length);
+				let bandedSubRooms = this.getGlobalData().bandedSubRooms;
+				let joinedSubRooms = this.getGlobalData().joinedSubRooms;
+				bandedSubRooms.forEach(roomId => {
+					if (!joinedSubRooms.includes(roomId)) {
+						joinableSubRooms.push(roomId);
+					}
+				});
+			},
+
+			updateUserPublishedState(userId, type, enable, tag = null, code = 0, message = '') {
+				if (code != 0) {
+					uni.showToast({
+						icon: 'none',
+						title: `${enable?'':'取消'} 发布失败: ${code}-${message}`
+					});
+					return;
+				}
+				let users = this.usersInfo;
+				let index = users.findIndex(user => user.userId === userId);
+				if (index === -1) return;
+				let user = users[index];
+				// tag 不为 null 代表设置的是自定义视频流
+				if (tag) {
+					if (!enable) {
+						// 清除自定义视频流的tag，设置null表示移除
+						user.tag = null;
+					} else {
+						user.tag = tag;
+					}
+					this.changePublishState(user.custom, type, enable);
+				} else {
+					this.changePublishState(user, type, enable);
+				}
+				users.splice(index, 1, user);
+			},
+
+			updateUserSubscribedState(userId, type, enable, tag = null, code = 0, message = '') {
+				if (code != 0) {
+					uni.showToast({
+						icon: 'none',
+						title: `${enable?'':'取消'} 订阅失败: ${code}-${message}`
+					});
+					return;
+				}
+				let users = this.usersInfo;
+				let index = users.findIndex(user => user.userId === userId);
+				if (index === -1) return;
+				let user = users[index];
+				if (tag) {
+					this.changeSubscribedState(user.custom, type, enable);
+				} else {
+					this.changeSubscribedState(user, type, enable);
+				}
+				users.splice(index, 1, user);
+			},
+
+			changePublishState(user, type, enable) {
+				switch (type) {
+					case RCRTCMediaType.Video:
+						user.isPublishVideo = enable;
+						break;
+					case RCRTCMediaType.Audio:
+						user.isPublishAudio = enable;
+						break;
+					case RCRTCMediaType.AudioVideo:
+						user.isPublishAudio = enable;
+						user.isPublishVideo = enable;
+						break;
+				}
+				if (!enable) {
+					this.changeSubscribedState(user, type, false);
+				}
+			},
+
+			changeSubscribedState(user, type, enable) {
+				switch (type) {
+					case RCRTCMediaType.Video:
+						user.isSubscribedVideo = enable;
+						break;
+					case RCRTCMediaType.Audio:
+						user.isSubscribedAudio = enable;
+						break;
+					case RCRTCMediaType.AudioVideo:
+						user.isSubscribedAudio = enable;
+						user.isSubscribedVideo = enable;
+						break;
+				}
+			},
+
+			// 判断权限
+			async requestAndroidPermission(permisionID) {
+				let result = await permision.requestAndroidPermission(permisionID)
+				let strStatus
+				if (result === 1) {
+					strStatus = "已获得授权"
+					return result;
+				}
+				if (result === 0) {
+					strStatus = "未获得授权"
+				} else {
+					strStatus = "被永久拒绝权限"
+				}
+				uni.showModal({
+					content: permisionID + strStatus,
+					showCancel: false
+				});
+				return result;
+			},
+
+			/* callbacks */
+
+			onRoomJoinedCallback(res) {
+				uni.hideLoading();
+				console.log('host OnRoomJoined ', res);
+				let {
+					code,
+					message
+				} = res;
+				if (code != 0) {
+					uni.showToast({
+						icon: 'none',
+						title: `Join Room Error: msg: ${message},code: ${code}`,
+						duration: 2000,
+						complete: () => {
+							// 返回上一个页面
+							setTimeout(() => {
+								uni.navigateBack();
+							}, 2000);
+						}
+					});
+				} else {
+					this.initialConfig();
+					// 将本地用户保存
+					this.usersInfo.push({ userId: this.localUserId, tag: null });
+				}
+			},
+
+			onRoomLeftCallback({code, message}) {
+				let str = code === 0 ? '成功' : `失败: ${code}-${message}`;
+				uni.showToast({
+					icon: 'none',
+					title: `退出房间${str}`
+				});
+			},
+
+			onEnableCameraCallback(res) {
+				console.log('host OnEnableCamera ', res);
+				uni.hideLoading();
+				let { enable, code, message } = res;
+				this.enableCamera = enable;
+				this.setupLocalView();
+			},
+
+			onPublishedCallback(res) {
+				uni.hideLoading();
+				let { type, code, message } = res;
+				console.log(res);
+				if (code === 0) {
+					this.changeLocalPulishState(type, true);
+				} else {
+					uni.showToast({
+						icon: 'none',
+						title: `发布资源失败：${message}`,
+					});
+				}
+			},
+
+			onUnpublishedCallback(res) {
+				uni.hideLoading();
+				let { type, code, message } = res;
+				console.log(res);
+				if (code === 0) {
+					this.changeLocalPulishState(type, false);
+				} else {
+					uni.showToast({
+						icon: 'none',
+						title: `取消发布资源失败：${message}`,
+					});
+				}
+			},
+
+			onUserJoinedCallback(res) {
+				console.log('host OnUserJoined', res);
+				let { userId, roomId } = res;
+				// 添加用户
+				let user = {
+					roomId,
+					userId,
+					isPublishAudio: false,
+					isPublishVideo: false,
+					isSubscribedVideo: false,
+					isSubscribedAudio: false,
+					videoStats: null,
+					tag: null,
+					custom: {
+						isPublishAudio: false,
+						isPublishVideo: false,
+						isSubscribedVideo: false,
+						isSubscribedAudio: false,
+						videoStats: null,
+					},
+				};
+				let users = this.usersInfo;
+				let findIndex = users.findIndex(user => user.userId === userId);
+				if (findIndex === -1) {
+					users.push(user);
+				}
+				if (roomId != this.roomId) {
+					//更新跨房间的用户信息
+					let joinedSubRooms = this.getGlobalData().joinedSubRooms;
+					if (!joinedSubRooms.includes(roomId)) {
+						joinedSubRooms.push(roomId);
+					}
+					this.updateJoinableSubRooms();
+				}
+			},
+			onUserLeftCallback(res) {
+				console.log('host OnUserLeft', res);
+				let { userId, roomId } = res;
+				let users = this.usersInfo;
+				let findIndex = users.findIndex(user => user.userId === userId);
+				if (findIndex != -1) {
+					users.splice(findIndex, 1);
+				}
+				// 处理子房间用户的离开
+				// let joinedSubRooms = this.getGlobalData().joinedSubRooms;
+				// let joinedIndex = joinedSubRooms.indexOf(roomId);
+				// joinedSubRooms.splice(joinedIndex, 1);
+				// this.updateJoinableSubRooms();
+			},
+			onUserOfflineCallback(res) {
+				console.log('host OnUserOffline', res);
+				let { userId, roomId } = res;
+				let users = this.usersInfo;
+				let findIndex = users.findIndex(user => user.userId === userId);
+				if (findIndex != -1) {
+					users.splice(findIndex, 1);
+				}
+			},
+			onRemotePublishedCallback(res) {
+				let { userId, roomId, type } = res;
+				this.updateUserPublishedState(userId, type, true);
+			},
+
+			onRemoteUnpublishedCallback(res) {
+				let { userId, roomId, type } = res;
+				this.updateUserPublishedState(userId, type, false);
+			},
+
+			onSubscribedCallback(res) {
+				uni.hideLoading();
+				let { userId, type, code, message } = res;
+				this.updateUserSubscribedState(userId, type, true, null, code, message);
+			},
+
+			onUnsubscribedCallback(res) {
+				uni.hideLoading();
+				let { userId, type, code, message } = res;
+				this.updateUserSubscribedState(userId, type, false, null, code, message);
+			},
+
+			onCustomStreamPublishedCallback(res) {
+				uni.hideLoading();
+				let { tag, code, message } = res;
+				if (code === 0) {
+					this.isPublishCustomStream = true;
+					this.setCustomVideoView();
+				} else {
+					uni.showToast({
+						icon: 'none',
+						title: `发布失败：${code}-${message}`
+					});
+				}
+				// 更新保存的用户
+				let users = this.usersInfo;
+				let index = users.findIndex(user => user.userId === this.localUserId);
+				let user = users[index];
+				user.tag = tag;
+				users.splice(index, 1, user);
+
+			},
+
+			onCustomStreamUnpublishedCallback(res) {
+				uni.hideLoading();
+				let { tag, code, message } = res;
+				if (code === 0) {
+					this.isPublishCustomStream = false;
+					this.removeCustomVideoView();
+				} else {
+					uni.showToast({
+						icon: 'none',
+						title: `取消发布失败：${code}-${message}`
+					});
+				}
+				// 更新保存的用户
+				let users = this.usersInfo;
+				let userIndex = users.findIndex(user => user.userId === this.localUserId);
+				user.tag = null;
+				users.splice(userIndex, 1, user);
+			},
+
+			onRemoteCustomStreamPublishedCallback(res) {
+				let { roomId, userId, tag, type } = res;
+				this.updateUserPublishedState(userId, type, true, tag);
+			},
+
+			onRemoteCustomStreamUnpublishedCallback(res) {
+				let { roomId, userId, tag, type } = res;
+				this.updateUserPublishedState(userId, type, false, tag);
+			},
+
+			onCustomStreamSubscribedCallback(res) {
+				uni.hideLoading();
+				let { userId, tag, type, code, message } = res;
+				this.updateUserSubscribedState(userId, type, true, tag, code, message);
+			},
+
+			onCustomStreamUnsubscribedCallback(res) {
+				uni.hideLoading();
+				let { userId, tag, type, code, message } = res;
+				this.updateUserSubscribedState(userId, type, false, tag, code, message);
+			},
+
+			onCustomStreamPublishFinishedCallback(res) {
+				let { tag } = res;
+				this.isPublishCustomStream = false;
+			},
+
+			onJoinSubRoomRequestedCallback(res) {
+				let { roomId, userId, code, message } = res;
+				if (code === 0) {
+					uni.showToast({
+						icon: 'none',
+						title: '请求已发出，待处理'
+					});
+				} else {
+					uni.showToast({
+						icon: 'none',
+						title: '请求发送失败'
+					});
+				}
+			},
+
+			onJoinSubRoomRequestRespondedCallback(res) {
+				let { roomId, userId, code, message } = res;
+				if (code === 0) {
+					RCRTCEngine.joinSubRoom(roomId);
+				} else {
+					uni.showToast({
+						icon: 'none',
+						title: `加入子房间${roomId}失败`
+					});
+				}
+			},
+
+			onJoinSubRoomRequestReceivedCallback(res) {
+				let { roomId, userId, extra } = res;
+				let content = `来自房间${roomId}的${userId}邀请你一起连麦，是否同意`;
+				uni.showModal({
+					title: '收到连麦请求',
+					content: content,
+					confirmText: '同意',
+					cancelText: '拒绝',
+					success: res => {
+						console.log(res);
+						if (res.confirm) {
+							RCRTCEngine.responseJoinSubRoomRequest(roomId, userId, true, true);
+						} else if (res.cancel) {
+							RCRTCEngine.responseJoinSubRoomRequest(roomId, userId, false, true);
+						}
+					},
+				});
+			},
+
+			onCancelJoinSubRoomRequestReceivedCallback(es) {
+				let { userId, roomId, extra } = res;
+				uni.showToast({
+					icon: 'none',
+					title: `${userId}拒绝了请求`
+				})
+			},
+
+			onJoinSubRoomRequestResponseReceivedCallback(res) {
+				let { roomId, userId, agree, extra } = res;
+				if (agree) {
+					RCRTCEngine.joinSubRoom(roomId);
+				} else {
+					uni.showToast({
+						icon: 'none',
+						title: `${userId}拒绝了请求`
+					});
+				}
+			},
+
+			onSubRoomJoinedCallback(res) {
+				console.log('onSubRoomJoinedCallback', res);
+				let { roomId, code, message } = res;
+				if (code === 0) {
+					let joinedSubRooms = this.getGlobalData().joinedSubRooms
+					if (!joinedSubRooms.includes(roomId)) {
+						joinedSubRooms.push(roomId);
+					}
+					this.updateJoinableSubRooms();
+					uni.showToast({
+						icon: 'none',
+						title: `加入${roomId}子房间成功`
+					});
+				} else {
+					uni.showToast({
+						icon: 'none',
+						title: `加入${roomId}子房间失败：${code}-${message}`
+					});
+				}
+			},
+
+			onSubRoomLeftCallback(res) {
+				console.log('onSubRoomLeftCallback', res);
+				let { roomId, code, message } = res;
+				// // 删除保存的用户
+				// let users = this.usersInfo;
+				// let uIndex = users.findIndex(user => user.roomId === roomId);
+				// users.splice(uIndex, 1);
+
+				let joinedSubRooms = this.getGlobalData().joinedSubRooms;
+				let joinedIndex = joinedSubRooms.indexOf(roomId);
+				if (joinedIndex != -1) {
+					joinedSubRooms.splice(joinedIndex, 1);
+				}
+				this.updateJoinableSubRooms();
+				if (code === 0) {
+					uni.showToast({
+						icon: 'none',
+						title: `离开${roomId}子房间成功`
+					});
+				} else {
+					uni.showToast({
+						icon: 'none',
+						title: `离开${roomId}子房间失败：${code}-${message}`
+					});
+				}
+			},
+
+			onSubRoomBandedCallback(res) {
+				console.log('onSubRoomBandedCallback', res);
+				let { roomId } = res;
+				let bandedSubRooms = this.getGlobalData().bandedSubRooms;
+				if (!bandedSubRooms.includes(roomId)) {
+					bandedSubRooms.push(roomId);
+				}
+				this.updateJoinableSubRooms();
+			},
+
+			onSubRoomDisbandCallback(res) {
+				console.log('onSubRoomDisbandCallback', res);
+				let { userId, roomId } = res;
+				let bandedSubRooms = this.getGlobalData().bandedSubRooms;
+				let bandedSubRoomsIndex = bandedSubRooms.indexOf(roomId);
+				if (bandedSubRoomsIndex != -1) {
+					bandedSubRooms.splice(bandedSubRoomsIndex, 1);
+				}
+				this.updateJoinableSubRooms();
+			},
+
+			onNetworkStatsCallback(res) {
+				this.networkStats = res;
+			},
+
+			onLocalAudioStatsCallback(res) {
+				this.localAudioStats = res;
+			},
+
+			onLocalVideoStatsCallback(res) {
+				if (res.tiny) {
+					this.localTinyVideoStats = res;
+				} else {
+					this.localVideoStats = res;
+				}
+			},
+
+			onRemoteVideoStatsCallback(res) {
+				let { userId, roomId, stats } = res;
+				let users = this.usersInfo;
+				let index = users.findIndex(user => user.userId === userId);
+				if (index === -1) return;
+				let user = users[index];
+				user.videoStats = stats;
+				users.splice(index, 1, user);
+			},
+
+			onRemoteCustomVideoStatsCallback(res) {
+				let { userId, roomId, tag, stats } = res;
+				let users = this.usersInfo;
+				let index = users.findIndex(user => user.userId === userId);
+				if (index === -1) return;
+				let user = users[index];
+				user.custom.videoStats = stats;
+				users.splice(index, 1, user);
+			},
+		}
+	}
+</script>
+
+<style scoped>
+	.setting-view {
+		display: flex;
+		position: fixed;
+		flex-direction: row;
+		justify-content: flex-end;
+		margin-bottom: 10rpx;
+		padding: 10rpx;
+		background-color: #007AFF;
+		height: 80rpx;
+		left: 0;
+		right: 0;
+	}
+
+	.setting-button {
+		margin-left: 20rpx;
+		opacity: 1;
+	}
+
+	.setting-button-disable {
+		opacity: 0.3;
+	}
+
+	.text {
+		font-size: 27rpx;
+	}
+
+	.whiteColor {
+		color: #FFFFFF
+	}
+
+	.radio {
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.localVideoView {
+		flex: 1;
+		height: 400rpx;
+	}
+
+	.videoTopView {
+		position: absolute;
+		left: 10rpx;
+		top: 10rpx;
+		align-items: flex-start;
+	}
+
+	.rightControlArea {
+		flex: 1;
+		margin-left: 10rpx;
+	}
+
+	.dropdownButton {
+		width: 140rpx;
+		height: 50rpx;
+	}
+
+	.fitButton {
+		margin-top: 10rpx;
+	}
+
+	.tinySetup {
+		margin: 10rpx;
+		border-width: 1rpx;
+		border-color: #465CFF;
+		justify-content: space-around;
+		padding-top: 20rpx;
+		padding-bottom: 20rpx;
+	}
+
+	.networkStats {
+		padding: 20rpx;
+	}
+
+	.statsText {
+		flex: 1;
+		text-align: center;
+	}
+
+	.menu {
+		position: fixed;
+		background-color: #EEEEEE;
+		top: 10rpx;
+		right: 10rpx;
+		padding: 20rpx;
+	}
+</style>

@@ -1,0 +1,11 @@
+*.log
+.idea/
+.gradle/
+build/
+**/.cxx
+*.iml
+local.properties
+.DS_Store
+node_modules
+example/unpackage/dist/
+example/unpackage/resources/
