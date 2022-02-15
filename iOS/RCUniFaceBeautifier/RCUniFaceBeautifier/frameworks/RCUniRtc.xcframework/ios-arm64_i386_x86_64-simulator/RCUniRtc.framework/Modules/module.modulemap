@@ -1,0 +1,6 @@
+framework module RCUniRtc {
+  umbrella header "RCUniRtc.h"
+
+  export *
+  module * { export * }
+}

@@ -63,7 +63,7 @@ RCRTCEngine.setOnRoomJoinedListener(({code, message}) => {
     // 加入房间成功
   } else {
     // 加入房间失败
-  } 
+  }	
 });
 
 // 加入 RTC 房间
@@ -193,7 +193,7 @@ RCRTCEngine.setOnRoomJoinedListener(({code, message}) => {
     // 加入房间成功
   } else {
     // 加入房间失败
-  } 
+  }	
 });
 
 // 加入 RTC 房间
@@ -291,7 +291,7 @@ RCRTCEngine.setOnRoomJoinedListener(({code, message}) => {
     // 创建/加入房间成功
     } else {
     // 创建/加入房间失败
-    }   
+    }	
 });
 
 // 加入 RTC 房间
@@ -341,7 +341,7 @@ RCRTCEngine.setOnRoomJoinedListener(({code, message}) => {
     // 创建/加入房间成功
     } else {
     // 创建/加入房间失败
-    }   
+    }	
 });
 
 // 加入 RTC 房间
@@ -399,3 +399,4 @@ RCRTCEngine.setRemoteView(userId, this.$refs.remoteView.getNativeViewRef(), (cod
 ```js
 RCRTCEngine.leaveRoom();
 ```
+
