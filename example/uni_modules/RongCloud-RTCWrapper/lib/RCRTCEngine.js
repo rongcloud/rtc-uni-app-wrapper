@@ -118,6 +118,9 @@ class RCRTCEngineImpl {
     setLiveMixRenderMode(mode) {
         return RCUniRtc.setLiveMixRenderMode(mode);
     }
+    setLiveMixBackgroundColor(red, green, blue) {
+        return RCUniRtc.setLiveMixBackgroundColor(red, green, blue);
+    }
     setLiveMixCustomLayouts(layouts) {
         return RCUniRtc.setLiveMixCustomLayouts(layouts);
     }
@@ -130,8 +133,8 @@ class RCRTCEngineImpl {
     setLiveMixVideoBitrate(bitrate, tiny) {
         return RCUniRtc.setLiveMixVideoBitrate(bitrate, tiny);
     }
-    setLiveMixVideoResolution(resolution, tiny) {
-        return RCUniRtc.setLiveMixVideoResolution(resolution, tiny);
+    setLiveMixVideoResolution(width, height, tiny) {
+        return RCUniRtc.setLiveMixVideoResolution(width, height, tiny);
     }
     setLiveMixVideoFps(fps, tiny) {
         return RCUniRtc.setLiveMixVideoFps(fps, tiny);
@@ -317,11 +320,11 @@ class RCRTCEngineImpl {
     setOnLiveMixUnsubscribedListener(callback) {
         this._setListener(RCRTCEngineEventsName.OnLiveMixUnsubscribed, callback);
     }
-    setOnEnableCameraListener(callback) {
-        this._setListener(RCRTCEngineEventsName.OnEnableCamera, callback);
+    setOnCameraEnabledListener(callback) {
+        this._setListener(RCRTCEngineEventsName.OnCameraEnabled, callback);
     }
-    setOnSwitchCameraListener(callback) {
-        this._setListener(RCRTCEngineEventsName.OnSwitchCamera, callback);
+    setOnCameraSwitchedListener(callback) {
+        this._setListener(RCRTCEngineEventsName.OnCameraSwitched, callback);
     }
     setOnLiveCdnAddedListener(callback) {
         this._setListener(RCRTCEngineEventsName.OnLiveCdnAdded, callback);
@@ -334,6 +337,9 @@ class RCRTCEngineImpl {
     }
     setOnLiveMixRenderModeSetListener(callback) {
         this._setListener(RCRTCEngineEventsName.OnLiveMixRenderModeSet, callback);
+    }
+    setOnLiveMixBackgroundColorSetListener(callback) {
+        this._setListener(RCRTCEngineEventsName.OnLiveMixBackgroundColorSet, callback);
     }
     setOnLiveMixCustomAudiosSetListener(callback) {
         this._setListener(RCRTCEngineEventsName.OnLiveMixCustomAudiosSet, callback);

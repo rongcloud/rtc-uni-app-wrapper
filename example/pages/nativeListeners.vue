@@ -14,10 +14,7 @@
 			console.log('nativeListener created');
 			this.addListeners();
 		},
-		onLoad() {
-			console.log('nativeListener onLoad');
-		},
-		onUnload() {
+		destroyed() {
 			// 设置callback为空，代表移除原生事件的监听
 			RCRTCEngine.setOnErrorListener();
 			RCRTCEngine.setOnKickedListener();
@@ -27,6 +24,69 @@
 			RCRTCEngine.setOnUnpublishedListener();
 			RCRTCEngine.setOnSubscribedListener();
 			RCRTCEngine.setOnUnsubscribedListener();
+			RCRTCEngine.setOnLiveMixSubscribedListener();
+			RCRTCEngine.setOnLiveMixUnsubscribedListener();
+			RCRTCEngine.setOnCameraEnabledListener();
+			RCRTCEngine.setOnCameraSwitchedListener();
+			RCRTCEngine.setOnLiveCdnAddedListener();
+			RCRTCEngine.setOnLiveCdnRemovedListener();
+			RCRTCEngine.setOnLiveMixLayoutModeSetListener();
+			RCRTCEngine.setOnLiveMixRenderModeSetListener();
+			RCRTCEngine.setOnLiveMixCustomAudiosSetListener();
+			RCRTCEngine.setOnLiveMixCustomLayoutsSetListener();
+			RCRTCEngine.setOnLiveMixAudioBitrateSetListener();
+			RCRTCEngine.setOnLiveMixVideoBitrateSetListener();
+			RCRTCEngine.setOnLiveMixVideoResolutionSetListener();
+			RCRTCEngine.setOnLiveMixVideoFpsSetListener();
+			RCRTCEngine.setOnAudioEffectCreatedListener();
+			RCRTCEngine.setOnAudioEffectFinishedListener();
+			RCRTCEngine.setOnAudioMixingStartedListener();
+			RCRTCEngine.setOnAudioMixingPausedListener();
+			RCRTCEngine.setOnAudioMixingStoppedListener();
+			RCRTCEngine.setOnAudioMixingFinishedListener();
+			RCRTCEngine.setOnUserJoinedListener();
+			RCRTCEngine.setOnUserOfflineListener();
+			RCRTCEngine.setOnUserLeftListener();
+			RCRTCEngine.setOnRemotePublishedListener();
+			RCRTCEngine.setOnRemoteUnpublishedListener();
+			RCRTCEngine.setOnRemoteLiveMixPublishedListener();
+			RCRTCEngine.setOnRemoteLiveMixUnpublishedListener();
+			RCRTCEngine.setOnRemoteStateChangedListener();
+			RCRTCEngine.setOnRemoteFirstFrameListener();
+			RCRTCEngine.setOnRemoteLiveMixFirstFrameListener();
+			
+			RCRTCEngine.setOnCustomStreamPublishedListener();
+			RCRTCEngine.setOnCustomStreamUnpublishedListener();
+			RCRTCEngine.setOnRemoteCustomStreamPublishedListener();
+			RCRTCEngine.setOnRemoteCustomStreamUnpublishedListener();
+			RCRTCEngine.setOnCustomStreamSubscribedListener();
+			RCRTCEngine.setOnCustomStreamUnsubscribedListener();
+			RCRTCEngine.setOnCustomStreamPublishFinishedListener();
+			RCRTCEngine.setOnJoinSubRoomRequestedListener();
+			RCRTCEngine.setOnJoinSubRoomRequestCanceledListener();
+			RCRTCEngine.setOnJoinSubRoomRequestRespondedListener();
+			RCRTCEngine.setOnJoinSubRoomRequestReceivedListener();
+			RCRTCEngine.setOnCancelJoinSubRoomRequestReceivedListener();
+			RCRTCEngine.setOnJoinSubRoomRequestResponseReceivedListener();
+			RCRTCEngine.setOnSubRoomJoinedListener();
+			RCRTCEngine.setOnSubRoomLeftListener();
+			RCRTCEngine.setOnSubRoomBandedListener();
+			RCRTCEngine.setOnSubRoomDisbandListener();
+			
+			// 状态监听
+			RCRTCEngine.setOnNetworkStatsListener();
+			RCRTCEngine.setOnLocalAudioStatsListener();
+			RCRTCEngine.setOnLocalVideoStatsListener();
+			RCRTCEngine.setOnRemoteAudioStatsListener();
+			RCRTCEngine.setOnRemoteVideoStatsListener();
+			RCRTCEngine.setOnLiveMixAudioStatsListener();
+			RCRTCEngine.setOnLiveMixVideoStatsListener();
+			RCRTCEngine.setOnLiveMixMemberAudioStatsListener();
+			RCRTCEngine.setOnLiveMixMemberCustomAudioStatsListener();
+			RCRTCEngine.setOnLocalCustomAudioStatsListener();
+			RCRTCEngine.setOnLocalCustomVideoStatsListener();
+			RCRTCEngine.setOnRemoteCustomAudioStatsListener();
+			RCRTCEngine.setOnRemoteCustomVideoStatsListener();
 		},
 		methods: {
 			addListeners() {
@@ -40,6 +100,7 @@
 					uni.$emit(RCRTCEngineEventsName.OnRoomJoined, res);
 				});
 				RCRTCEngine.setOnRoomLeftListener((res) => {
+					console.log('setOnRoomLeftListener');
 					uni.$emit(RCRTCEngineEventsName.OnRoomLeft, res);
 				});
 				RCRTCEngine.setOnPublishedListener((res) => {
@@ -60,11 +121,11 @@
 				RCRTCEngine.setOnLiveMixUnsubscribedListener((res) => {
 					uni.$emit(RCRTCEngineEventsName.OnLiveMixUnsubscribed, res);
 				});
-				RCRTCEngine.setOnEnableCameraListener((res) => {
-					uni.$emit(RCRTCEngineEventsName.OnEnableCamera, res);
+				RCRTCEngine.setOnCameraEnabledListener((res) => {
+					uni.$emit(RCRTCEngineEventsName.OnCameraEnabled, res);
 				});
-				RCRTCEngine.setOnSwitchCameraListener((res) => {
-					uni.$emit(RCRTCEngineEventsName.OnSwitchCamera, res);
+				RCRTCEngine.setOnCameraSwitchedListener((res) => {
+					uni.$emit(RCRTCEngineEventsName.OnCameraSwitched, res);
 				});
 				RCRTCEngine.setOnLiveCdnAddedListener((res) => {
 					uni.$emit(RCRTCEngineEventsName.OnLiveCdnAdded, res);

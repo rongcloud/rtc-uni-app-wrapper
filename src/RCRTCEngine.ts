@@ -27,7 +27,7 @@ import {
     OnCustomStreamSubscribedResult,
     OnCustomStreamUnpublishedResult,
     OnCustomStreamUnsubscribedResult,
-    OnEnableCameraResult,
+    OnCameraEnabledResult,
     OnErrorResult,
     OnJoinSubRoomRequestCanceledResult,
     OnJoinSubRoomRequestedResult,
@@ -73,13 +73,15 @@ import {
     OnSubRoomJoinedResult,
     OnSubRoomLeftResult,
     OnSubscribedResult,
-    OnSwitchCameraResult,
+    OnCameraSwitchedResult,
     OnUnpublishedResult,
     OnUnsubscribedResult,
     OnUserJoinedResult,
     OnUserLeftResult,
     OnUserOfflineResult,
-    OnRemoteCustomStreamStateChangedResult
+    OnRemoteCustomStreamStateChangedResult,
+    BaseCallback,
+    OnLiveMixBackgroundColorSetResult
 } from './RCRTCDefines';
 
 import {
@@ -210,6 +212,9 @@ class RCRTCEngineImpl implements
     setLiveMixRenderMode(mode: RCRTCLiveMixRenderMode): number {
         return RCUniRtc.setLiveMixRenderMode(mode);
     }
+    setLiveMixBackgroundColor(red: number, green: number, blue: number): number {
+        return RCUniRtc.setLiveMixBackgroundColor(red, green, blue);
+    }
     setLiveMixCustomLayouts(layouts: RCRTCCustomLayout[]): number {
         return RCUniRtc.setLiveMixCustomLayouts(layouts);
     }
@@ -222,8 +227,8 @@ class RCRTCEngineImpl implements
     setLiveMixVideoBitrate(bitrate: number, tiny: false): number {
         return RCUniRtc.setLiveMixVideoBitrate(bitrate, tiny);
     }
-    setLiveMixVideoResolution(resolution: RCRTCVideoResolution, tiny: false): number {
-        return RCUniRtc.setLiveMixVideoResolution(resolution, tiny);
+    setLiveMixVideoResolution(width:number, height: number, tiny: false): number {
+        return RCUniRtc.setLiveMixVideoResolution(width, height, tiny);
     }
     setLiveMixVideoFps(fps: RCRTCVideoFps, tiny: false): number {
         return RCUniRtc.setLiveMixVideoFps(fps, tiny);
@@ -414,11 +419,11 @@ class RCRTCEngineImpl implements
     setOnLiveMixUnsubscribedListener(callback?: (result: OnLiveMixUnsubscribedResult) => void): void {
         this._setListener(RCRTCEngineEventsName.OnLiveMixUnsubscribed, callback);
     }
-    setOnEnableCameraListener(callback?: (result: OnEnableCameraResult) => void): void {
-        this._setListener(RCRTCEngineEventsName.OnEnableCamera, callback);
+    setOnCameraEnabledListener(callback?: (result: OnCameraEnabledResult) => void): void {
+        this._setListener(RCRTCEngineEventsName.OnCameraEnabled, callback);
     }
-    setOnSwitchCameraListener(callback?: (result: OnSwitchCameraResult) => void): void {
-        this._setListener(RCRTCEngineEventsName.OnSwitchCamera, callback);
+    setOnCameraSwitchedListener(callback?: (result: OnCameraSwitchedResult) => void): void {
+        this._setListener(RCRTCEngineEventsName.OnCameraSwitched, callback);
     }
     setOnLiveCdnAddedListener(callback?: (result: OnLiveCdnAddedResult) => void): void {
         this._setListener(RCRTCEngineEventsName.OnLiveCdnAdded, callback);
@@ -431,6 +436,9 @@ class RCRTCEngineImpl implements
     }
     setOnLiveMixRenderModeSetListener(callback?: (result: OnLiveMixRenderModeSetResult) => void): void {
         this._setListener(RCRTCEngineEventsName.OnLiveMixRenderModeSet, callback);
+    }
+    setOnLiveMixBackgroundColorSetListener(callback?: BaseCallback<OnLiveMixBackgroundColorSetResult>): void {
+        this._setListener(RCRTCEngineEventsName.OnLiveMixBackgroundColorSet, callback);
     }
     setOnLiveMixCustomAudiosSetListener(callback?: (result: OnLiveMixCustomAudiosSetResult) => void): void {
         this._setListener(RCRTCEngineEventsName.OnLiveMixCustomAudiosSet, callback);
@@ -896,7 +904,7 @@ export interface RCRTCEngineInterface {
      *
      * @param {RCRTCMediaType} type 媒体类型
      * @param {boolean} mute true: 不发送 false: 发送
-     * @return {*}  {number}
+     * @return {*}  {number} 错误码
      * @memberof RCRTCEngineInterface
      */
     muteLocalStream(type: RCRTCMediaType, mute: boolean): number;
@@ -907,7 +915,7 @@ export interface RCRTCEngineInterface {
      * @param {string} userId 远端用户 userId
      * @param {RCRTCMediaType} type 媒体类型
      * @param {boolean} mute true: 不发送 false: 发送
-     * @return {*}  {number}
+     * @return {*}  {number} 错误码
      * @memberof RCRTCEngineInterface
      */
     muteRemoteStream(userId: string, type: RCRTCMediaType, mute: boolean): number;
@@ -916,7 +924,7 @@ export interface RCRTCEngineInterface {
      * 设置 CDN 直播推流地址, 仅供直播主播用户使用
      *
      * @param {string} url 推流地址
-     * @return {*}  {number}
+     * @return {*}  {number} 错误码
      * @memberof RCRTCEngineInterface
      */
     addLiveCdn(url: string): number;
@@ -925,7 +933,7 @@ export interface RCRTCEngineInterface {
      * 移除 CDN 直播推流地址, 仅供直播主播用户使用
      *
      * @param {string} url 推流地址
-     * @return {*}  {number}
+     * @return {*}  {number} 错误码
      * @memberof RCRTCEngineInterface
      */
     removeLiveCdn(url: string): number;
@@ -934,7 +942,7 @@ export interface RCRTCEngineInterface {
      * 设置直播合流布局类型, 仅供直播主播用户使用
      *
      * @param {RCRTCLiveMixLayoutMode} mode 布局类型
-     * @return {*}  {number}
+     * @return {*}  {number} 错误码
      * @memberof RCRTCEngineInterface
      */
     setLiveMixLayoutMode(mode: RCRTCLiveMixLayoutMode): number;
@@ -943,12 +951,23 @@ export interface RCRTCEngineInterface {
      * 设置直播合流布局填充类型, 仅供直播主播用户使用
      *
      * @param {RCRTCLiveMixRenderMode} mode 填充类型
-     * @return {*}  {number}
+     * @return {*}  {number} 错误码
      * @memberof RCRTCEngineInterface 
      * @memberof RCRTCEngineInterface
      */
     setLiveMixRenderMode(mode: RCRTCLiveMixRenderMode): number;
 
+    /**
+     * 设置直播合流布局背景颜色 仅供直播主播用户使用
+     *
+     * @param {number} red 取值范围: 0 ~ 255
+     * @param {number} green 取值范围: 0 ~ 255
+     * @param {number} blue 0 ~ 255
+     * @return {*}  {number} 错误码
+     * @memberof RCRTCEngineInterface
+     */
+    setLiveMixBackgroundColor(red: number, green: number, blue: number): number;
+    
     /**
      * 设置直播混流布局配置, 仅供直播主播用户使用
      *
@@ -962,7 +981,7 @@ export interface RCRTCEngineInterface {
      * 设置直播自定义音频流列表, 仅供直播主播用户使用
      *
      * @param {string[]} userIds 音频流列表
-     * @return {*}  {number}
+     * @return {*}  {number} 错误码
      * @memberof RCRTCEngineInterface
      */
     setLiveMixCustomAudios(userIds: string[]): number;
@@ -989,12 +1008,13 @@ export interface RCRTCEngineInterface {
     /**
      * 设置直播合流视频分辨率, 仅供直播主播用户使用
      *
-     * @param {RCRTCVideoResolution} resolution 视频分辨率
+     * @param {number} width 视频宽度
+     * @param {number} height 视频高度
      * @param {false} tiny 是否小流 true:视频小流 false:视频大流，默认值 false
      * @return {*}  {number}
      * @memberof RCRTCEngineInterface
      */
-    setLiveMixVideoResolution(resolution: RCRTCVideoResolution, tiny: false): number;
+    setLiveMixVideoResolution(width:number, height: number, tiny: false): number;
 
     /**
      * 设置直播合流视频帧率, 仅供直播主播用户使用
@@ -1040,7 +1060,7 @@ export interface RCRTCEngineInterface {
      * 暂停音效文件播放, 仅供会议用户或直播主播用户使用
      *
      * @param {number} effectId 自定义全局唯一音效Id
-     * @return {*}  {number}
+     * @return {*}  {number} 错误码
      * @memberof RCRTCEngineInterface
      */
     pauseAudioEffect(effectId: number): number;
@@ -1048,7 +1068,7 @@ export interface RCRTCEngineInterface {
     /**
      * 暂停全部音效文件播放, 仅供会议用户或直播主播用户使用
      *
-     * @return {*}  {number}
+     * @return {*}  {number} 错误码
      * @memberof RCRTCEngineInterface
      */
     pauseAllAudioEffects(): number;
@@ -1057,7 +1077,7 @@ export interface RCRTCEngineInterface {
      * 恢复音效文件播放, 仅供会议用户或直播主播用户使用
      *
      * @param {number} effectId 自定义全局唯一音效Id
-     * @return {*}  {number}
+     * @return {*}  {number} 错误码
      * @memberof RCRTCEngineInterface
      */
     resumeAudioEffect(effectId: number): number;
@@ -1065,7 +1085,7 @@ export interface RCRTCEngineInterface {
     /**
      * 恢复全部音效文件播放, 仅供会议用户或直播主播用户使用
      *
-     * @return {*}  {number}
+     * @return {*}  {number} 错误码
      * @memberof RCRTCEngineInterface
      */
     resumeAllAudioEffects(): number;
@@ -1074,7 +1094,7 @@ export interface RCRTCEngineInterface {
      * 停止音效文件播放, 仅供会议用户或直播主播用户使用
      *
      * @param {number} effectId 自定义全局唯一音效Id
-     * @return {*}  {number}
+     * @return {*}  {number} 错误码
      * @memberof RCRTCEngineInterface
      */
     stopAudioEffect(effectId: number): number;
@@ -1082,7 +1102,7 @@ export interface RCRTCEngineInterface {
     /**
      * 停止全部音效文件播放, 仅供会议用户或直播主播用户使用
      *
-     * @return {*}  {number}
+     * @return {*}  {number} 错误码
      * @memberof RCRTCEngineInterface
      */
     stopAllAudioEffects(): number;
@@ -1092,7 +1112,7 @@ export interface RCRTCEngineInterface {
      *
      * @param {number} effectId 自定义全局唯一音效Id
      * @param {number} volume 音量 0~100, 默认 100
-     * @return {*}  {number}
+     * @return {*}  {number} 错误码
      * @memberof RCRTCEngineInterface
      */
     adjustAudioEffectVolume(effectId: number, volume: number): number;
@@ -1110,7 +1130,7 @@ export interface RCRTCEngineInterface {
      * 设置全局音效文件播放音量, 仅供会议用户或直播主播用户使用
      *
      * @param {number} volume 音量 0~100, 默认 100
-     * @return {*}  {number}
+     * @return {*}  {number} 错误码
      * @memberof RCRTCEngineInterface
      */
     adjustAllAudioEffectsVolume(volume: number): number;
@@ -1122,7 +1142,7 @@ export interface RCRTCEngineInterface {
      * @param {RCRTCAudioMixingMode} mode  混音行为模式
      * @param {boolean} playback 是否本地播放， 默认 true
      * @param {number} loop 循环混音或者播放次数，默认播放 1 次
-     * @return {*}  {number}
+     * @return {*}  {number} 错误码
      * @memberof RCRTCEngineInterface
      * @category 混音
      */
@@ -1131,7 +1151,7 @@ export interface RCRTCEngineInterface {
     /**
      * 停止混音, 仅供会议用户或直播主播用户使用
      *
-     * @return {*}  {number}
+     * @return {*}  {number} 错误码
      * @memberof RCRTCEngineInterface
      * @category 混音
      */
@@ -1140,7 +1160,7 @@ export interface RCRTCEngineInterface {
     /**
      * 暂停混音, 仅供会议用户或直播主播用户使用
      *
-     * @return {*}  {number}
+     * @return {*}  {number} 错误码
      * @memberof RCRTCEngineInterface
      * @category 混音
      */
@@ -1149,7 +1169,7 @@ export interface RCRTCEngineInterface {
     /**
      * 恢复混音, 仅供会议用户或直播主播用户使用
      *
-     * @return {*}  {number}
+     * @return {*}  {number} 错误码
      * @memberof RCRTCEngineInterface
      */
     resumeAudioMixing(): number;
@@ -1167,7 +1187,7 @@ export interface RCRTCEngineInterface {
      * 设置混音本地播放音量, 仅供会议用户或直播主播用户使用
      *
      * @param {number} volume  音量 0~100, 默认 100
-     * @return {*}  {number}
+     * @return {*}  {number} 错误码
      * @memberof RCRTCEngineInterface
      */
     adjustAudioMixingPlaybackVolume(volume: number): number;

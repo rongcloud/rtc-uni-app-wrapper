@@ -32,11 +32,11 @@
 		</view>
 		<view class="mute-view">
 			<label class="uni-inline-item radio" @click="muteVideoClick">
-				<radio :checked="muteVideo" />
+				<radio :checked="muteVideo" :disabled="true"/>
 				<text class="text">静音视频</text>
 			</label>
 			<label class="uni-inline-item radio" @click="muteAudioClick">
-				<radio :checked="muteAudio" />
+				<radio :checked="muteAudio" :disabled="true"/>
 				<text class="text">静音音频</text>
 			</label>
 		</view>
@@ -199,6 +199,15 @@
 				if (!enable) {
 					this.subscribe = false;
 				}
+				if (type === RCRTCMediaType.AudioVideo) {
+					// 音视频模式，高亮 音频 和 视频
+					this.mediaTypes.forEach(item => {
+						item.publish = enable;
+					});
+					this.currentMediaType = RCRTCMediaType.AudioVideo;
+				} else {
+					this.currentMediaType = RCRTCMediaType.Audio;
+				}
 				let findIndex = this.mediaTypes.findIndex(item => item.value === type);
 				let mediaTypeItem = this.mediaTypes[findIndex];
 				mediaTypeItem.publish = enable;
@@ -248,6 +257,9 @@
 				this.currentMediaType = item.value;
 			},
 			subscribeClick() {
+				if (this.currentMediaType === -1) {
+					return;
+				}
 				if (!this.subscribe) {
 					let code = RCRTCEngine.subscribeLiveMix(this.currentMediaType, this.tiny);
 					if (code === 0) {
@@ -304,6 +316,12 @@
 							this.muteAudio = mute;
 							break;
 					}
+				} else {
+					let str = mute ? '' : '取消';
+					uni.showToast({
+						icon: 'none',
+						title: `${str}静音失败：${code}`
+					})
 				}
 			},
 			/* callbacks */

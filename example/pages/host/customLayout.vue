@@ -57,7 +57,7 @@
 		RCRTCStreamType
 	} from '@/uni_modules/RongCloud-RTCWrapper/lib/RCRTCDefines';
 	import RCRTCEngine from '@/uni_modules/RongCloud-RTCWrapper/lib/RCRTCEngine';
-	
+
 	import fuiDropdownList from "@/components/fui-dropdown-list/fui-dropdown-list";
 
 	export default {
@@ -80,12 +80,15 @@
 		onLoad() {
 			this.layouts = this.getGlobalCustomLayouts();
 			let globalUsers = getApp().globalData.hostPageData.users;
+			console.log(globalUsers);
 			globalUsers.forEach(user => {
-				let { userId, tag } = user;
+				let { userId, customs } = user;
 				this.userIds.push(userId);
-				if (tag) {
-					this.tags.push(tag);
-					this.userIds.push(tag);
+				if (customs) {
+					customs.forEach(custom => {
+						this.tags.push(custom.tag);
+						this.userIds.push(custom.tag);
+					});
 				}
 			});
 			this.users = JSON.parse(JSON.stringify(globalUsers));
@@ -135,7 +138,7 @@
 				let { x, y, width, height } = this;
 				let layout;
 				let selectedUser = this.users.find(user => {
-					return user.userId === this.selectedId || user.tag === this.selectedId;
+					return user.userId === this.selectedId || user.customs.find(item => item.tag === this.selectedId);
 				});
 				let userId = selectedUser.userId;
 				if (this.tags.includes(this.selectedId)) {
@@ -144,7 +147,6 @@
 				} else {
 					layout = { x, y, width, height, userId };
 				}
-				console.log(layout);
 				let findIndex = this.layouts.findIndex(u => {
 					return u.userId === userId && u.tag === layout.tag;
 				});
@@ -162,11 +164,6 @@
 			},
 			commit() {
 				if (this.layouts.length === 0) {
-					// uni.showToast({
-					// 	icon: 'none',
-					// 	title: '至少设置一个用户的布局',
-					// 	duration: 2000,
-					// })
 					uni.showModal({
 						title: '提示',
 						content: '提交空数据代表取消自定义布局模式',

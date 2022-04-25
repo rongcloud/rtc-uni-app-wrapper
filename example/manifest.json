@@ -17,7 +17,9 @@
             "delay" : 0
         },
         /* 模块配置 */
-        "modules" : {},
+        "modules" : {
+            "Push" : {}
+        },
         /* 应用发布信息 */
         "distribute" : {
             /* android打包配置 */
@@ -54,38 +56,13 @@
             },
             /* SDK配置 */
             "sdkConfigs" : {
-                "ad" : {}
+                "ad" : {},
+                "push" : {
+                    "unipush" : {}
+                }
             }
         },
         "nativePlugins" : {
-            "RongCloud-IM" : {
-                "__plugin_info__" : {
-                    "name" : "RCUniIM",
-                    "description" : "融云 uni 原生插件",
-                    "platforms" : "Android,iOS",
-                    "url" : "",
-                    "android_package_name" : "",
-                    "ios_bundle_id" : "",
-                    "isCloud" : false,
-                    "bought" : -1,
-                    "pid" : "",
-                    "parameters" : {}
-                }
-            },
-            "RongCloud-RTC" : {
-                "__plugin_info__" : {
-                    "name" : "RCUniRtc",
-                    "description" : "Rongcloud rtc lib sdk for uni",
-                    "platforms" : "Android,iOS",
-                    "url" : "",
-                    "android_package_name" : "",
-                    "ios_bundle_id" : "",
-                    "isCloud" : false,
-                    "bought" : -1,
-                    "pid" : "",
-                    "parameters" : {}
-                }
-            },
             "RongCloud-Example" : {
                 "__plugin_info__" : {
                     "name" : "RCUniFaceBeautifier",
@@ -97,6 +74,48 @@
                     "isCloud" : false,
                     "bought" : -1,
                     "pid" : "",
+                    "parameters" : {}
+                }
+            },
+            "RongCloud-IM" : {
+                "__plugin_info__" : {
+                    "name" : "RCUniIM",
+                    "description" : "融云即时通讯 SDK uni 原生插件",
+                    "platforms" : "Android,iOS",
+                    "url" : "https://ext.dcloud.net.cn/plugin?id=6120",
+                    "android_package_name" : "cn.rongcloud.rtc.uni.example",
+                    "ios_bundle_id" : "cn.rongcloud.rtc.uni.example",
+                    "isCloud" : true,
+                    "bought" : 1,
+                    "pid" : "6120",
+                    "parameters" : {}
+                }
+            },
+            "RongCloud-RTC" : {
+                "__plugin_info__" : {
+                    "name" : "RCUniRtc",
+                    "description" : "融云 RTC SDK uni-app 原生插件",
+                    "platforms" : "Android,iOS",
+                    "url" : "https://ext.dcloud.net.cn/plugin?id=7418",
+                    "android_package_name" : "cn.rongcloud.rtc.uni.example",
+                    "ios_bundle_id" : "cn.rongcloud.rtc.uni.example",
+                    "isCloud" : true,
+                    "bought" : 1,
+                    "pid" : "7418",
+                    "parameters" : {}
+                }
+            },
+            "RongCloud-Beauty" : {
+                "__plugin_info__" : {
+                    "name" : "RCUniBeauty",
+                    "description" : "融云基础版美颜插件，服务于 RCUniRtc 或 RCUniRtc",
+                    "platforms" : "Android,iOS",
+                    "url" : "https://ext.dcloud.net.cn/plugin?id=7982",
+                    "android_package_name" : "cn.rongcloud.rtc.uni.example",
+                    "ios_bundle_id" : "cn.rongcloud.rtc.uni.example",
+                    "isCloud" : true,
+                    "bought" : 1,
+                    "pid" : "7982",
                     "parameters" : {}
                 }
             }

@@ -1,5 +1,4 @@
 # 融云 uni-app RTC
-[![GitHub stars](https://img.shields.io/github/stars/rongcloud/rtc-flutter-wrapper.svg)](https://github.com/rongcloud/rtc-flutter-wrapper) [![Pub version](https://img.shields.io/pub/v/rongcloud_rtc_wrapper_plugin.svg)](https://pub.dev/packages/rongcloud_rtc_wrapper_plugin)
 
 本文档主要讲解了如何使用融云  uni-app RTC SDK，基于 融云 iOS/Android 平台的  RTCLib  SDK
 

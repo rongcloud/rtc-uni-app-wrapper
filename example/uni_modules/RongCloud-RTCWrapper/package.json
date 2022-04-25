@@ -1,12 +1,12 @@
 {
   "id": "RongCloud-RTCWrapper",
   "displayName": "RongCloud-RTCWrapper",
-  "version": "1.0.0",
+  "version": "5.1.17",
   "description": "融云实时音视频 SDK uni js层 插件, 需要依赖 RongCloud-RTC 原生插件",
   "keywords": [
     "RongCloud",
-	  "rtc",
-	  "音视频"
+    "RTC",
+    "音视频"
 ],
   "repository": "",
   "engines": {
@@ -14,8 +14,8 @@
   },
   "dcloudext": {
     "category": [
-        "前端组件",
-        "通用组件"
+        "JS SDK",
+        "通用 SDK"
     ],
     "sale": {
       "regular": {
@@ -29,52 +29,52 @@
       "qq": ""
     },
     "declaration": {
-      "ads": "",
-      "data": "",
-      "permissions": ""
+      "ads": "无",
+      "data": "插件不采集任何数据",
+      "permissions": "无"
     },
     "npmurl": ""
   },
   "uni_modules": {
-    "dependencies": ["RongCloud-CallWrapper", "RC-CallKit"],
+    "dependencies": [],
     "encrypt": [],
     "platforms": {
       "cloud": {
-        "tcb": "u",
-        "aliyun": "u"
+        "tcb": "y",
+        "aliyun": "y"
       },
       "client": {
         "Vue": {
-          "vue2": "u",
-          "vue3": "u"
+          "vue2": "n",
+          "vue3": "n"
         },
         "App": {
-          "app-vue": "u",
-          "app-nvue": "u"
+          "app-vue": "y",
+          "app-nvue": "y"
         },
         "H5-mobile": {
-          "Safari": "u",
-          "Android Browser": "u",
-          "微信浏览器(Android)": "u",
-          "QQ浏览器(Android)": "u"
+          "Safari": "n",
+          "Android Browser": "n",
+          "微信浏览器(Android)": "n",
+          "QQ浏览器(Android)": "n"
         },
         "H5-pc": {
-          "Chrome": "u",
-          "IE": "u",
-          "Edge": "u",
-          "Firefox": "u",
-          "Safari": "u"
+          "Chrome": "n",
+          "IE": "n",
+          "Edge": "n",
+          "Firefox": "n",
+          "Safari": "n"
         },
         "小程序": {
-          "微信": "u",
-          "阿里": "u",
-          "百度": "u",
-          "字节跳动": "u",
-          "QQ": "u"
+          "微信": "n",
+          "阿里": "n",
+          "百度": "n",
+          "字节跳动": "n",
+          "QQ": "n"
         },
         "快应用": {
-          "华为": "u",
-          "联盟": "u"
+          "华为": "n",
+          "联盟": "n"
         }
       }
     }

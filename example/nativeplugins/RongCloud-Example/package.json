@@ -30,7 +30,8 @@
         }
       ],
       "frameworks": [
-        "GPUImage.framework"
+        "GPUImage.framework",
+				"RCUniFaceBeautifier.framework"
       ],
       "integrateType": "framework",
       "deploymentTarget": "9.0"

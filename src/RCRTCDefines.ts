@@ -423,7 +423,7 @@ export interface OnLiveMixUnsubscribedResult {
  * @param code 返回码
  * @param message 返回消息
  */
-export interface OnEnableCameraResult {
+export interface OnCameraEnabledResult {
     enable: boolean;
     code: number;
     message: string;
@@ -435,7 +435,7 @@ export interface OnEnableCameraResult {
  * @param code 返回码
  * @param message 返回消息
  */
-export interface OnSwitchCameraResult {
+export interface OnCameraSwitchedResult {
     camera: RCRTCCamera;
     code: number;
     message: string;
@@ -481,6 +481,16 @@ export interface OnLiveMixLayoutModeSetResult {
  * @param message 返回消息
  */
 export interface OnLiveMixRenderModeSetResult {
+    code: number;
+    message: string;
+}
+
+/**
+ * 设置合流布局背景颜色操作回调参数
+ * @param code 返回码
+ * @param message 返回消息
+ */
+export interface OnLiveMixBackgroundColorSetResult {
     code: number;
     message: string;
 }
@@ -830,12 +840,14 @@ export interface OnJoinSubRoomRequestCanceledResult {
  * 响应请求加入子房间回调参数
  * @param roomId
  * @param userId
+ * @param agree 是否同意 true：同意
  * @param code
  * @param message
  */
 export interface OnJoinSubRoomRequestRespondedResult {
     roomId: string,
     userId: string,
+    agree: boolean,
     code: number,
     message: string,
 }
@@ -1334,12 +1346,13 @@ export enum RCRTCEngineEventsName {
     OnUnsubscribed = 'OnUnsubscribed',
     OnLiveMixSubscribed = 'OnLiveMixSubscribed',
     OnLiveMixUnsubscribed = 'OnLiveMixUnsubscribed',
-    OnEnableCamera = 'OnEnableCamera',
-    OnSwitchCamera = 'OnSwitchCamera',
+    OnCameraEnabled = 'OnCameraEnabled',
+    OnCameraSwitched = 'OnCameraSwitched',
     OnLiveCdnAdded = 'OnLiveCdnAdded',
     OnLiveCdnRemoved = 'OnLiveCdnRemoved',
     OnLiveMixLayoutModeSet = 'OnLiveMixLayoutModeSet',
     OnLiveMixRenderModeSet = 'OnLiveMixRenderModeSet',
+    OnLiveMixBackgroundColorSet = 'OnLiveMixBackgroundColorSet',
     OnLiveMixCustomAudiosSet = 'OnLiveMixCustomAudiosSet',
     OnLiveMixCustomLayoutsSet = 'OnLiveMixCustomLayoutsSet',
     OnLiveMixAudioBitrateSet = 'OnLiveMixAudioBitrateSet',

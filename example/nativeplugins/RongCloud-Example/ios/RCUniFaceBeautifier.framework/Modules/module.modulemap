@@ -1,0 +1,6 @@
+framework module RCUniFaceBeautifier {
+  umbrella header "RCUniFaceBeautifier.h"
+
+  export *
+  module * { export * }
+}

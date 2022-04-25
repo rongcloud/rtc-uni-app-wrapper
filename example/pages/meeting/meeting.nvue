@@ -1,6 +1,9 @@
 <template>
 	<view>
 		<view class="setting-view">
+			<button class="setting-button" :class="{ 'setting-button-disable': !enableCamera }" @click="mhBeautyClick">
+				<text>MH</text>
+			</button>
 			<button class="setting-button" :class="{ 'setting-button-disable': !enableCamera }" @click="beautyClick">
 				<image style="width: 16px; height: 16px;" src="@/static/img/beauty.png"></image>
 			</button>
@@ -127,6 +130,48 @@
 		<fuiDropdownList :options="fitTypeTitles" ref="fitTypeList" :isCheckbox="false" @click="fitTypeItemClick">
 		</fuiDropdownList>
 		<fuiDropdownList :options="menus" ref="menus" :isCheckbox="false" @click="menusItemClick"></fuiDropdownList>
+		<view class="beauty" v-if="showMHBeauty" :style="{width:windowWidth+'px'}" @click.stop="">
+			<view class="beauty-btn">
+				<view class="change-btn">
+					<text class="ch-tit">美颜</text><text class="switch-btn"
+						@click="switchChange">{{mhBeautyEnable?'开启':'关闭'}}</text>
+				</view>
+				<view class="close-btn">
+					<text class="close-tit" @click="showMHBeauty=false">X</text>
+				</view>
+			</view>
+			<view class="beauty-view">
+				<view v-if="curIndex === '0'" class="beauty-tab filte-view">
+					<view class="tab-item" v-for="(item) in beautyFilterArr" :key="item.id" @click="switchBeautyFilter(item.id)"
+						:class="{current: item.id === currentBeautyFilter}">
+						<text>{{item.name}}</text>
+					</view>
+				</view>
+				<!-- 美白 -->
+				<view v-if="curIndex === '1'" class="white-view com-view">
+					<slider :value="whiteVal" min="0" max="9" @change="whiteChange" show-value />
+				</view>
+				<!-- 红润 -->
+				<view v-if="curIndex === '2'" class="ruddy-view com-view">
+					<slider :value="ruddyVal" min="0" max="9" @change="ruddyChange" show-value />
+				</view>
+				<!-- 磨皮 -->
+				<view v-if="curIndex === '3'" class="buffing-view com-view">
+					<slider :value="buffingVal" min="0" max="9" @change="buffingChange" show-value />
+				</view>
+				<!-- 亮度 -->
+				<view v-if="curIndex === '4'" class="brightness-view com-view">
+					<slider :value="brightnessVal" min="0" max="9" @change="brightnessChange" show-value />
+				</view>
+			</view>
+			<view class="beauty-tab">
+				<view class="tab-item" v-for="(item) in beautyOptions" :key="item.id" @click="curIndex = item.id"
+					:class="{current: item.id === curIndex}">
+					<text>{{item.text}}</text>
+				</view>
+			</view>
+		</view>
+
 	</view>
 </template>
 
@@ -148,6 +193,8 @@
 	import remoteAnchorView from "@/components/remoteAnchorView";
 	import * as Constants from '../../common/constants.js';
 	import permision from "@/js_sdk/wa-permission/permission.js";
+	// 美狐基础版美颜
+	import RCBeautyEngine from "@/uni_modules/RongCloud-BeautyWrapper/lib/RCBeautyEngine"
 	// 美颜的原生插件（用户可以根据自己的需求实现）
 	const RCUniFaceBeautifier = uni.requireNativePlugin('RongCloud-Example-RCUniFaceBeautifier');
 
@@ -176,7 +223,8 @@
 				speaker: false,
 				isShowTiny: false,
 				isOpenBeauty: false,
-
+				showMHBeauty: false,
+				
 				fpsTitles: [],
 				resolutionTitles: [],
 				fitTypeTitles: [],
@@ -206,6 +254,16 @@
 				localTinyVideoStats: null,
 
 				remotePublishers: [],
+				
+				windowWidth: 0,
+				beautyOptions: Constants.beautyOptions,
+				beautyFilterArr: Constants.beautyFilters,
+				curIndex: '0',
+				currentBeautyFilter: 0,
+				whiteVal: 0,
+				ruddyVal: 0,
+				buffingVal: 0,
+				brightnessVal: 5,
 			}
 		},
 
@@ -216,6 +274,12 @@
 		},
 
 		onLoad(option) {
+			uni.getSystemInfo({
+				success: (res) => {
+					this.windowWidth = res.windowWidth;
+				}
+			})
+			
 			this.localUserId = option.userId;
 			this.roomId = option.roomId;
 			// 是否开启小流
@@ -292,7 +356,7 @@
 				// 本地用户离开房间回调
 				uni.$on(RCRTCEngineEventsName.OnRoomLeft, this.onRoomLeftCallback.bind(this));
 				// 本地用户开关相机回调
-				uni.$on(RCRTCEngineEventsName.OnEnableCamera, this.onEnableCameraCallback.bind(this));
+				uni.$on(RCRTCEngineEventsName.OnCameraEnabled, this.onEnableCameraCallback.bind(this));
 				// 本地用户发布资源回调
 				uni.$on(RCRTCEngineEventsName.OnPublished, this.onPublishedCallback.bind(this));
 				// 本地用户取消发布资源回调
@@ -317,7 +381,7 @@
 			removeListeners() {
 				uni.$off(RCRTCEngineEventsName.OnRoomJoined);
 				uni.$off(RCRTCEngineEventsName.OnRoomLeft);
-				uni.$off(RCRTCEngineEventsName.OnEnableCamera);
+				uni.$off(RCRTCEngineEventsName.OnCameraEnabled);
 				uni.$off(RCRTCEngineEventsName.OnPublished);
 				uni.$off(RCRTCEngineEventsName.OnUnpublished);
 				uni.$off(RCRTCEngineEventsName.OnUserJoined);
@@ -499,6 +563,9 @@
 			fitTypeItemClick(e) {
 				this.currentFitTypeIndex = e.index;
 			},
+			mhBeautyClick() {
+				this.showMHBeauty = !this.showMHBeauty;
+			},
 			beautyClick() {
 				if (!this.enableCamera) {
 					uni.showToast({
@@ -627,6 +694,100 @@
 				});
 				return result;
 			},
+			
+			switchChange() {
+				this.mhBeautyEnable = !this.mhBeautyEnable;
+				if (!this.mhBeautyEnable) {
+					this.reset();
+				} else {
+					this.setBeautyOption();
+				}
+			},
+			//设置美颜
+			setBeautyOption() {
+				let option = {
+					whitenessLevel: this.whiteVal,
+					ruddyLevel: this.ruddyVal,
+					smoothLevel: this.buffingVal,
+					brightLevel: this.brightnessVal
+				}
+				if (this.mhBeautyEnable) { //开启
+					console.log('设置美颜')
+					RCBeautyEngine.setBeautyOptions(this.mhBeautyEnable, option);
+				}
+			},
+			//切换滤镜
+			switchBeautyFilter(id) {
+				//切换滤镜打开美颜
+				if (!this.mhBeautyEnable) {
+					this.mhBeautyEnable = true;
+				}
+				let option = {
+					whitenessLevel: this.whiteVal,
+					ruddyLevel: this.ruddyVal,
+					smoothLevel: this.buffingVal,
+					brightLevel: this.brightnessVal
+				}
+				//打开滤镜
+				this.currentBeautyFilter = id;
+				this.mhBeautyEnable ? RCBeautyEngine.setBeautyOptions(this.mhBeautyEnable, option) : '';
+				RCBeautyEngine.setBeautyFilter(this.currentBeautyFilter);
+			},
+			//美白
+			whiteChange(e) {
+				console.log('美白', e.detail.value);
+				//打开美颜
+				if (!this.mhBeautyEnable) {
+					this.mhBeautyEnable = true;
+				}
+				this.whiteVal = e.detail.value;
+				this.setBeautyOption();
+			},
+			//红润
+			ruddyChange(e) {
+				console.log('红润', e.detail.value);
+				//打开美颜
+				if (!this.mhBeautyEnable) {
+					this.mhBeautyEnable = true;
+				}
+				this.ruddyVal = e.detail.value;
+				this.setBeautyOption();
+			},
+			//磨皮
+			buffingChange(e) {
+				console.log('磨皮', e.detail.value);
+				//打开美颜
+				if (!this.mhBeautyEnable) {
+					this.mhBeautyEnable = true;
+				}
+				this.buffingVal = e.detail.value;
+				this.setBeautyOption();
+			},
+			//亮度
+			brightnessChange(e) {
+				console.log('亮度', e.detail.value);
+				//打开美颜
+				if (!this.mhBeautyEnable) {
+					this.mhBeautyEnable = true;
+				}
+				this.brightnessVal = e.detail.value;
+				this.setBeautyOption();
+			},
+			//重置
+			reset() {
+				RCBeautyEngine.resetBeauty();
+				this.initBeautyOpton();
+			},
+			initBeautyOpton() {
+				//初始化滤镜
+				this.currentBeautyFilter = RCBeautyEngine.getCurrentBeautyFilter();
+				//初始化美颜参数
+				let beautyOption = RCBeautyEngine.getCurrentBeautyOptions();
+				this.whiteVal = beautyOption.whitenessLevel;
+				this.ruddyVal = beautyOption.ruddyLevel;
+				this.buffingVal = beautyOption.smoothLevel;
+				this.brightnessVal = beautyOption.brightLevel;
+			},
 
 			/* callbacks */
 
@@ -654,7 +815,7 @@
 				}
 			},
 
-			onRoomLeftCallback({code, message}) {
+			onRoomLeftCallback({ code, message }) {
 				let str = code === 0 ? '成功' : `失败: ${code}-${message}`;
 				uni.showToast({
 					icon: 'none',
@@ -905,4 +1066,98 @@
 		right: 10rpx;
 		padding: 20rpx;
 	}
+
+	.beauty {
+		height: 500upx;
+		position: fixed;
+		bottom: 0;
+		background: #000;
+	}
+
+	.beauty-btn {
+		height: 100upx;
+		padding-right: 20upx;
+		flex-direction: row;
+		justify-content: space-between;
+	}
+
+	.change-btn {
+		padding-top: 20upx;
+		flex-direction: row;
+	}
+
+	.switch-btn {
+		border: 1upx;
+		border-color: #fff;
+		padding: 20upx;
+		background: blue;
+		color: #fff;
+		margin-left: 20upx;
+		margin-top: -10upx;
+	}
+
+	.ch-tit {
+		margin-top: 8upx;
+		color: #fff;
+	}
+
+	.ch-res {
+		margin-top: -10upx;
+		margin-left: 20upx;
+		color: #fff;
+		padding: 20upx;
+		border-radius: 10upx;
+		justify-content: center;
+		align-items: center;
+		background: #4e6ef2;
+	}
+
+	.close-btn {
+		padding-top: 20upx;
+	}
+
+	.close-tit {
+		color: #fff;
+	}
+
+	.beauty-view {
+		flex: 1;
+		background: #ccc;
+	}
+
+	.com-view {
+		padding-top: 40upx;
+		background: #ccc;
+		padding-left: 30upx;
+		padding-right: 30upx;
+
+	}
+
+	.beauty-tab {
+		border-top: 1px;
+		border-top-color: #000000;
+		padding: 0 20upx;
+		flex: 1;
+		background: #fff;
+		flex-direction: row;
+		justify-content: space-between;
+		padding-top: 40upx;
+	}
+
+	.filte-view {}
+
+	.tab-item {
+		width: 100upx;
+		height: 100upx;
+		border: 1px;
+		border-color: #000000;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.current {
+		background: yellow;
+	}
+
+	.white-view {}
 </style>

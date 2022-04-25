@@ -1,4 +1,4 @@
-import { RCRTCLocalAudioStats, RCRTCLocalVideoStats, RCRTCNetworkStats, RCRTCRemoteAudioStats, RCRTCRemoteVideoStats, BaseCallback, OnAudioEffectCreatedResult, OnAudioEffectFinishedResult, OnCancelJoinSubRoomRequestReceivedResult, OnCustomStreamPublishedResult, OnCustomStreamPublishFinishedResult, OnCustomStreamSubscribedResult, OnCustomStreamUnpublishedResult, OnCustomStreamUnsubscribedResult, OnEnableCameraResult, OnErrorResult, OnJoinSubRoomRequestCanceledResult, OnJoinSubRoomRequestedResult, OnJoinSubRoomRequestReceivedResult, OnJoinSubRoomRequestRespondedResult, OnJoinSubRoomRequestResponseReceivedResult, OnKickedResult, OnLiveCdnAddedResult, OnLiveCdnRemovedResult, OnLiveMixAudioBitrateSetResult, OnLiveMixCustomAudiosSetResult, OnLiveMixCustomLayoutsSetResult, OnLiveMixLayoutModeSetResult, OnLiveMixMemberAudioStatsResult, OnLiveMixMemberCustomAudioStatsResult, OnLiveMixRenderModeSetResult, OnLiveMixSubscribedResult, OnLiveMixUnsubscribedResult, OnLiveMixVideoBitrateSetResult, OnLiveMixVideoFpsSetResult, OnLiveMixVideoResolutionSetResult, OnLocalCustomAudioStatsResult, OnLocalCustomVideoStatsResult, OnPublishedResult, OnRemoteAudioStatsResult, OnRemoteCustomAudioStatsResult, OnRemoteCustomStreamFirstFrameResult, OnRemoteCustomStreamPublishedResult, OnRemoteCustomStreamStateChangedResult, OnRemoteCustomStreamUnpublishedResult, OnRemoteCustomVideoStatsResult, OnRemoteFirstFrameResult, OnRemoteLiveMixFirstFrameResult, OnRemoteLiveMixPublishedResult, OnRemoteLiveMixUnpublishedResult, OnRemotePublishedResult, OnRemoteStateChangedResult, OnRemoteUnpublishedResult, OnRemoteVideoStatsResult, OnRoomJoinedResult, OnRoomLeftResult, OnSubRoomBandedResult, OnSubRoomDisbandResult, OnSubRoomJoinedResult, OnSubRoomLeftResult, OnSubscribedResult, OnSwitchCameraResult, OnUnpublishedResult, OnUnsubscribedResult, OnUserJoinedResult, OnUserLeftResult, OnUserOfflineResult } from "./RCRTCDefines";
+import { RCRTCLocalAudioStats, RCRTCLocalVideoStats, RCRTCNetworkStats, RCRTCRemoteAudioStats, RCRTCRemoteVideoStats, BaseCallback, OnAudioEffectCreatedResult, OnAudioEffectFinishedResult, OnCancelJoinSubRoomRequestReceivedResult, OnCustomStreamPublishedResult, OnCustomStreamPublishFinishedResult, OnCustomStreamSubscribedResult, OnCustomStreamUnpublishedResult, OnCustomStreamUnsubscribedResult, OnCameraEnabledResult, OnErrorResult, OnJoinSubRoomRequestCanceledResult, OnJoinSubRoomRequestedResult, OnJoinSubRoomRequestReceivedResult, OnJoinSubRoomRequestRespondedResult, OnJoinSubRoomRequestResponseReceivedResult, OnKickedResult, OnLiveCdnAddedResult, OnLiveCdnRemovedResult, OnLiveMixAudioBitrateSetResult, OnLiveMixCustomAudiosSetResult, OnLiveMixCustomLayoutsSetResult, OnLiveMixLayoutModeSetResult, OnLiveMixMemberAudioStatsResult, OnLiveMixMemberCustomAudioStatsResult, OnLiveMixRenderModeSetResult, OnLiveMixSubscribedResult, OnLiveMixUnsubscribedResult, OnLiveMixVideoBitrateSetResult, OnLiveMixVideoFpsSetResult, OnLiveMixVideoResolutionSetResult, OnLocalCustomAudioStatsResult, OnLocalCustomVideoStatsResult, OnPublishedResult, OnRemoteAudioStatsResult, OnRemoteCustomAudioStatsResult, OnRemoteCustomStreamFirstFrameResult, OnRemoteCustomStreamPublishedResult, OnRemoteCustomStreamStateChangedResult, OnRemoteCustomStreamUnpublishedResult, OnRemoteCustomVideoStatsResult, OnRemoteFirstFrameResult, OnRemoteLiveMixFirstFrameResult, OnRemoteLiveMixPublishedResult, OnRemoteLiveMixUnpublishedResult, OnRemotePublishedResult, OnRemoteStateChangedResult, OnRemoteUnpublishedResult, OnRemoteVideoStatsResult, OnRoomJoinedResult, OnRoomLeftResult, OnSubRoomBandedResult, OnSubRoomDisbandResult, OnSubRoomJoinedResult, OnSubRoomLeftResult, OnSubscribedResult, OnCameraSwitchedResult, OnUnpublishedResult, OnUnsubscribedResult, OnUserJoinedResult, OnUserLeftResult, OnUserOfflineResult, OnLiveMixBackgroundColorSetResult } from "./RCRTCDefines";
 export interface RCRTCEngineEventsInterface {
     /**
      * 本地用户操作错误回调
@@ -66,13 +66,13 @@ export interface RCRTCEngineEventsInterface {
      * @param callback 回调函数，不传值表示移除当前事件的所有监听。
      * @memberof RCRTCEngineEventsInterface
      */
-    setOnEnableCameraListener(callback?: BaseCallback<OnEnableCameraResult>): void;
+    setOnCameraEnabledListener(callback?: BaseCallback<OnCameraEnabledResult>): void;
     /**
      * 本地用户切换前后置摄像头操作回调
      * @param callback 回调函数，不传值表示移除当前事件的所有监听。
      * @memberof RCRTCEngineEventsInterface
      */
-    setOnSwitchCameraListener(callback?: BaseCallback<OnSwitchCameraResult>): void;
+    setOnCameraSwitchedListener(callback?: BaseCallback<OnCameraSwitchedResult>): void;
     /**
      * 添加旁路推流URL操作回调, 仅供直播主播用户使用
      * @param callback 回调函数，不传值表示移除当前事件的所有监听。
@@ -97,6 +97,12 @@ export interface RCRTCEngineEventsInterface {
      * @memberof RCRTCEngineEventsInterface
      */
     setOnLiveMixRenderModeSetListener(callback?: BaseCallback<OnLiveMixRenderModeSetResult>): void;
+    /**
+     * 设置合流布局背景颜色操作回调, 仅供直播主播用户使用
+     * @param callback 回调函数，不传值表示移除当前事件的所有监听。
+     * @memberof RCRTCEngineEventsInterface
+     */
+    setOnLiveMixBackgroundColorSetListener(callback?: BaseCallback<OnLiveMixBackgroundColorSetResult>): void;
     /**
      * 设置需要合流音频操作回调, 仅供直播主播用户使用
      * @param callback 回调函数，不传值表示移除当前事件的所有监听。

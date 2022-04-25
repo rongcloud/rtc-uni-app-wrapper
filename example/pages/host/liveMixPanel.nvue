@@ -344,7 +344,11 @@
 			// 视频 分辨率
 			resolutionItemClick(e) {
 				this.currentVideoParams.resolution = e.index;
-				RCRTCEngine.setLiveMixVideoResolution(e.index, this.isShowTiny);
+				let resolution = this.resolutionTitles[e.index];
+				let size = resolution.split('x');
+				let width = parseInt(size[0]);
+				let height = parseInt(size[1]);
+				RCRTCEngine.setLiveMixVideoResolution(width, height, this.isShowTiny);
 				this.updateGlobalVideoParams();
 			},
 			// 音频码率
@@ -404,7 +408,6 @@
 				if (layouts.length > 0) {
 					this.tempLayoutMode = RCRTCLiveMixLayoutMode.Custom;
 					// 设置 自定义布局
-					RCRTCEngine.setLiveMixLayoutMode(RCRTCLiveMixLayoutMode.Custom);
 					RCRTCEngine.setLiveMixCustomLayouts(layouts);
 				} else {
 					this.tempLayoutMode = RCRTCLiveMixLayoutMode.Suspension;

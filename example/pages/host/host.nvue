@@ -112,10 +112,12 @@
 			:localTinyVideoStats="localTinyVideoStats"></stats-view>
 		<view v-for="(user,index) in remotePublishers" :key="index">
 			<remote-anchor-view :key="user.userId" :ref="user.userId" v-bind="user"></remote-anchor-view>
-		</view>
-		<view v-for="(user,index) in remoteCustomPublishers" :key="index">
-			<remote-custom-anchor-view :key="user.tag" :ref="user.tag" :userId="user.userId" :tag="user.tag"
-				v-bind="user.custom"></remote-custom-anchor-view>
+			<view v-if="user.customs.length > 0">
+				<view v-for="custom in user.customs" :key="custom.tag">
+					<remote-custom-anchor-view :key="custom.tag" :ref="custom.tag" :userId="user.userId" :tag="custom.tag"
+						v-bind="custom"></remote-custom-anchor-view>
+				</view>
+			</view>
 		</view>
 		<fuiDropdownList :options="resolutionTitles" ref="resolutionList" :height="600" :isCheckbox="false"
 			@click="resolutionItemClick">
@@ -136,14 +138,13 @@
 		</fuiDropdownList>
 		<fuiDropdownList :options="fitTypeTitles" ref="fitTypeList" :isCheckbox="false" @click="fitTypeItemClick">
 		</fuiDropdownList>
-		<fuiDropdownList :options="menus" ref="menus" :isCheckbox="false" @click="menusItemClick"></fuiDropdownList>
 	</view>
 </template>
 
 <script>
 	import RCRTCEngine from '@/uni_modules/RongCloud-RTCWrapper/lib/RCRTCEngine';
 	import RCRTCView from '@/uni_modules/RongCloud-RTCWrapper/components/RCRTCView';
-	
+
 	import {
 		RCRTCCamera,
 		RCRTCViewFitType,
@@ -219,11 +220,8 @@
 				localAudioStats: null,
 				localVideoStats: null,
 				localTinyVideoStats: null,
-
-				// remotePublishers: [],
-				// remoteCustomPublishers: [],
+				
 				isShowMenu: false,
-
 				isCreateCustomStream: false,
 				isPublishCustomStream: false,
 				filePath: '',
@@ -250,7 +248,7 @@
 
 		watch: {
 			usersInfo(newVal) {
-			  this.getGlobalData().users = newVal;
+				this.getGlobalData().users = newVal;
 			},
 		},
 
@@ -349,7 +347,7 @@
 				// 本地用户离开房间回调
 				uni.$on(RCRTCEngineEventsName.OnRoomLeft, this.onRoomLeftCallback.bind(this));
 				// 本地用户开关相机回调
-				uni.$on(RCRTCEngineEventsName.OnEnableCamera, this.onEnableCameraCallback.bind(this));
+				uni.$on(RCRTCEngineEventsName.OnCameraEnabled, this.onEnableCameraCallback.bind(this));
 				// 本地用户发布资源回调
 				uni.$on(RCRTCEngineEventsName.OnPublished, this.onPublishedCallback.bind(this));
 				// 本地用户取消发布资源回调
@@ -408,7 +406,7 @@
 			removeListeners() {
 				uni.$off(RCRTCEngineEventsName.OnRoomJoined);
 				uni.$off(RCRTCEngineEventsName.OnRoomLeft);
-				uni.$off(RCRTCEngineEventsName.OnEnableCamera);
+				uni.$off(RCRTCEngineEventsName.OnCameraEnabled);
 				uni.$off(RCRTCEngineEventsName.OnPublished);
 				uni.$off(RCRTCEngineEventsName.OnUnpublished);
 				uni.$off(RCRTCEngineEventsName.OnUserJoined);
@@ -620,12 +618,6 @@
 			},
 			publishCustomStreamClick(filePath) {
 				let path = filePath;
-				// if (Platform === 'android') {
-				// 	path = path.replace('file://', '');
-				// }
-				// if (!this.isCreateCustomStream) {
-
-				// }
 				uni.showLoading({
 					title: '加载中...',
 				});
@@ -783,13 +775,31 @@
 				let user = users[index];
 				// tag 不为 null 代表设置的是自定义视频流
 				if (tag) {
-					if (!enable) {
-						// 清除自定义视频流的tag，设置null表示移除
-						user.tag = null;
+					let customIndex = user.customs.findIndex(item => item.tag == tag);
+					console.log('customIndex = ', customIndex);
+					if (customIndex === -1) {
+						let custom = {
+							tag: tag,
+							isPublishAudio: false,
+							isPublishVideo: false,
+							isSubscribedVideo: false,
+							isSubscribedAudio: false,
+							videoStats: null
+						}
+						this.changePublishState(custom, type, enable);
+						user.customs.push(custom);
 					} else {
-						user.tag = tag;
+						let custom = user.customs[customIndex];
+						if (!enable) {
+							this.changePublishState(custom, type, false);
+						} else {
+							this.changePublishState(custom, type, true);
+						}
+						console.log(custom);
+						if (!(custom.isPublishAudio || custom.isPublishVideo)) {
+							user.customs.splice(customIndex, 1);
+						}
 					}
-					this.changePublishState(user.custom, type, enable);
 				} else {
 					this.changePublishState(user, type, enable);
 				}
@@ -809,7 +819,10 @@
 				if (index === -1) return;
 				let user = users[index];
 				if (tag) {
-					this.changeSubscribedState(user.custom, type, enable);
+					let custom = user.customs.find(item => item.tag === tag);
+					if (custom) {
+						this.changeSubscribedState(custom, type, enable);
+					}
 				} else {
 					this.changeSubscribedState(user, type, enable);
 				}
@@ -893,11 +906,11 @@
 				} else {
 					this.initialConfig();
 					// 将本地用户保存
-					this.usersInfo.push({ userId: this.localUserId, tag: null });
+					this.usersInfo.push({ userId: this.localUserId, tag: null, customs:[] });
 				}
 			},
 
-			onRoomLeftCallback({code, message}) {
+			onRoomLeftCallback({ code, message }) {
 				let str = code === 0 ? '成功' : `失败: ${code}-${message}`;
 				uni.showToast({
 					icon: 'none',
@@ -953,14 +966,14 @@
 					isSubscribedVideo: false,
 					isSubscribedAudio: false,
 					videoStats: null,
-					tag: null,
-					custom: {
-						isPublishAudio: false,
-						isPublishVideo: false,
-						isSubscribedVideo: false,
-						isSubscribedAudio: false,
-						videoStats: null,
-					},
+					// customs 内部保存的是 
+					// {tag: null,
+					// isPublishAudio: false,
+					// isPublishVideo: false,
+					// isSubscribedVideo: false,
+					// isSubscribedAudio: false,
+					// videoStats: null,}
+					customs: [],
 				};
 				let users = this.usersInfo;
 				let findIndex = users.findIndex(user => user.userId === userId);
@@ -1057,6 +1070,7 @@
 				// 更新保存的用户
 				let users = this.usersInfo;
 				let userIndex = users.findIndex(user => user.userId === this.localUserId);
+				let user = users[userIndex];
 				user.tag = null;
 				users.splice(userIndex, 1, user);
 			},
@@ -1104,14 +1118,16 @@
 			},
 
 			onJoinSubRoomRequestRespondedCallback(res) {
-				let { roomId, userId, code, message } = res;
-				if (code === 0) {
-					RCRTCEngine.joinSubRoom(roomId);
-				} else {
-					uni.showToast({
-						icon: 'none',
-						title: `加入子房间${roomId}失败`
-					});
+				let { roomId, userId, code, agree, message } = res;
+				if (agree) {
+					if (code === 0) {
+						RCRTCEngine.joinSubRoom(roomId);
+					} else {
+						uni.showToast({
+							icon: 'none',
+							title: `加入子房间${roomId}失败`
+						});
+					}
 				}
 			},
 
@@ -1255,7 +1271,10 @@
 				let index = users.findIndex(user => user.userId === userId);
 				if (index === -1) return;
 				let user = users[index];
-				user.custom.videoStats = stats;
+				let custom = user.customs.find(item => item.tag === tag);
+				if (custom) {
+					custom.videoStats = stats;
+				}
 				users.splice(index, 1, user);
 			},
 		}

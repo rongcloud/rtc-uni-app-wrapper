@@ -2,7 +2,8 @@
 	<view>
 		<view style="margin: 20rpx;">
 			<view class="cache-view">
-				<button @click="selectCacheUsersClick"><text style="margin: 0; font-size: 28rpx;">从缓存用户中选择</text></button>
+				<button @click="selectCacheUsersClick"><text
+						style="margin: 0; font-size: 28rpx;">从缓存用户中选择</text></button>
 				<button @click="removeCacheUsersClick"><text style="margin: 0; font-size: 28rpx;">清空</text></button>
 			</view>
 			<view class="uni-input-wrapper">
@@ -26,8 +27,8 @@
 					<input class="uni-input" @input="onTokenInput" :disabled="connected" placeholder="Token"
 						v-model="token" />
 				</view>
-				<button v-if="showGenerateButton" style="margin-left: 10rpx;" type="primary" size="mini" :disabled="connected"
-					@click="getToken(appKey)">
+				<button v-if="showGenerateButton" style="margin-left: 10rpx;" type="primary" size="mini"
+					:disabled="connected" @click="getToken(appKey)">
 					生成
 				</button>
 			</view>
@@ -62,7 +63,8 @@
 				</button>
 			</view>
 		</view>
-		<fuiDropdownList :options="cacheUserNames" ref="cacheUsersList" :isCheckbox="false" @click="cacheUsersItemClick"></fuiDropdownList>
+		<fuiDropdownList :options="cacheUserNames" ref="cacheUsersList" :isCheckbox="false"
+			@click="cacheUsersItemClick"></fuiDropdownList>
 		<!-- 由于 uni 的原生事件只能在单页面内接收，所以需要在这里注册原生事件监听，将原生页面级事件转发到 uni 全局；
 		此组件需要放在调用 RCRTCEngine.init() 的页面，并且需要保证当前页面不会被销毁 -->
 		<nativeListeners></nativeListeners>
@@ -73,7 +75,6 @@
 	import * as config from '../common/config.js';
 	import * as util from '../common/util.js';
 	import * as constants from '../common/constants.js';
-	
 	import * as im from "@/uni_modules/RongCloud-IMWrapper/js_sdk/index"
 	import nativeListeners from './nativeListeners';
 	import {
@@ -113,7 +114,7 @@
 			}
 		},
 		computed: {
-			
+
 		},
 		onLoad: function(option) {
 			this.modes = constants.modes;
@@ -121,6 +122,8 @@
 			this.medias = constants.medias;
 			this.actions = constants.actions;
 			this.showGenerateButton = config.host.trim() != '';
+			im.clearReceiveMessageListener();
+			console.log('clearReceiveMessageListener');
 			im.addReceiveMessageListener(res => {
 				uni.$emit('rcimlib-receive-message', res);
 			});
@@ -132,32 +135,32 @@
 		methods: {
 			selectCacheUsersClick() {
 				uni.getStorage({
-				    key: StorageLoginUsersKey,
-				    success: (res) => {
-				      this.cacheUsers = res.data;
-							this.cacheUserNames = this.cacheUsers.map(user => `${user.appKey}-${user.userId}`);
-							this.$refs.cacheUsersList.show();
-				    }
+					key: StorageLoginUsersKey,
+					success: (res) => {
+						this.cacheUsers = res.data;
+						this.cacheUserNames = this.cacheUsers.map(user => `${user.appKey}-${user.userId}`);
+						this.$refs.cacheUsersList.show();
+					}
 				});
 			},
 			removeCacheUsersClick() {
 				uni.removeStorage({
-				    key: StorageLoginUsersKey,
-				    success: function (res) {
-				        this.cacheUsers = [];
-				        this.cacheUserNames = [];
-								uni.showToast({
-									icon: 'none',
-									title: '清空成功'
-								})
-				    }
+					key: StorageLoginUsersKey,
+					success: function(res) {
+						this.cacheUsers = [];
+						this.cacheUserNames = [];
+						uni.showToast({
+							icon: 'none',
+							title: '清空成功'
+						})
+					}
 				});
-				
+
 			},
 			cacheUsersItemClick(e) {
 				let user = this.cacheUsers[e.index];
 				console.log(user);
-				let {appKey, navigate, file, media, token, userId} = user;
+				let { appKey, navigate, file, media, token, userId } = user;
 				this.appKey = appKey;
 				this.navigate = navigate;
 				this.file = file;
@@ -230,10 +233,7 @@
 				});
 			},
 			disconnect() {
-				if (this.inited) {
-					RCRTCEngine.unInit();
-					this.inited = false;
-				}
+				RCRTCEngine.unInit();
 				im.disconnect();
 				this.connected = false;
 			},
@@ -255,6 +255,13 @@
 				im.setServerInfo(n, f);
 				im.init(k);
 				im.disconnect();
+				plus.push.getClientInfoAsync((info) => {
+					console.log(info)
+				  let cid = info["clientid"];  
+					let token = info['token'];
+					im.setPushConfig({'deviceToken': token})
+				});
+				
 				im.connect(token, (res) => {
 					if (res.code != 0) {
 						// connect error
@@ -275,7 +282,8 @@
 						this.userId = res.userId;
 						getApp().globalData.localUserId = res.userId;
 						console.log('im connect success, userId = ' + res.userId);
-						let user = {appKey: k, token: token, navigate: n, file: f, media: this.media, userId: res.userId};
+						let user = { appKey: k, token: token, navigate: n, file: f, media: this.media, userId: res
+								.userId };
 						let cacheUsers = uni.getStorageSync(StorageLoginUsersKey);
 						if (!cacheUsers) {
 							cacheUsers = [];
@@ -287,13 +295,13 @@
 							// 否则更新内容
 							cacheUsers.splice(findIndex, 1, user);
 						}
-						
+
 						uni.setStorage({
-						    key: StorageLoginUsersKey,
-						    data: cacheUsers,
-						    success: function () {
-						        console.log('success');
-						    }
+							key: StorageLoginUsersKey,
+							data: cacheUsers,
+							success: function() {
+								console.log('success');
+							}
 						});
 						uni.hideLoading();
 					}
@@ -318,9 +326,10 @@
 					mediaUrl: this.media,
 					videoSetup: videoSetup
 				};
+				console.log(setup);
 				// 初始化引擎
 				RCRTCEngine.init(setup);
-				
+
 				let roomSetup = {
 					type: this.currentMedia,
 					role: this.currentMode,
@@ -349,12 +358,13 @@
 
 <style scoped>
 	.uni-input-wrapper {
-		border:1rpx solid #888888;
+		border: 1rpx solid #888888;
 		margin-top: 10rpx;
 	}
+
 	.cache-view {
-		display: flex; 
-		justify-content: space-between; 
+		display: flex;
+		justify-content: space-between;
 		width: 100%;
 	}
 </style>
