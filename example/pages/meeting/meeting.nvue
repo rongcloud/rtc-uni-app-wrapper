@@ -1,6 +1,9 @@
 <template>
 	<view>
 		<view class="setting-view">
+			<button class="setting-button" :class="{ 'setting-button-disable': !enableCamera }" @click="fuBeautyClick">
+				<text>相</text>
+			</button>
 			<button class="setting-button" :class="{ 'setting-button-disable': !enableCamera }" @click="mhBeautyClick">
 				<text>MH</text>
 			</button>
@@ -171,7 +174,7 @@
 				</view>
 			</view>
 		</view>
-
+		<fu-beauty-panel v-if="isShowFUBeauty" @close="fuBeautyClick"></fu-beauty-panel>
 	</view>
 </template>
 
@@ -186,17 +189,21 @@
 		RCRTCVideoResolution,
 		RCRTCEngineEventsName,
 		RCRTCStatsEventsName,
+		RCRTCCameraCaptureOrientation,
 	} from '@/uni_modules/RongCloud-RTCWrapper/lib/RCRTCDefines';
 
 	import fuiDropdownList from "@/components/fui-dropdown-list/fui-dropdown-list";
 	import statsView from "@/components/statsView";
 	import remoteAnchorView from "@/components/remoteAnchorView";
 	import * as Constants from '../../common/constants.js';
+	import * as Config from '../../common/config.js';
 	import permision from "@/js_sdk/wa-permission/permission.js";
 	// 美狐基础版美颜
 	import RCBeautyEngine from "@/uni_modules/RongCloud-BeautyWrapper/lib/RCBeautyEngine"
 	// 美颜的原生插件（用户可以根据自己的需求实现）
 	const RCUniFaceBeautifier = uni.requireNativePlugin('RongCloud-Example-RCUniFaceBeautifier');
+
+	import RCFUBeautyEngine from '@/uni_modules/RongCloud-FUBeautyWrapper/lib/RCFUBeautyEngine';
 
 	const Platform = uni.getSystemInfoSync().platform;
 
@@ -211,6 +218,7 @@
 			return {
 				localUserId: '',
 				roomId: '',
+				roomSetup: {},
 				enableTinyStream: false,
 
 				joinRoomSuccess: false,
@@ -224,6 +232,7 @@
 				isShowTiny: false,
 				isOpenBeauty: false,
 				showMHBeauty: false,
+				isShowFUBeauty: false,
 				
 				fpsTitles: [],
 				resolutionTitles: [],
@@ -272,6 +281,10 @@
 				return this.fitTypes[this.currentFitTypeIndex].value;
 			},
 		},
+		
+		onResize() {
+			this.updateScreenOrientation();
+		},
 
 		onLoad(option) {
 			uni.getSystemInfo({
@@ -282,6 +295,7 @@
 			
 			this.localUserId = option.userId;
 			this.roomId = option.roomId;
+			this.roomSetup = option.roomSetup;
 			// 是否开启小流
 			this.enableTinyStream = option.enableTinyStream === 'true';
 			// 初始化data
@@ -325,6 +339,8 @@
 			 * 因为在 onUnload 中会遇到无法调用原生功能的情况。
 			 * */
 			RCRTCEngine.leaveRoom();
+			// 关闭相芯美颜、重置相芯美颜
+			this.resetFUBeautyData();
 		},
 
 		methods: {
@@ -351,10 +367,13 @@
 			},
 
 			addListeners() {
+				uni.$on(RCRTCEngineEventsName.OnError, this.onErrorCallback.bind(this));
 				// 本地用户加入房间回调
 				uni.$on(RCRTCEngineEventsName.OnRoomJoined, this.onRoomJoinedCallback.bind(this));
 				// 本地用户离开房间回调
 				uni.$on(RCRTCEngineEventsName.OnRoomLeft, this.onRoomLeftCallback.bind(this));
+				// 被踢出房间回调
+				uni.$on(RCRTCEngineEventsName.OnKicked, this.onKickedCallback.bind(this));
 				// 本地用户开关相机回调
 				uni.$on(RCRTCEngineEventsName.OnCameraEnabled, this.onEnableCameraCallback.bind(this));
 				// 本地用户发布资源回调
@@ -381,6 +400,7 @@
 			removeListeners() {
 				uni.$off(RCRTCEngineEventsName.OnRoomJoined);
 				uni.$off(RCRTCEngineEventsName.OnRoomLeft);
+				uni.$off(RCRTCEngineEventsName.OnKicked);
 				uni.$off(RCRTCEngineEventsName.OnCameraEnabled);
 				uni.$off(RCRTCEngineEventsName.OnPublished);
 				uni.$off(RCRTCEngineEventsName.OnUnpublished);
@@ -408,7 +428,6 @@
 			// 初始配置
 			initialConfig() {
 				RCRTCEngine.enableSpeaker(this.speaker);
-
 				let videoConfig = {
 					fps: this.currentFps,
 					resolution: this.currentResolution,
@@ -459,6 +478,8 @@
 					title: '加载中...'
 				});
 				RCRTCEngine.enableCamera(!this.enableCamera, this.frontCamera ? RCRTCCamera.Front : RCRTCCamera.Back);
+				// RCFUBeautyEngine.setDisplayOrientation(7);
+				RCFUBeautyEngine.setIsFrontCamera(this.frontCamera);
 			},
 			setupLocalView() {
 				if (this.enableCamera) {
@@ -480,6 +501,8 @@
 			changeFrontCamera(event) {
 				this.frontCamera = !this.frontCamera;
 				let code = RCRTCEngine.switchCamera();
+				// RCFUBeautyEngine.setDisplayOrientation(7);
+				RCFUBeautyEngine.setIsFrontCamera(this.frontCamera);
 				console.log('changeFrontCamera code = ', code);
 			},
 			changePublishAudio() {
@@ -593,6 +616,21 @@
 						}
 					});
 				}
+			},
+			fuBeautyClick(){
+				let fuBeautyRegisterCode = getApp().globalData.fuBeautyRegisterCode;
+				if (fuBeautyRegisterCode != 1) {
+					let code = RCFUBeautyEngine.register(Config.g_auth_package);
+					getApp().globalData.fuBeautyRegisterCode = code;
+					// code === 1 注册成功
+					uni.showToast({
+						icon: 'none',
+						title: '相芯注册' + (code === 1 ? '成功' : '失败'),
+						duration: 2000
+					});
+					console.log('相芯注册状态码：', code);
+				}
+				this.isShowFUBeauty = !this.isShowFUBeauty;
 			},
 			audioEffectClick() {
 				if (!this.publishAudio) {
@@ -788,8 +826,68 @@
 				this.buffingVal = beautyOption.smoothLevel;
 				this.brightnessVal = beautyOption.brightLevel;
 			},
-
+			resetFUBeautyData() {
+				if (getApp().globalData.fuBeautyRegisterCode === 1) {
+					RCFUBeautyEngine.reset();
+					RCFUBeautyEngine.setBeautyEnable(false);
+					getApp().globalData.fuBeautyData.enable = false;
+					getApp().globalData.fuBeautyData.skinBeautyValues = null;
+					getApp().globalData.fuBeautyData.faceShapeValues = null;
+					getApp().globalData.fuBeautyData.filterBeautyValues = null;
+					getApp().globalData.fuBeautyData.currentSkinBlurType = 0;
+				}
+			},
+			updateScreenOrientation() {
+				// 安卓 和 iOS 同样的角度但含义不同，所以下面做了平台判断
+				let orientationNumber = plus.navigator.getOrientation();
+				console.log(orientationNumber);
+				let orientation = 0;
+				let fuOrientation = 0;
+				switch(orientationNumber){
+					case 0:
+						orientation = RCRTCCameraCaptureOrientation.Portrait;
+						fuOrientation = 0;
+						break;
+					case 90:
+						{
+							if (Platform === 'android') {
+								orientation = RCRTCCameraCaptureOrientation.LandscapeRight;
+								fuOrientation = 1;
+							} else {
+								orientation = RCRTCCameraCaptureOrientation.LandscapeLeft;
+								fuOrientation = 3;
+							}
+						}
+						break;
+					case 180:
+					{
+						orientation = RCRTCCameraCaptureOrientation.PortraitUpsideDown;
+						fuOrientation = 2;
+					}
+						break;
+					case -90:
+						{
+							if (Platform === 'android') {
+								orientation = RCRTCCameraCaptureOrientation.LandscapeLeft;
+								fuOrientation = 3;
+							} else {
+								orientation = RCRTCCameraCaptureOrientation.LandscapeRight;
+								fuOrientation = 1;
+							}
+						}
+						break;
+				}
+				// 设置 rtc 摄像头采集方向
+				RCRTCEngine.setCameraCaptureOrientation(orientation);
+				// 设置相芯美颜显示方向
+				RCFUBeautyEngine.setDisplayOrientation(fuOrientation);
+			},
+			
 			/* callbacks */
+
+			onErrorCallback({code, message}) {
+				console.log(`onErrorCallback code:${code}, message:${message}`);
+			},
 
 			onRoomJoinedCallback(res) {
 				console.log('host OnRoomJoined ', res);
@@ -821,6 +919,14 @@
 					icon: 'none',
 					title: `退出房间${str}`
 				});
+			},
+			
+			onKickedCallback({roomId, message}) {
+				uni.showToast({
+					icon: 'none',
+					title: `因超时被踢出房间`
+				});
+				uni.navigateBack();
 			},
 
 			onEnableCameraCallback(res) {

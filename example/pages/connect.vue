@@ -255,12 +255,6 @@
 				im.setServerInfo(n, f);
 				im.init(k);
 				im.disconnect();
-				plus.push.getClientInfoAsync((info) => {
-					console.log(info)
-				  let cid = info["clientid"];  
-					let token = info['token'];
-					im.setPushConfig({'deviceToken': token})
-				});
 				
 				im.connect(token, (res) => {
 					if (res.code != 0) {

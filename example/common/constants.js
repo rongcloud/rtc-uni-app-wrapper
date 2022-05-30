@@ -142,3 +142,231 @@ export const audioScenes = [
 	'MusicChatRoom',
 	'MusicClassRoom'
 ]
+
+export const skinBeautyValues = [
+	{
+		label: '磨皮',
+		min: 0.0,
+		max: 60,
+		value: 0.0,
+	},
+	{
+		label: '美白',
+		min: 0.0,
+		max: 10,
+		value: 0.0,
+	},
+	{
+		label: '红润',
+		min: 0.0,
+		max: 10,
+		value: 0.0,
+	},
+	{
+		label: '锐化',
+		min: 0.0,
+		max: 10,
+		value: 0.0,
+	},
+	{
+		label: '亮眼',
+		min: 0.0,
+		max: 10,
+		value: 0.0,
+	},
+	{
+		label: '美牙',
+		min: 0.0,
+		max: 10,
+		value: 0.0,
+	}
+]
+
+export const faceShapeValues = [
+	{
+		label: '强度',
+		min: 0.0,
+		max: 10,
+		value: 0.0,
+	},
+	{
+		label: '大眼',
+		min: 0.0,
+		max: 10,
+		value: 0.0,
+	},
+	{
+		label: '圆眼',
+		min: 0.0,
+		max: 10,
+		value: 0.0,
+	},
+	{
+		label: '开眼角',
+		min: 0.0,
+		max: 10,
+		value: 0.0,
+	},
+	{
+		label: '瘦脸',
+		min: 0.0,
+		max: 10,
+		value: 0.0,
+	},
+	{
+		label: 'V脸',
+		min: 0.0,
+		max: 10,
+		value: 0.0,
+	},
+	{
+		label: '窄脸',
+		min: 0.0,
+		max: 10,
+		value: 0.0,
+	},
+	{
+		label: '小脸',
+		min: 0.0,
+		max: 10,
+		value: 0.0,
+	},
+	{
+		label: '瘦鼻',
+		min: 0.0,
+		max: 10,
+		value: 0.0,
+	},
+	{
+		label: '额头',
+		min: 0.0,
+		max: 10,
+		value: 5,
+	},
+	{
+		label: '嘴巴',
+		min: 0.0,
+		max: 10,
+		value: 5,
+	},
+	{
+		label: '下巴',
+		min: 0.0,
+		max: 10,
+		value: 5,
+	},
+	{
+		label: '去除黑眼圈',
+		min: 0.0,
+		max: 10,
+		value: 0.0,
+	},
+	{
+		label: '去除法令纹',
+		min: 0.0,
+		max: 10,
+		value: 0.0,
+	},
+	{
+		label: '微笑嘴角',
+		min: 0.0,
+		max: 10,
+		value: 0.0,
+	},
+	{
+		label: '人中',
+		min: 0.0,
+		max: 10,
+		value: 5,
+	},
+	{
+		label: '鼻子',
+		min: 0.0,
+		max: 10,
+		value: 5,
+	},
+	{
+		label: '眼睛间距',
+		min: 0.0,
+		max: 10,
+		value: 5,
+	},
+	{
+		label: '眼睛角度',
+		min: 0.0,
+		max: 10,
+		value: 5,
+	},
+	{
+		label: '瘦下颌骨',
+		min: 0.0,
+		max: 10,
+		value: 0.0,
+	},
+	{
+		label: '瘦颧骨',
+		min: 0.0,
+		max: 10,
+		value: 0.0,
+	},
+]
+
+export const filterBeautyValues = [
+	{
+		label: '原图',
+		min: 0.0,
+		max: 10,
+		value: 0.0,
+		name: 'origin',
+	},
+	{
+		label: '白亮',
+		min: 0.0,
+		max: 10,
+		value: 0.0,
+		name: 'bailiang1',
+	},
+	{
+		label: '粉嫩',
+		min: 0.0,
+		max: 10,
+		value: 0.0,
+		name: 'fennen1',
+	},
+	{
+		label: '冷色调',
+		min: 0.0,
+		max: 10,
+		value: 0.0,
+		name: 'lengsediao1',
+	},
+	{
+		label: '暖色调',
+		min: 0.0,
+		max: 10,
+		value: 0.0,
+		name: 'nuansediao1',
+	},
+	{
+		label: '小清新',
+		min: 0.0,
+		max: 10,
+		value: 0.0,
+		name: 'xiaoqingxin1',
+	}
+]
+
+export const skinBlurTypes = [
+	{
+		label: '清晰',
+		value: 0,
+	},
+	{
+		label: '朦胧',
+		value: 0,
+	},
+	{
+		label: '精细',
+		value: 0,
+	}
+]

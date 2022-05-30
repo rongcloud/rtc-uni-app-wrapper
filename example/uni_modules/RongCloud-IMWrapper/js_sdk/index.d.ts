@@ -1,7 +1,7 @@
 /*
  * RCIMLibUni - v5.1.3-release.4
- * CommitId - 683537a92582a32f4686f41774947782dc7ff16e
- * Wed Jan 19 2022 15:01:35 GMT+0800 (中国标准时间)
+ * CommitId - feed3f0f61dd39b78c4d0a5b5bdb387ad3bb003e
+ * Tue Mar 22 2022 15:58:58 GMT+0800 (中国标准时间)
  * ©2020 RongCloud, Inc. All rights reserved.
  */
 /**
@@ -271,6 +271,20 @@ interface FileMessage extends MessageContent {
     name?: string;
     size?: number;
     fileType?: string;
+    extra?: string;
+}
+/**
+ * 小视频信息
+ */
+interface SightMessage extends MessageContent {
+    objectName: ObjectName.Sight;
+    local: string;
+    remote?: string;
+    thumbnail?: string;
+    name?: string;
+    base64?: string;
+    size?: number;
+    duration: number;
     extra?: string;
 }
 /**
@@ -1372,6 +1386,17 @@ declare function searchConversations(keyword: string, conversationTypes: Convers
  */
 declare function searchMessages(conversationType: ConversationType, targetId: string, keyword: string, count: number, startTime: number | undefined, callback: (result: MessageListResult) => void): void;
 /**
+ * 搜索消息
+ *
+ * @param conversationType 会话类型
+ * @param targetId 目标 ID
+ * @param userId 用户 ID
+ * @param count 获取数量
+ * @param startTime 开始时间
+ * @param callback 回调函数
+ */
+declare function searchMessagesByUserId(conversationType: ConversationType, targetId: string, userId: string, count: number, startTime: number | undefined, callback: (result: MessageListResult) => void): void;
+/**
  * 获取消息
  *
  * @param messageId 消息 ID
@@ -1716,4 +1741,4 @@ declare function getPushContentShowStatus(callback: (result: statusResult) => vo
  */
 declare function setPushConfig(config: PushConfig): void;
 
-export { BaseResult, ChatRoomInfo, ChatRoomInfoResult, ChatRoomMemberOrder, CommandMessage, CommandNotificationMessage, ConnectErrorCode, ConnectResult, ConnectionListenerResult, ConnectionStatus, ConnectionStatusAndroid, ConnectionStatusIOS, ContactNotificationMessage, Conversation, ConversationListResult, ConversationResult, ConversationType, CountResult, CustomMessage, CustomMessageType, Discussion, DraftResult, ErrorCode, FileMessage, GIFMessage, GroupNotificationMessage, HQVoiceMessage, ImageMessage, InfomationNotificationMessage, LocationMessage, LogInfoResult, MediaMessageCallback, MemberInfo, MentionedInfo, MentionedType, Message, MessageContent, MessageDirection, MessageListResult, MessageObjectNames, MessageResult, ObjectName, ProfileNotificationMessage, ProgressMessageResult, PublicServiceCommandMessage, PublicServiceMenuItem, PublicServiceMenuItemType, PublicServiceProfile, PublicServiceType, PushConfig, PushLanguage, PushNotificationMessage, RCAndroidPushConfig, RCIMEngineSetup, ReadReceipt, ReadReceiptMessage, RealTimeLocationStatus, RecallMessageResult, RecallNotificationMessage, ReceiptRequest, ReceiptResponse, ReceiveMessage, ResponseType, SearchConversationResult, SearchType, SendMessageResult, SendRecallMessageResult, SentMessage, SentProgressMessageCallback, SentStatus, TextMessage, TimestampOrder, TypingStatus, TypingStatusMessage, UniListenerResult, UserInfo, VoiceMessage, addConnectionStatusListener, addLogInfoListener, addReadReceiptReceivedListener, addRecallMessageListener, addReceiptRequestListener, addReceiptResponseListener, addReceiveMessageListener, addToBlacklist, addTypingStatusListener, cancelDownloadMediaMessage, cancelSendMediaMessage, cleanHistoryMessages, cleanRemoteHistoryMessages, clearConnectionStatusListener, clearLogInfoListener, clearMessages, clearMessagesUnreadStatus, clearReadReceiptReceivedListener, clearRecallMessageListener, clearReceiptRequestListener, clearReceiptResponseListener, clearReceiveMessageListener, clearTextMessageDraft, clearTypingStatusListener, connect, deleteMessages, deleteMessagesByIds, disconnect, downloadMediaMessage, getBlacklist, getBlacklistStatus, getBlockedConversationList, getChatRoomInfo, getConnectionStatus, getConversation, getConversationList, getConversationNotificationStatus, getCurrentUserId, getFirstUnreadMessage, getHistoryMessages, getHistoryMessagesByTimestamp, getMessage, getMessageByUId, getMessageCount, getMessageSendTime, getNotificationQuietHours, getOfflineMessageDuration, getPushContentShowStatus, getRemoteChatRoomHistoryMessages, getRemoteHistoryMessages, getTextMessageDraft, getTopConversationList, getTotalUnreadCount, getUnreadCount, getUnreadMentionedMessages, init, initWithSetup, insertIncomingMessage, insertOutgoingMessage, joinChatRoom, joinExistChatRoom, quitChatRoom, recallMessage, removeConversation, removeFromBlacklist, removeNotificationQuietHours, saveTextMessageDraft, searchConversations, searchMessages, sendDirectionalMessage, sendMediaMessage, sendMessage, sendReadReceiptMessage, sendReadReceiptRequest, sendReadReceiptResponse, sendTypingStatus, setConversationNotificationStatus, setConversationToTop, setMessageExtra, setMessageReceivedStatus, setMessageSentStatus, setNotificationQuietHours, setOfflineMessageDuration, setPushConfig, setPushContentShowStatus, setPushLanguageCode, setReconnectKickEnable, setServerInfo, setStatisticServer, statusResult, syncConversationReadStatus };
+export { BaseResult, ChatRoomInfo, ChatRoomInfoResult, ChatRoomMemberOrder, CommandMessage, CommandNotificationMessage, ConnectErrorCode, ConnectResult, ConnectionListenerResult, ConnectionStatus, ConnectionStatusAndroid, ConnectionStatusIOS, ContactNotificationMessage, Conversation, ConversationListResult, ConversationResult, ConversationType, CountResult, CustomMessage, CustomMessageType, Discussion, DraftResult, ErrorCode, FileMessage, GIFMessage, GroupNotificationMessage, HQVoiceMessage, ImageMessage, InfomationNotificationMessage, LocationMessage, LogInfoResult, MediaMessageCallback, MemberInfo, MentionedInfo, MentionedType, Message, MessageContent, MessageDirection, MessageListResult, MessageObjectNames, MessageResult, ObjectName, ProfileNotificationMessage, ProgressMessageResult, PublicServiceCommandMessage, PublicServiceMenuItem, PublicServiceMenuItemType, PublicServiceProfile, PublicServiceType, PushConfig, PushLanguage, PushNotificationMessage, RCAndroidPushConfig, RCIMEngineSetup, ReadReceipt, ReadReceiptMessage, RealTimeLocationStatus, RecallMessageResult, RecallNotificationMessage, ReceiptRequest, ReceiptResponse, ReceiveMessage, ResponseType, SearchConversationResult, SearchType, SendMessageResult, SendRecallMessageResult, SentMessage, SentProgressMessageCallback, SentStatus, SightMessage, TextMessage, TimestampOrder, TypingStatus, TypingStatusMessage, UniListenerResult, UserInfo, VoiceMessage, addConnectionStatusListener, addLogInfoListener, addReadReceiptReceivedListener, addRecallMessageListener, addReceiptRequestListener, addReceiptResponseListener, addReceiveMessageListener, addToBlacklist, addTypingStatusListener, cancelDownloadMediaMessage, cancelSendMediaMessage, cleanHistoryMessages, cleanRemoteHistoryMessages, clearConnectionStatusListener, clearLogInfoListener, clearMessages, clearMessagesUnreadStatus, clearReadReceiptReceivedListener, clearRecallMessageListener, clearReceiptRequestListener, clearReceiptResponseListener, clearReceiveMessageListener, clearTextMessageDraft, clearTypingStatusListener, connect, deleteMessages, deleteMessagesByIds, disconnect, downloadMediaMessage, getBlacklist, getBlacklistStatus, getBlockedConversationList, getChatRoomInfo, getConnectionStatus, getConversation, getConversationList, getConversationNotificationStatus, getCurrentUserId, getFirstUnreadMessage, getHistoryMessages, getHistoryMessagesByTimestamp, getMessage, getMessageByUId, getMessageCount, getMessageSendTime, getNotificationQuietHours, getOfflineMessageDuration, getPushContentShowStatus, getRemoteChatRoomHistoryMessages, getRemoteHistoryMessages, getTextMessageDraft, getTopConversationList, getTotalUnreadCount, getUnreadCount, getUnreadMentionedMessages, init, initWithSetup, insertIncomingMessage, insertOutgoingMessage, joinChatRoom, joinExistChatRoom, quitChatRoom, recallMessage, removeConversation, removeFromBlacklist, removeNotificationQuietHours, saveTextMessageDraft, searchConversations, searchMessages, searchMessagesByUserId, sendDirectionalMessage, sendMediaMessage, sendMessage, sendReadReceiptMessage, sendReadReceiptRequest, sendReadReceiptResponse, sendTypingStatus, setConversationNotificationStatus, setConversationToTop, setMessageExtra, setMessageReceivedStatus, setMessageSentStatus, setNotificationQuietHours, setOfflineMessageDuration, setPushConfig, setPushContentShowStatus, setPushLanguageCode, setReconnectKickEnable, setServerInfo, setStatisticServer, statusResult, syncConversationReadStatus };

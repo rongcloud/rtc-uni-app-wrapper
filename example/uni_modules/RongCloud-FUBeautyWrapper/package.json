@@ -1,10 +1,10 @@
 {
-  "id": "RongCloud-BeautyWrapper",
-  "displayName": "RongCloud-BeautyWrapper",
+  "id": "RongCloud-FUBeautyWrapper",
+  "displayName": "RongCloud-FUBeautyWrapper",
   "version": "5.1.17",
-  "description": "RongCloud-BeautyWrapper",
+  "description": "RongCloud-FUBeautyWrapper",
   "keywords": [
-    "RongCloud-BeautyWrapper"
+    "RongCloud-FUBeautyWrapper"
 ],
   "repository": "",
   "engines": {

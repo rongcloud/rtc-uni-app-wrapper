@@ -56,9 +56,14 @@
 						<text class="text">本地镜像</text>
 					</label>
 				</view>
-				<button @click="changeSpeaker" style="margin-top: 10rpx; width: 140rpx; height: 50rpx;">
-					<text class="text">{{speaker ? '扬声器' : '听筒'}}</text>
-				</button>
+				<view class="uni-row">
+					<button @click="changeSpeaker" style="margin-top: 10rpx; width: 140rpx; height: 50rpx;">
+						<text class="text">{{speaker ? '扬声器' : '听筒'}}</text>
+					</button>
+					<button @click="customFocusClick" style="margin-top: 10rpx; width: 140rpx; height: 50rpx; margin-left: 30rpx;">
+						<text class="text">手动对焦</text>
+					</button>
+				</view>
 				<view class="uni-row">
 					<button @click="showFpsList" class="dropdownButton" style="margin-top: 10rpx;">
 						<text class="text">{{fpsTitles[currentFps]}}</text>
@@ -210,7 +215,7 @@
 				currentResolution: RCRTCVideoResolution.Resolution_720x1280,
 				currentTinyResolution: RCRTCVideoResolution.Resolution_180x320,
 				currentFps: RCRTCVideoFps.Fps30,
-				currentFitTypeIndex: 0,
+				currentFitTypeIndex: 1,
 				currentMaxVideoKbpsIndex: 1,
 				currentMinVideoKbpsIndex: 1,
 				currentTinyMaxVideoKbpsIndex: 1,
@@ -553,6 +558,9 @@
 			changeSpeaker() {
 				this.speaker = !this.speaker;
 				RCRTCEngine.enableSpeaker(this.speaker);
+			},
+			customFocusClick() {
+				RCRTCEngine.setCameraFocusPositionInPreview(0.5, 0.5);
 			},
 			showFpsList() {
 				this.$refs.fpsList.show();

@@ -14,7 +14,15 @@
 				// 合流视频设置参数
 				liveMixVideoParams: null,
 				liveMixTinyVideoParams: null,
-			}
+			},
+			fuBeautyData: {
+				enable: false,
+				currentSkinBlurType: 0,
+			},
+			meetingPageData: {
+				
+			},
+			fuBeautyRegisterCode: -1,
 		}, 
     onLaunch: function() {
       console.log('App Launch')

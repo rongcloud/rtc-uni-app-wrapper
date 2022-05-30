@@ -1,7 +1,7 @@
 /*
  * RCIMLibUni - v5.1.3-release.4
- * CommitId - 683537a92582a32f4686f41774947782dc7ff16e
- * Wed Jan 19 2022 15:01:35 GMT+0800 (中国标准时间)
+ * CommitId - feed3f0f61dd39b78c4d0a5b5bdb387ad3bb003e
+ * Tue Mar 22 2022 15:58:58 GMT+0800 (中国标准时间)
  * ©2020 RongCloud, Inc. All rights reserved.
  */
 'use strict';
@@ -952,6 +952,19 @@ function searchMessages(conversationType, targetId, keyword, count, startTime = 
     RCIMClient.searchMessages(conversationType, targetId, keyword, count, startTime, callback);
 }
 /**
+ * 搜索消息
+ *
+ * @param conversationType 会话类型
+ * @param targetId 目标 ID
+ * @param userId 用户 ID
+ * @param count 获取数量
+ * @param startTime 开始时间
+ * @param callback 回调函数
+ */
+function searchMessagesByUserId(conversationType, targetId, userId, count, startTime = 0, callback) {
+    RCIMClient.searchMessagesByUserId(conversationType, targetId, userId, count, startTime, callback);
+}
+/**
  * 获取消息
  *
  * @param messageId 消息 ID
@@ -1442,6 +1455,7 @@ exports.removeNotificationQuietHours = removeNotificationQuietHours;
 exports.saveTextMessageDraft = saveTextMessageDraft;
 exports.searchConversations = searchConversations;
 exports.searchMessages = searchMessages;
+exports.searchMessagesByUserId = searchMessagesByUserId;
 exports.sendDirectionalMessage = sendDirectionalMessage;
 exports.sendMediaMessage = sendMediaMessage;
 exports.sendMessage = sendMessage;
