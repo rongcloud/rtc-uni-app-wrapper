@@ -30,7 +30,6 @@
 </template>
 
 <script>
-	import RCRTCEngine from '@/uni_modules/RongCloud-RTCWrapper/lib/RCRTCEngine';
 	import * as Config from '@/common/config.js';
 	import {
 		get
@@ -38,9 +37,13 @@
 	export default {
 		data() {
 			return {
+				rtcEngine: null,
 				cdns: [],
 				selectedCDNInfos: [],
 			}
+		},
+		onLoad() {
+			this.rtcEngine = getApp().globalData.rtcEngine
 		},
 		methods: {
 			loadCDNClick() {
@@ -101,10 +104,10 @@
 				uni.showLoading({
 					title: '加载中...'
 				});
-				let session = RCRTCEngine.getSessionId();
+				let session = this.rtcEngine.getSessionId();
 				let url = `${Config.host}cdn/${id}/sealLive/${session}`;
 				get(url, {}, json => {
-					RCRTCEngine.addLiveCdn(json.push);
+					this.rtcEngine.addLiveCdn(json.push);
 					this.showCDNInfo(json, name);
 					uni.hideLoading();
 				}, (error) => {

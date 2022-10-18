@@ -49,7 +49,6 @@
 </template>
 
 <script>
-	import RCRTCEngine from '@/uni_modules/RongCloud-RTCWrapper/lib/RCRTCEngine';
 	import {
 		RCRTCCamera,
 		RCRTCViewFitType,
@@ -60,6 +59,7 @@
 	export default {
 		data() {
 			return {
+				rtcEngine: null,
 				roomId: '',
 				userId: '',
 				joinedSubRooms: [],
@@ -69,6 +69,7 @@
 		onLoad() {
 			this.joinedSubRooms = this.getGlobalData().joinedSubRooms;
 			this.joinableSubRooms = this.getGlobalData().joinableSubRooms;
+			this.rtcEngine = getApp().globalData.rtcEngine;
 		},
 		methods: {
 			getGlobalData() {
@@ -100,13 +101,13 @@
 					});
 					return;
 				}
-				RCRTCEngine.requestJoinSubRoom(this.roomId, this.userId, true);
+				this.rtcEngine.requestJoinSubRoom(this.roomId, this.userId, true);
 			},
 			leftClick(roomId) {
-				RCRTCEngine.leaveSubRoom(roomId, false);
+				this.rtcEngine.leaveSubRoom(roomId, false);
 			},
 			disbandClick(roomId) {
-				RCRTCEngine.leaveSubRoom(roomId, true);
+				this.rtcEngine.leaveSubRoom(roomId, true);
 				// 自己调用解散不回调 disband,所以在这里手动删除
 				let bandedSubRooms = this.getGlobalData().bandedSubRooms;
 				let bandedSubRoomsIndex = bandedSubRooms.indexOf(roomId);
@@ -115,7 +116,7 @@
 				}
 			},
 			joinRoomClick(roomId) {
-				RCRTCEngine.joinSubRoom(roomId);
+				this.rtcEngine.joinSubRoom(roomId);
 			},
 		}
 	}

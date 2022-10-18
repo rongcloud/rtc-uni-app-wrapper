@@ -216,6 +216,7 @@
 		},
 		data() {
 			return {
+				rtcEngine: null,
 				localUserId: '',
 				roomId: '',
 				roomSetup: {},
@@ -287,6 +288,7 @@
 		},
 
 		onLoad(option) {
+			this.rtcEngine = getApp().globalData.rtcEngine;
 			uni.getSystemInfo({
 				success: (res) => {
 					this.windowWidth = res.windowWidth;
@@ -338,7 +340,7 @@
 			 * 可以在这里处理需要调用原生才能实现的功能，
 			 * 因为在 onUnload 中会遇到无法调用原生功能的情况。
 			 * */
-			RCRTCEngine.leaveRoom();
+			this.rtcEngine.leaveRoom();
 			// 关闭相芯美颜、重置相芯美颜
 			this.resetFUBeautyData();
 		},
@@ -422,12 +424,12 @@
 				});
 				console.log(roomSetup, roomId);
 				// 这个返回值只代表 joinRoom 接口调用成功
-				let code = RCRTCEngine.joinRoom(roomId, roomSetup);
+				let code = this.rtcEngine.joinRoom(roomId, roomSetup);
 			},
 
 			// 初始配置
 			initialConfig() {
-				RCRTCEngine.enableSpeaker(this.speaker);
+				this.rtcEngine.enableSpeaker(this.speaker);
 				let videoConfig = {
 					fps: this.currentFps,
 					resolution: this.currentResolution,
@@ -435,7 +437,7 @@
 					minBitrate: this.minVideoKbps[this.currentMinVideoKbpsIndex],
 					maxBitrate: this.maxVideoKbps[this.currentMaxVideoKbpsIndex],
 				};
-				RCRTCEngine.setVideoConfig(videoConfig, false);
+				this.rtcEngine.setVideoConfig(videoConfig, false);
 				if (this.enableTinyStream) {
 					let tinyVideoConfig = {
 						fps: this.currentFps,
@@ -444,7 +446,7 @@
 						minBitrate: this.tinyMinVideoKbps[this.currentTinyMinVideoKbpsIndex],
 						maxBitrate: this.tinyMaxVideoKbps[this.currentTinyMaxVideoKbpsIndex],
 					};
-					RCRTCEngine.setVideoConfig(tinyVideoConfig, true);
+					this.rtcEngine.setVideoConfig(tinyVideoConfig, true);
 				}
 			},
 			async changeAudio(event) {
@@ -456,7 +458,7 @@
 						}
 					}
 				}
-				let code = RCRTCEngine.enableMicrophone(!this.enableAudio);
+				let code = this.rtcEngine.enableMicrophone(!this.enableAudio);
 				let tempStr = (this.enableAudio ? '打开' : '关闭') + '麦克风';
 				if (code === 0) {
 					this.enableAudio = !this.enableAudio;
@@ -477,20 +479,20 @@
 				uni.showLoading({
 					title: '加载中...'
 				});
-				RCRTCEngine.enableCamera(!this.enableCamera, this.frontCamera ? RCRTCCamera.Front : RCRTCCamera.Back);
+				this.rtcEngine.enableCamera(!this.enableCamera, this.frontCamera ? RCRTCCamera.Front : RCRTCCamera.Back);
 				// RCFUBeautyEngine.setDisplayOrientation(7);
 				RCFUBeautyEngine.setIsFrontCamera(this.frontCamera);
 			},
 			setupLocalView() {
 				if (this.enableCamera) {
-					RCRTCEngine.setLocalView(this.$refs.localVideoView.getNativeViewRef(), (code) => {
+					this.rtcEngine.setLocalView(this.$refs.localVideoView.getNativeViewRef(), (code) => {
 						console.log('setLocalView code: ', code);
 						if (code === 0) {
 							console.log('setLocalView success');
 						}
 					});
 				} else {
-					RCRTCEngine.removeLocalView((code) => {
+					this.rtcEngine.removeLocalView((code) => {
 						console.log('removeLocalView code: ', code);
 						if (code === 0) {
 							console.log('removeLocalView success');
@@ -500,16 +502,16 @@
 			},
 			changeFrontCamera(event) {
 				this.frontCamera = !this.frontCamera;
-				let code = RCRTCEngine.switchCamera();
+				let code = this.rtcEngine.switchCamera();
 				// RCFUBeautyEngine.setDisplayOrientation(7);
 				RCFUBeautyEngine.setIsFrontCamera(this.frontCamera);
 				console.log('changeFrontCamera code = ', code);
 			},
 			changePublishAudio() {
 				if (this.publishAudio) {
-					RCRTCEngine.unpublish(RCRTCMediaType.Audio);
+					this.rtcEngine.unpublish(RCRTCMediaType.Audio);
 				} else {
-					RCRTCEngine.publish(RCRTCMediaType.Audio);
+					this.rtcEngine.publish(RCRTCMediaType.Audio);
 				}
 				uni.showLoading({
 					title: '加载中...',
@@ -517,9 +519,9 @@
 			},
 			changePublishVideo() {
 				if (this.publishVideo) {
-					RCRTCEngine.unpublish(RCRTCMediaType.Video);
+					this.rtcEngine.unpublish(RCRTCMediaType.Video);
 				} else {
-					RCRTCEngine.publish(RCRTCMediaType.Video);
+					this.rtcEngine.publish(RCRTCMediaType.Video);
 				}
 				uni.showLoading({
 					title: '加载中...',
@@ -530,7 +532,7 @@
 			},
 			changeSpeaker() {
 				this.speaker = !this.speaker;
-				RCRTCEngine.enableSpeaker(this.speaker);
+				this.rtcEngine.enableSpeaker(this.speaker);
 			},
 			showFpsList() {
 				this.$refs.fpsList.show();
@@ -691,7 +693,7 @@
 						maxBitrate: this.maxVideoKbps[this.currentMaxVideoKbpsIndex],
 					};
 				}
-				RCRTCEngine.setVideoConfig(config, this.isShowTiny);
+				this.rtcEngine.setVideoConfig(config, this.isShowTiny);
 			},
 
 			updateRemoteUserSubscribedState(users, userId, type, enable) {
@@ -878,7 +880,7 @@
 						break;
 				}
 				// 设置 rtc 摄像头采集方向
-				RCRTCEngine.setCameraCaptureOrientation(orientation);
+				this.rtcEngine.setCameraCaptureOrientation(orientation);
 				// 设置相芯美颜显示方向
 				RCFUBeautyEngine.setDisplayOrientation(fuOrientation);
 			},

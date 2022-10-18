@@ -892,6 +892,26 @@ export interface OnRemoteCustomVideoStatsResult {
     tag: string;
     stats: RCRTCRemoteVideoStats;
 }
+export interface OnNetworkProbeFinishedResult {
+    i: number;
+    s: string;
+}
+export interface OnNetworkProbeUpLinkStatsResult {
+    stats: RCRTCNetworkProbeStats;
+}
+export interface OnNetworkProbeDownLinkStatsResult {
+    stats: RCRTCNetworkProbeStats;
+}
+export interface OnLiveRoleSwitchedResult {
+    current: RCRTCRole;
+    code: number;
+    errMsg: string;
+}
+export interface OnRemoteLiveRoleSwitchedResult {
+    roomId: string;
+    userId: string;
+    role: RCRTCRole;
+}
 /** 以下是枚举值的定义 */
 /**
  * 音频编译类型
@@ -1267,4 +1287,148 @@ export declare enum RCRTCStatsEventsName {
     OnLocalCustomVideoStats = "OnLocalCustomVideoStats",
     OnRemoteCustomAudioStats = "OnRemoteCustomAudioStats",
     OnRemoteCustomVideoStats = "OnRemoteCustomVideoStats"
+}
+export interface RCRTCNetworkProbeStats {
+    qualityLevel?: RCRTCNetworkQualityLevel;
+    rtt?: number;
+    packetLostRate?: number;
+}
+export declare enum RCRTCNetworkQualityLevel {
+    qualityExcellent = 0,
+    qualityGood = 1,
+    qualityPoor = 2,
+    qualityBad = 3,
+    qualityVeryBad = 4,
+    qualityDown = 5
+}
+export declare enum RCRTCRole {
+    meetingMember = 0,
+    liveBroadcaster = 1,
+    liveAudience = 2
+}
+/**
+ * 开启直播内置 cdn 结果回调
+ * @param enable    是否开启
+ * @param code      错误码
+ * @param errMsg    错误消息
+ */
+export interface OnLiveMixInnerCdnStreamEnabledResult {
+    enable: boolean;
+    code: number;
+    errMsg: string;
+}
+/**
+ * 直播内置 cdn 资源发布回调
+ */
+export interface OnRemoteLiveMixInnerCdnStreamPublishedResult {
+}
+/**
+ * 直播内置 cdn 资源取消发布回调
+ */
+export interface OnRemoteLiveMixInnerCdnStreamUnpublishedResult {
+}
+/**
+ * 订阅直播内置 cdn 资源回调
+ * @param code      错误码
+ * @param errMsg    错误消息
+ */
+export interface OnLiveMixInnerCdnStreamSubscribedResult {
+    code: number;
+    errMsg: string;
+}
+/**
+ * 取消订阅直播内置 cdn 资源回调
+ * @param code      错误码
+ * @param errMsg    错误消息
+ */
+export interface OnLiveMixInnerCdnStreamUnsubscribedResult {
+    code: number;
+    errMsg: string;
+}
+/**
+ * 观众端设置订阅 cdn 流的分辨率的回调
+ * @param code      错误码
+ * @param errMsg    错误消息
+ */
+export interface OnLocalLiveMixInnerCdnVideoResolutionSetResult {
+    code: number;
+    errMsg: string;
+}
+/**
+ * 观众端 设置订阅 cdn 流的帧率的回调
+ * @param code      错误码
+ * @param errMsg    错误消息
+ */
+export interface OnLocalLiveMixInnerCdnVideoFpsSetResult {
+    code: number;
+    errMsg: string;
+}
+/**
+ * 设置水印的回调
+ * @param code      错误码
+ * @param errMsg    错误消息
+ */
+export interface OnWatermarkSetResult {
+    code: number;
+    errMsg: string;
+}
+/**
+ * 移除水印的回调
+ * @param code      错误码
+ * @param errMsg    错误消息
+ */
+export interface OnWatermarkRemovedResult {
+    code: number;
+    errMsg: string;
+}
+/**
+ * 开启网络探测结果回调
+ * @param code      错误码
+ * @param errMsg    错误消息
+ */
+export interface OnNetworkProbeStartedResult {
+    code: number;
+    errMsg: string;
+}
+/**
+ * 关闭网络探测结果回调
+ * @param code      错误码
+ * @param errMsg    错误消息
+ */
+export interface OnNetworkProbeStoppedResult {
+    code: number;
+    errMsg: string;
+}
+/**
+ * 开启 SEI 功能结果回调
+ * @param enable 是否开启
+ * @param code      错误码
+ * @param errMsg    错误消息
+ */
+export interface OnSeiEnabledResult {
+    enable: boolean;
+    code: number;
+    errMsg: string;
+}
+/**
+ * 收到 SEI 信息回调
+ * @param roomId 房间 id
+ * @param userId 远端用户 id
+ * @param sei SEI 信息
+ */
+export interface OnSeiReceivedResult {
+    roomId: string;
+    userId: string;
+    sei: string;
+}
+/**
+ * 观众收到合流 SEI 信息回调
+ * @param sei SEI 信息
+ */
+export interface OnLiveMixSeiReceivedResult {
+    sei: string;
+}
+export interface OnNetworkProbeFinishedResult {
+    code: number;
+    errMsg: string;
 }

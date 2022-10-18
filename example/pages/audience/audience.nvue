@@ -1,59 +1,123 @@
 <template>
 	<view>
-		<view class="media-type-view">
-			<radio-group class="uni-inline-item" style="justify-content: space-around;">
-				<label class="uni-inline-item" style="margin-left: 20rpx;" v-for="(item, index) in mediaTypes"
-					:key="item.value" @click="changeMediaType(item)">
-					<radio :value="item.value" :checked="item.value === currentMediaType && item.publish"
-						:disabled="true" />
-					<text class="text" :class="{disableText: !item.publish}">{{item.label}}</text>
-				</label>
-			</radio-group>
-		</view>
-		<view class="tiny-view" v-if="displayTinyButton">
-			<label class="uni-inline-item radio" @click="tinyClick">
-				<radio :checked="tiny" :disabled="true" />
-				<text class="text">订阅小流</text>
-			</label>
-		</view>
-		<view class="subscribe-view">
-			<button class="subscribe-button" @click="subscribeClick">
-				<text :class="{disableText: !canSubscribe}">{{subscribe ? '取消订阅' : '订阅'}}</text>
-			</button>
-		</view>
-		<view class="video-container-view">
-			<RCRTCView class="video-view" ref="videoView" :fitType="currentFitType" :mirror="mirror">
-			</RCRTCView>
-			<view class="video-top-view">
-				<button class="fitButton" plain="true" @click="fitTypeButtonClick">
-					<text class="whiteColor">{{fitTypeTitles[currentFitTypeIndex]}}</text>
-				</button>
+		<view class="setting-view">
+			<view @click="changeRole" style="margin-right: 40rpx;">
+				<uniIcons type="staff-filled" size="20" color="#FFFFFF"></uniIcons>
+			</view>
+			
+			<view @click="messageClick">
+				<uniIcons type="chat-filled" size="20" color="#FFFFFF"></uniIcons>
 			</view>
 		</view>
-		<view class="mute-view">
-			<label class="uni-inline-item radio" @click="muteVideoClick">
-				<radio :checked="muteVideo" :disabled="true"/>
-				<text class="text">静音视频</text>
-			</label>
-			<label class="uni-inline-item radio" @click="muteAudioClick">
-				<radio :checked="muteAudio" :disabled="true"/>
-				<text class="text">静音音频</text>
-			</label>
+		
+		<view class="uni-row" style="margin-top: 20rpx;justify-content:flex-end;">
+			<view class="video-container-view">
+				<RCRTCView class="video-view" ref="videoView" :fitType="currentFitType" :mirror="mirror">
+				</RCRTCView>
+				<view class="video-top-view">
+					<button class="fitButton" plain="true" @click="fitTypeButtonClick">
+						<text class="whiteColor">{{fitTypeTitles[currentFitTypeIndex]}}</text>
+					</button>
+				</view>
+			</view>
+			
+			<view class="rightControlArea">
+				<text class="streamTitle">合流</text>
+				<view class="media-type-view">
+					<radio-group class="uni-inline-item">
+						<label class="uni-inline-item" style="margin-left: 10rpx;" v-for="(item, index) in mediaTypes"
+							:key="item.value" @click="changeMediaType(item)">
+							<radio :value="item.value" :checked="item.value === currentMediaType && item.publish"
+								:disabled="true" />
+							<text class="text" :class="{disableText: !item.publish}">{{item.label}}</text>
+						</label>
+					</radio-group>
+				</view>
+				
+				<view class="uni-row">
+					<view class="tiny-view" v-if="displayTinyButton">
+						<label class="uni-inline-item radio" @click="tinyClick">
+							<radio :checked="tiny" :disabled="true" />
+							<text class="text">订阅小流</text>
+						</label>
+					</view>
+					
+					<view class="subscribe-view">
+						<button class="subscribe-button" @click="subscribeClick" type="primary">
+							<text :class="{disableText: !canSubscribe}" style="color: #FFFFFF;">{{subscribe ? '取消订阅' : '订阅'}}</text>
+						</button>
+					</view>
+				</view>
+				
+				<view class="mute-view">
+					<label class="uni-inline-item radio" @click="muteVideoClick">
+						<radio :checked="muteVideo" :disabled="true"/>
+						<text class="text">静音视频</text>
+					</label>
+					<label class="uni-inline-item radio" @click="muteAudioClick">
+						<radio :checked="muteAudio" :disabled="true"/>
+						<text class="text">静音音频</text>
+					</label>
+				</view>
+				
+				<view class="voice-view">
+					<button @click="speakerClick" style="margin-top: 10rpx; width: 180rpx; height: 50rpx;" type="primary">
+						<text class="text" style="color: #FFFFFF;">{{speaker ? '扬声器播放中' : '听筒播放中'}}</text>
+					</button>
+				</view>
+				
+				
+			</view>
+			
 		</view>
-		<view class="voice-view">
-			<button @click="speakerClick" style="margin-top: 10rpx; width: 150rpx; height: 50rpx;">
-				<text class="text">{{speaker ? '扬声器播放中' : '听筒播放中'}}</text>
-			</button>
-		</view>
+		
 		<stats-view :networkStats="networkStats" :localAudioStats="audioStats" :localVideoStats="videoStats"
 			:localTinyVideoStats="tinyVideoStats">
 		</stats-view>
 		<fuiDropdownList :options="fitTypeTitles" ref="fitTypeList" :isCheckbox="false" @click="fitTypeItemClick">
 		</fuiDropdownList>
+		
+		<view class="uni-row" style="margin-top: 80rpx;justify-content:flex-end;">
+			<view class="video-container-view">
+				<RCRTCView class="video-view" ref="cdnView" :fitType="currentFitType" :mirror="mirror">
+				</RCRTCView>
+				<view class="video-top-view">
+					<button class="fitButton" plain="true" @click="fitTypeButtonClick">
+						<text class="whiteColor">{{fitTypeTitles[currentFitTypeIndex]}}</text>
+					</button>
+				</view>
+			</view>
+			
+			<view class="rightControlArea">
+				<text class="streamTitle">融云 CDN 流</text>
+				
+				<view class="subscribe-view">
+					<button style="width: 260rpx;" @click="subscribeCDNClick" type="primary">
+						<text style="color: #FFFFFF;">{{subscribeCDN ? '取消订阅' : '订阅内置CDN'}}</text>
+					</button>
+				</view>
+				
+				<view class="uni-row">
+					<button @click="showFpsList" class="dropdownButton">
+						<text class="text">{{fpsTitles[currentFps]}}</text>
+					</button>
+					<button @click="showResolutionList(false)" class="dropdownButton">
+						<text class="text">{{resolutionTitles[currentResolution]}}</text>
+					</button>
+				</view>
+				
+			</view>
+			
+		</view>
+		
+		<fuiDropdownList :options="fpsTitles" ref="fpsList" :isCheckbox="false" @click="fpsItemClick"></fuiDropdownList>
+		<fuiDropdownList :options="resolutionTitles" ref="resolutionList" :height="600" :isCheckbox="false"
+			@click="resolutionItemClick"></fuiDropdownList>
 	</view>
 </template>
 
 <script>
+	import uniIcons from "@/components/uni-icons/uni-icons.vue"
 	import * as Constants from '../../common/constants';
 	import {
 		RCRTCCamera,
@@ -71,12 +135,15 @@
 
 	export default {
 		components: {
+			uniIcons,
 			RCRTCView,
 			fuiDropdownList,
 			statsView
 		},
 		data() {
 			return {
+				rtcEngine: null,
+				isSwitchLiveRole: false,
 				mirror: false,
 				mediaTypes: [],
 				currentMediaType: -1,
@@ -90,8 +157,17 @@
 				isPublishVideo: false,
 				isPublishAudio: false,
 				subscribe: false,
+				subscribeCDN: false,
 				videoStatsRes: null,
 				audioStats: null,
+				fpsTitles: [],
+				resolutionTitles: [],
+				currentFps: RCRTCVideoFps.Fps15,
+				currentResolution: RCRTCVideoResolution.Resolution_480x640,
+				tempRoomSetup: null,
+				localUserId: '',
+				enableTinyStream: '',
+				usersInfo: [],
 			}
 		},
 		computed: {
@@ -113,6 +189,11 @@
 			},
 		},
 		onLoad(option) {
+			this.tempRoomSetup = option.roomSetup;
+			this.localUserId = option.userId;
+			this.enableTinyStream = option.enableTinyStream;
+			this.isSwitchLiveRole = option.isSwitchLiveRole;
+			this.rtcEngine = getApp().globalData.rtcEngine;
 			this.roomId = option.roomId;
 			this.fitTypeTitles = this.fitTypes.map(item => item.label);
 			this.mediaTypes = Constants.mediaTypes.map(({ value, label }) => {
@@ -129,13 +210,42 @@
 
 			this.addListeners();
 			// 加入房间
-			this.joinRoom(option.roomId, JSON.parse(option.roomSetup));
+			if (!this.isSwitchLiveRole) {
+				this.joinRoom(option.roomId, JSON.parse(option.roomSetup));
+			}
+			
+			this.fpsTitles = Object.keys(RCRTCVideoFps).filter((item) => {
+				return isNaN(Number(item));
+			}).map((item, index) => {
+				let temp = item.replace('Fps', '');
+				return temp + ' FPS';
+			});
+			
+			this.resolutionTitles = Object.keys(RCRTCVideoResolution).filter((item) => {
+				return isNaN(Number(item));
+			}).map((item, index) => {
+				let temp = item.replace('Resolution_', '');
+				return temp;
+			});
+			
+			this.usersInfo = getApp().globalData.roomUsers
+			for(let i=0;i<this.usersInfo.length;i++) {
+				if(this.usersInfo[i].isPublishVideo && this.usersInfo[i].isPublishAudio){
+					this.changeRemotePublishStatus(2, true);
+				}
+				if(this.usersInfo[i].isPublishVideo) {
+					this.changeRemotePublishStatus(1, true);
+				}else if(this.usersInfo[i].isPublishAudio){
+					this.changeRemotePublishStatus(0, true);
+				}
+			}
+			console.log('this.usersInfo---',this.usersInfo)
 		},
 		onUnload() {
 			this.removeListeners();
 		},
 		onBackPress() {
-			RCRTCEngine.leaveRoom();
+			this.rtcEngine.leaveRoom();
 		},
 		onNavigationBarButtonTap(e) {
 			console.log(e);
@@ -148,6 +258,7 @@
 		},
 		methods: {
 			addListeners() {
+				console.log('audience-addListeners')
 				// 本地用户加入房间的回调
 				uni.$on(RCRTCEngineEventsName.OnRoomJoined, this.onRoomJoinedCallback.bind(this));
 				// 本地用户离开房间的回调
@@ -158,6 +269,7 @@
 				});
 
 				uni.$on(RCRTCEngineEventsName.OnRemoteLiveMixUnpublished, ({ type }) => {
+					console.log('OnRemoteLiveMixUnpublished---',type)
 					this.changeRemotePublishStatus(type, false);
 				});
 
@@ -169,6 +281,13 @@
 				uni.$on(RCRTCStatsEventsName.OnLiveMixAudioStats, res => {
 					this.audioStats = res;
 				});
+				
+				uni.$on('IRCRTCIWListener:onLiveMixInnerCdnStreamSubscribed', this.onLiveMixInnerCdnStreamSubscribedCallback.bind(this));
+				uni.$on('IRCRTCIWListener:onLiveMixInnerCdnStreamUnsubscribed', this.onLiveMixInnerCdnStreamUnsubscribedCallback.bind(this));
+				uni.$on('IRCRTCIWListener:onLocalLiveMixInnerCdnVideoResolutionSet', this.onLocalLiveMixInnerCdnVideoResolutionSetCallback.bind(this));
+				uni.$on('IRCRTCIWListener:onLocalLiveMixInnerCdnVideoFpsSet', this.onLocalLiveMixInnerCdnVideoFpsSetCallback.bind(this));
+				uni.$on('IRCRTCIWListener:onLiveRoleSwitched', this.onLiveRoleSwitchedCallback.bind(this));
+				uni.$on('IRCRTCIWListener:onRemoteLiveRoleSwitched', this.onRemoteLiveRoleSwitchedCallback.bind(this));
 			},
 			removeListeners() {
 				uni.$off(RCRTCEngineEventsName.OnRoomJoined);
@@ -180,6 +299,13 @@
 				uni.$off(RCRTCEngineEventsName.OnRemoteLiveMixUnpublished);
 				uni.$off(RCRTCStatsEventsName.OnLiveMixVideoStats);
 				uni.$off(RCRTCStatsEventsName.OnLiveMixAudioStats);
+				
+				uni.$off('IRCRTCIWListener:onLiveMixInnerCdnStreamSubscribed');
+				uni.$off('IRCRTCIWListener:onLiveMixInnerCdnStreamUnsubscribed');
+				uni.$off('IRCRTCIWListener:onLocalLiveMixInnerCdnVideoResolutionSet');
+				uni.$off('IRCRTCIWListener:onLocalLiveMixInnerCdnVideoFpsSet');
+				// uni.$off("IRCRTCIWListener:onLiveRoleSwitched");
+				uni.$off("IRCRTCIWListener:onRemoteLiveRoleSwitched");
 			},
 			joinRoom(roomId, roomSetup) {
 				uni.showLoading({
@@ -187,12 +313,13 @@
 				});
 				console.log(roomSetup, roomId);
 				// 这个返回值只代表 joinRoom 接口调用成功
-				let code = RCRTCEngine.joinRoom(roomId, roomSetup);
+				let code = this.rtcEngine.joinRoom(roomId, roomSetup);
+				console.log('joinRoom-code---',code)
 			},
 
 			intialConfig() {
 				// 初始化配置
-				RCRTCEngine.enableSpeaker(this.speaker);
+				this.rtcEngine.enableSpeaker(this.speaker);
 			},
 
 			changeRemotePublishStatus(type, enable) {
@@ -215,7 +342,7 @@
 			},
 
 			setLiveMixView() {
-				RCRTCEngine.setLiveMixView(this.$refs.videoView.getNativeViewRef(), code => {
+				this.rtcEngine.setLiveMixView(this.$refs.videoView.getNativeViewRef(), code => {
 					if (code === 0) {
 						console.log('设置合流视频成功');
 					} else {
@@ -229,7 +356,7 @@
 			},
 
 			removeLiveMixView() {
-				RCRTCEngine.removeLiveMixView(code => {
+				this.rtcEngine.removeLiveMixView(code => {
 					if (code === 0) {
 						console.log('移除合流视频成功');
 					} else {
@@ -261,7 +388,7 @@
 					return;
 				}
 				if (!this.subscribe) {
-					let code = RCRTCEngine.subscribeLiveMix(this.currentMediaType, this.tiny);
+					let code = this.rtcEngine.subscribeLiveMix(this.currentMediaType, this.tiny);
 					if (code === 0) {
 						uni.showLoading({
 							title: '加载中...'
@@ -274,7 +401,7 @@
 						});
 					}
 				} else {
-					let code = RCRTCEngine.unsubscribeLiveMix(this.currentMediaType);
+					let code = this.rtcEngine.unsubscribeLiveMix(this.currentMediaType);
 					if (code === 0) {
 						uni.showLoading({
 							title: '加载中...'
@@ -297,7 +424,7 @@
 			},
 			speakerClick() {
 				this.speaker = !this.speaker;
-				RCRTCEngine.enableSpeaker(this.speaker);
+				this.rtcEngine.enableSpeaker(this.speaker);
 			},
 			muteVideoClick() {
 				this.muteLiveMixStream(RCRTCMediaType.Video, !this.muteVideo);
@@ -306,7 +433,7 @@
 				this.muteLiveMixStream(RCRTCMediaType.Audio, !this.muteAudio);
 			},
 			muteLiveMixStream(type, mute) {
-				let code = RCRTCEngine.muteLiveMixStream(type, mute);
+				let code = this.rtcEngine.muteLiveMixStream(type, mute);
 				if (code === 0) {
 					switch (type) {
 						case RCRTCMediaType.Video:
@@ -385,6 +512,127 @@
 					});
 				}
 			},
+			onLiveMixInnerCdnStreamSubscribedCallback(res) {
+				// 订阅直播内置 cdn 资源回调
+				console.log('onLiveMixInnerCdnStreamSubscribedCallback---')
+				if (res.code != 0) {
+					uni.showToast({
+						title: 'error:'+res.code,
+						icon: 'error'
+					});
+					return
+				}
+
+			},
+			onLiveMixInnerCdnStreamUnsubscribedCallback(res) {
+				// 取消订阅直播内置 cdn 资源回调
+				console.log('onLiveMixInnerCdnStreamUnsubscribedCallback---')
+				if (res.code == 0) {
+				    // 取消订阅成功
+					this.subscribeCDN = false;
+					console.log('取消订阅成功');
+				} else {
+				  // 取消订阅失败
+				  this.subscribeCDN = true;
+				  console.log('取消订阅失败code---' + res.code);
+				}
+			},
+			onLocalLiveMixInnerCdnVideoResolutionSetCallback(res) {
+				// 观众端设置订阅 cdn 流的分辨率的回调
+				console.log('分辨率的回调',res)
+			},
+			onLocalLiveMixInnerCdnVideoFpsSetCallback(res) {
+				//观众端 设置订阅 cdn 流的帧率的回调
+				console.log('帧率的回调',res)
+			},
+			onLiveRoleSwitchedCallback(res){
+				console.log('onLiveRoleSwitchedCallback---',res)
+				uni.$off("IRCRTCIWListener:onLiveRoleSwitched");
+				let roomSetup = {
+					type: JSON.parse(this.tempRoomSetup).type,
+					role: 1,
+				};
+				uni.redirectTo({url:`../host/host?isSwitchLiveRole=true&roomId=${this.roomId}&roomSetup=${JSON.stringify(roomSetup)}&userId=${this.localUserId}&enableTinyStream=${this.enableTinyStream}`})
+			},
+			onRemoteLiveRoleSwitchedCallback(res){
+				console.log('onRemoteLiveRoleSwitchedCallback---',res)
+			},
+			
+			subscribeCDNClick(){
+				if(this.subscribeCDN){
+					console.log('unsubscribeLiveMixInnerCdnStream()')
+					this.rtcEngine.unsubscribeLiveMixInnerCdnStream()
+				}else{
+					let subscribeCode = this.rtcEngine.subscribeLiveMixInnerCdnStream()
+					if (subscribeCode != 0) {
+						uni.showToast({
+							title: 'error:'+subscribeCode,
+							icon: 'error'
+						});
+						return
+					}
+					
+					this.rtcEngine.setLiveMixInnerCdnStreamView(this.$refs.cdnView.getNativeViewRef(), (code) => {
+					  if (code === 0) {
+					      // 设置成功
+						  this.subscribeCDN = true;
+						  console.log('设置预览窗口成功');
+					  } else {
+					    // 设置失败
+						this.subscribeCDN = false;
+						console.log('设置预览窗口失败code---' + code);
+					  }
+					});
+				}
+			},
+			fpsItemClick(e) {
+				if(!this.subscribeCDN) {
+					uni.showToast({
+						title: '请先订阅',
+						icon: 'error'
+					})
+					return
+				}
+				this.currentFps = e.index;
+				this.rtcEngine.setLocalLiveMixInnerCdnVideoFps(this.currentFps)
+			},
+			showFpsList() {
+				this.$refs.fpsList.show();
+			},
+			resolutionItemClick(e) {
+				if(!this.subscribeCDN) {
+					uni.showToast({
+						title: '请先订阅',
+						icon: 'error'
+					})
+					return
+				}
+				this.currentResolution = e.index;
+				console.log("this.currentResolution",e)
+				let size = e.text.split('x');
+				let width = parseInt(size[0]);
+				let height = parseInt(size[1]);
+				console.log("currentResolution",width,height)
+				this.rtcEngine.setLocalLiveMixInnerCdnVideoResolution(width,height)
+			},
+			showResolutionList() {
+				this.$refs.resolutionList.show();
+			},
+			messageClick(){
+				uni.navigateTo({
+					url: `../messagePanel?host=${false}&roomId=${this.roomId}`
+				});
+			},
+			changeRole(){
+				console.log('changeRole---')
+				let code = this.rtcEngine.switchLiveRole(1)
+				if (code!=0) {
+					uni.showToast({
+						title: 'code：' + code,
+						icon: 'error'
+					})
+				}
+			}
 		}
 	}
 </script>
@@ -409,24 +657,27 @@
 	.tiny-view {
 		margin-top: 20rpx;
 		align-items: center;
+		flex: 1;
 	}
 
 	.subscribe-view {
 		margin-top: 20rpx;
 		align-items: center;
+		flex: 1;
 	}
 
 	.subscribe-button {
-		width: 160rpx;
+		width: 180rpx;
 	}
 
 	.video-container-view {
 		margin-top: 20rpx;
 		background-color: #007AFF;
+		flex: 1;
 	}
 
 	.video-view {
-		height: 500rpx;
+		height: 400rpx;
 	}
 
 	.video-top-view {
@@ -445,5 +696,32 @@
 	.voice-view {
 		align-items: center;
 		margin-top: 20rpx;
+	}
+	
+	.rightControlArea {
+		flex: 1.2;
+	}
+	
+	.streamTitle {
+		margin-top: 10px;
+		text-align: center;
+		color: #007AFF;
+		margin-bottom: 10px;
+	}
+	
+	.dropdownButton {
+		width: 140rpx;
+		height: 60rpx;
+		margin-left: 30rpx;
+	}
+	
+	.setting-view {
+		flex-direction: row;
+		justify-content: flex-end;
+		padding-right: 30rpx;
+		background-color: #007AFF;
+		height: 60rpx;
+		left: 0;
+		right: 0;
 	}
 </style>

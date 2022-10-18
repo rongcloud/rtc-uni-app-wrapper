@@ -67,7 +67,7 @@ import {
     OnUserLeftResult,
     OnUserOfflineResult,
     OnLiveMixBackgroundColorSetResult,
-} from "./RCRTCDefines";
+} from './RCRTCDefines';
 
 /* 事件接口定义 */
 export interface RCRTCEngineEventsInterface {
@@ -404,14 +404,18 @@ export interface RCRTCEngineEventsInterface {
      * @param {BaseCallback<OnCancelJoinSubRoomRequestReceivedResult>} [callback]
      * @memberof RCRTCStatsEventsInterface
      */
-    setOnCancelJoinSubRoomRequestReceivedListener(callback?: BaseCallback<OnCancelJoinSubRoomRequestReceivedResult>): void;
+    setOnCancelJoinSubRoomRequestReceivedListener(
+        callback?: BaseCallback<OnCancelJoinSubRoomRequestReceivedResult>
+    ): void;
     /**
      * 收到加入请求响应回调 仅供直播主播用户使用
      *
      * @param {BaseCallback<OnJoinSubRoomRequestResponseReceivedResult>} [callback]
      * @memberof RCRTCStatsEventsInterface
      */
-    setOnJoinSubRoomRequestResponseReceivedListener(callback?: BaseCallback<OnJoinSubRoomRequestResponseReceivedResult>): void;
+    setOnJoinSubRoomRequestResponseReceivedListener(
+        callback?: BaseCallback<OnJoinSubRoomRequestResponseReceivedResult>
+    ): void;
     /**
      * 加入子房间回调, 仅供直播主播用户使用
      *
@@ -440,7 +444,6 @@ export interface RCRTCEngineEventsInterface {
      * @memberof RCRTCStatsEventsInterface
      */
     setOnSubRoomDisbandListener(callback?: BaseCallback<OnSubRoomDisbandResult>): void;
-
 }
 
 export interface RCRTCStatsEventsInterface {
@@ -451,10 +454,10 @@ export interface RCRTCStatsEventsInterface {
      */
     setOnNetworkStatsListener(callback?: BaseCallback<RCRTCNetworkStats>): void;
     /**
-    * 上报本地音频统计信息
-    * @param callback 回调函数，不传值表示移除当前事件的所有监听。
-    * @memberof RCRTCEngineEventsInterface
-    */
+     * 上报本地音频统计信息
+     * @param callback 回调函数，不传值表示移除当前事件的所有监听。
+     * @memberof RCRTCEngineEventsInterface
+     */
     setOnLocalAudioStatsListener(callback?: BaseCallback<RCRTCLocalAudioStats>): void;
     /**
      * 上报本地视频统计信息
@@ -530,6 +533,4 @@ export interface RCRTCStatsEventsInterface {
      * @memberof RCRTCStatsEventsInterface
      */
     setOnRemoteCustomVideoStatsListener(callback?: BaseCallback<OnRemoteCustomVideoStatsResult>): void;
-
-
 }

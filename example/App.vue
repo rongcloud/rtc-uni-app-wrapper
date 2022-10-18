@@ -23,6 +23,9 @@
 				
 			},
 			fuBeautyRegisterCode: -1,
+			rtcEngine: null,
+			imEngine: null,
+			roomUsers: [],
 		}, 
     onLaunch: function() {
       console.log('App Launch')

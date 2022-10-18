@@ -1,7 +1,58 @@
 <template>
 	<view>
 		<view class="setting-view">
-			<button class="setting-button" @click="subRoomClick">
+			<button @click="showDrawer('showRight')" icon="search">
+				<uniIcons type="bars" size="20"></uniIcons>
+			</button>
+			<uniDrawer ref="showRight" mode="right" :mask-click="false" @change="change($event,'showRight')">
+				<view class="scroll-view">
+					<scroll-view class="scroll-view-box" scroll-y="true">
+						<view class="info-content">
+							<button class="btnItem" @click="subRoomClick">
+								<text class="setText">跨房间连麦</text>
+								<uniIcons type="headphones" size="30"></uniIcons>
+							</button>
+							<button class="btnItem" @click="cdnClick" style="margin-top: 10px;">
+								<text class="setText">第三方CDN</text>
+								<uniIcons type="map-pin-ellipse" size="30"></uniIcons>
+							</button>
+							<button class="btnItem" style="margin-top: 10px;" @click="">
+								<view class="btnItem">
+									<label @click="cdnMentionClick" class="radio">
+										<text class="setText">融云内置CDN</text>
+										<radio :checked="cdnChecked" :disabled="true" />
+									</label>
+								</view>
+								<uniIcons type="map-pin" size="30"></uniIcons>
+							</button>
+							<button class="btnItem" @click="layoutClick" style="margin-top: 10px;">
+								<text class="setText">合流设置</text>
+								<uniIcons type="loop" size="30"></uniIcons>
+							</button>
+							<button class="btnItem" @click="setWatermark" style="margin-top: 10px;">
+								<text class="setText">设置水印</text>
+								<uniIcons type="image-filled" size="30"></uniIcons>
+							</button>
+							<button class="btnItem" @click="seiPage" style="margin-top: 10px;">
+								<text class="setText">Sei功能</text>
+								<uniIcons type="chatboxes-filled" size="30"></uniIcons>
+							</button>
+							<button class="btnItem" @click="changeRole" style="margin-top: 10px;">
+								<text class="setText">切换为观众</text>
+								<uniIcons type="staff-filled" size="30"></uniIcons>
+							</button>
+							<button class="btnItem" @click="messageClick" style="margin-top: 10px;">
+								<text class="setText">聊天室</text>
+								<uniIcons type="chat-filled" size="30"></uniIcons>
+							</button>
+						</view>
+						<view class="info-content">
+							<button @click="closeDrawer('showRight')" type="primary" style="margin-top: 20px;"><text class="word-btn-white" style="padding: 10px;color: #FFFFFF;">关闭菜单</text></button>
+						</view>
+					</scroll-view>
+				</view>
+			</uniDrawer>
+			<!-- <button class="setting-button" @click="subRoomClick">
 				<image style="width: 16px; height: 16px;" src="@/static/img/sub_room.png"></image>
 			</button>
 			<button class="setting-button" :class="{ 'setting-button-disable': !publishVideo }" @click="cdnClick">
@@ -12,7 +63,7 @@
 			</button>
 			<button class="setting-button" @click="messageClick">
 				<image style="width: 16px; height: 16px;" src="@/static/img/message.png"></image>
-			</button>
+			</button> -->
 		</view>
 		<view class="uni-row" style="margin-top: 90rpx;">
 			<view style="flex: 1; background-color: #007AFF;">
@@ -147,6 +198,9 @@
 </template>
 
 <script>
+	import uniDrawer from "@/components/uni-drawer/uni-drawer.vue"
+	import uniIcons from "@/components/uni-icons/uni-icons.vue"
+	
 	import RCRTCEngine from '@/uni_modules/RongCloud-RTCWrapper/lib/RCRTCEngine';
 	import RCRTCView from '@/uni_modules/RongCloud-RTCWrapper/components/RCRTCView';
 
@@ -179,10 +233,14 @@
 			remoteAnchorView,
 			remoteCustomAnchorView,
 			fuiDropdownList,
+			uniDrawer,
+			uniIcons,
 		},
 
 		data() {
 			return {
+				rtcEngine: null,
+				isSwitchLiveRole: false,
 				localUserId: '',
 				roomId: '',
 				enableTinyStream: false,
@@ -231,6 +289,9 @@
 				isPublishCustomStream: false,
 				filePath: '',
 				fileName: '',
+				
+				cdnChecked: false,
+				tempRoomSetup: null,
 			}
 		},
 
@@ -245,6 +306,7 @@
 				return this.usersInfo.filter(({ userId, tag }) => userId != this.localUserId);
 			},
 			remoteCustomPublishers: function() {
+				console.log('remoteCustomPublishers---')
 				return this.usersInfo.filter(({ userId, tag }) => {
 					return userId != this.localUserId && tag != null;
 				});
@@ -258,6 +320,8 @@
 		},
 
 		onLoad(option) {
+			this.rtcEngine = getApp().globalData.rtcEngine;
+			this.isSwitchLiveRole = option.isSwitchLiveRole;
 			this.localUserId = option.userId;
 			this.roomId = option.roomId;
 			this.inintialGlobalData();
@@ -290,7 +354,13 @@
 
 			this.fitTypeTitles = this.fitTypes.map(item => item.label);
 			// 加入房间
-			this.joinRoom(option.roomId, JSON.parse(option.roomSetup));
+			if (!this.isSwitchLiveRole) {
+				this.joinRoom(option.roomId, JSON.parse(option.roomSetup));
+			}else{
+				this.usersInfo = getApp().globalData.roomUsers
+			}
+			this.tempRoomSetup = option.roomSetup; 
+			
 		},
 
 		onUnload() {
@@ -304,7 +374,7 @@
 			 * 可以在这里处理需要调用原生才能实现的功能，
 			 * 因为在 onUnload 中会遇到无法调用原生功能的情况。
 			 * */
-			RCRTCEngine.leaveRoom();
+			this.rtcEngine.leaveRoom();
 		},
 
 		onNavigationBarButtonTap(e) {
@@ -336,15 +406,11 @@
 					bandedSubRooms: [],
 				};
 			},
-			getGlobalData() {
-				return getApp().globalData.hostPageData;
-			},
 			destoryGlobalData() {
 				getApp().globalData.hostPageData = null;
 			},
-			// 全局保存的所有直播用户
-			getGlobalUsers() {
-				return this.getGlobalData().users;
+			getGlobalData() {
+				return getApp().globalData.hostPageData;
 			},
 			addListeners() {
 				// 本地用户加入房间回调
@@ -406,6 +472,10 @@
 				uni.$on(RCRTCStatsEventsName.OnLocalVideoStats, this.onLocalVideoStatsCallback.bind(this));
 				uni.$on(RCRTCStatsEventsName.OnRemoteVideoStats, this.onRemoteVideoStatsCallback.bind(this));
 				uni.$on(RCRTCStatsEventsName.OnRemoteCustomVideoStats, this.onRemoteCustomVideoStatsCallback.bind(this));
+				
+				uni.$on('IRCRTCIWListener:onLiveMixInnerCdnStreamEnabled', this.onLiveMixInnerCdnStreamEnabledCallback.bind(this));
+				uni.$on('IRCRTCIWListener:onLiveRoleSwitched', this.onLiveRoleSwitchedCallback.bind(this));
+				uni.$on('IRCRTCIWListener:onRemoteLiveRoleSwitched', this.onRemoteLiveRoleSwitchedCallback.bind(this));
 			},
 
 			removeListeners() {
@@ -442,6 +512,9 @@
 				uni.$off(RCRTCStatsEventsName.OnLocalVideoStats);
 				uni.$off(RCRTCStatsEventsName.OnRemoteVideoStats);
 				uni.$off(RCRTCStatsEventsName.OnRemoteCustomVideoStats);
+				uni.$off("IRCRTCIWListener:onLiveMixInnerCdnStreamEnabled");
+				// uni.$off("IRCRTCIWListener:onLiveRoleSwitched");
+				uni.$off("IRCRTCIWListener:onRemoteLiveRoleSwitched");
 			},
 
 			joinRoom(roomId, roomSetup) {
@@ -449,7 +522,7 @@
 					title: '加入房间中...'
 				});
 				// 这个返回值只代表 joinRoom 接口调用成功
-				let code = RCRTCEngine.joinRoom(roomId, roomSetup);
+				let code = this.rtcEngine.joinRoom(roomId, roomSetup);
 				if (code === 0) {
 					console.log('joinRoom 接口调用成功');
 				} else {
@@ -458,7 +531,7 @@
 			},
 			// 初始配置
 			initialConfig() {
-				RCRTCEngine.enableSpeaker(this.speaker);
+				this.rtcEngine.enableSpeaker(this.speaker);
 				let videoConfig = {
 					fps: this.currentFps,
 					resolution: this.currentResolution,
@@ -466,7 +539,7 @@
 					minBitrate: this.minVideoKbps[this.currentMinVideoKbpsIndex],
 					maxBitrate: this.maxVideoKbps[this.currentMaxVideoKbpsIndex],
 				};
-				RCRTCEngine.setVideoConfig(videoConfig, false);
+				this.rtcEngine.setVideoConfig(videoConfig, false);
 				if (this.enableTinyStream) {
 					let tinyVideoConfig = {
 						fps: this.currentFps,
@@ -475,7 +548,7 @@
 						minBitrate: this.tinyMinVideoKbps[this.currentTinyMinVideoKbpsIndex],
 						maxBitrate: this.tinyMaxVideoKbps[this.currentTinyMaxVideoKbpsIndex],
 					};
-					RCRTCEngine.setVideoConfig(tinyVideoConfig, true);
+					this.rtcEngine.setVideoConfig(tinyVideoConfig, true);
 				}
 			},
 			async changeAudio(event) {
@@ -487,7 +560,7 @@
 						}
 					}
 				}
-				let code = RCRTCEngine.enableMicrophone(!this.enableAudio);
+				let code = this.rtcEngine.enableMicrophone(!this.enableAudio);
 				let tempStr = (!this.enableAudio ? '打开' : '关闭') + '麦克风';
 				if (code === 0) {
 					this.enableAudio = !this.enableAudio;
@@ -508,18 +581,21 @@
 				uni.showLoading({
 					title: '加载中...'
 				});
-				RCRTCEngine.enableCamera(!this.enableCamera, this.frontCamera ? RCRTCCamera.Front : RCRTCCamera.Back);
+				this.rtcEngine.enableCamera(!this.enableCamera, this.frontCamera ? RCRTCCamera.Front : RCRTCCamera.Back);
 			},
 			setupLocalView() {
+				console.log('setupLocalView')
 				if (this.enableCamera) {
-					RCRTCEngine.setLocalView(this.$refs.localVideoView.getNativeViewRef(), (code) => {
+					console.log('setupLocalView-true')
+					this.rtcEngine.setLocalView(this.$refs.localVideoView.getNativeViewRef(), (code) => {
 						console.log('setLocalView code: ', code);
 						if (code === 0) {
 							console.log('setLocalView success');
 						}
 					});
 				} else {
-					RCRTCEngine.removeLocalView((code) => {
+					console.log('setupLocalView-false')
+					this.rtcEngine.removeLocalView((code) => {
 						console.log('removeLocalView code: ', code);
 						if (code === 0) {
 							console.log('removeLocalView success');
@@ -529,14 +605,14 @@
 			},
 			changeFrontCamera(event) {
 				this.frontCamera = !this.frontCamera;
-				let code = RCRTCEngine.switchCamera();
+				let code = this.rtcEngine.switchCamera();
 				console.log('changeFrontCamera code = ', code);
 			},
 			changePublishAudio() {
 				if (this.publishAudio) {
-					RCRTCEngine.unpublish(RCRTCMediaType.Audio);
+					this.rtcEngine.unpublish(RCRTCMediaType.Audio);
 				} else {
-					RCRTCEngine.publish(RCRTCMediaType.Audio);
+					this.rtcEngine.publish(RCRTCMediaType.Audio);
 				}
 				uni.showLoading({
 					title: '加载中...',
@@ -544,9 +620,9 @@
 			},
 			changePublishVideo() {
 				if (this.publishVideo) {
-					RCRTCEngine.unpublish(RCRTCMediaType.Video);
+					this.rtcEngine.unpublish(RCRTCMediaType.Video);
 				} else {
-					RCRTCEngine.publish(RCRTCMediaType.Video);
+					this.rtcEngine.publish(RCRTCMediaType.Video);
 				}
 				uni.showLoading({
 					title: '加载中...',
@@ -557,10 +633,10 @@
 			},
 			changeSpeaker() {
 				this.speaker = !this.speaker;
-				RCRTCEngine.enableSpeaker(this.speaker);
+				this.rtcEngine.enableSpeaker(this.speaker);
 			},
 			customFocusClick() {
-				RCRTCEngine.setCameraFocusPositionInPreview(0.5, 0.5);
+				this.rtcEngine.setCameraFocusPositionInPreview(0.5, 0.5);
 			},
 			showFpsList() {
 				this.$refs.fpsList.show();
@@ -630,12 +706,12 @@
 					title: '加载中...',
 				});
 				if (this.isPublishCustomStream) {
-					let publishCode = RCRTCEngine.unpublishCustomStream(this.getCustomTag());
+					let publishCode = this.rtcEngine.unpublishCustomStream(this.getCustomTag());
 					if (publishCode === 0) {
 						console.log('接口调用成功');
 					}
 				} else {
-					let code = RCRTCEngine.createCustomStreamFromFile(path, this.getCustomTag(), false, true);
+					let code = this.rtcEngine.createCustomStreamFromFile(path, this.getCustomTag(), false, true);
 					if (code === 0) {
 						console.log('创建自定义流成功');
 						this.isCreateCustomStream = true;
@@ -646,7 +722,7 @@
 						})
 						return;
 					}
-					let publishCode = RCRTCEngine.publishCustomStream(this.getCustomTag());
+					let publishCode = this.rtcEngine.publishCustomStream(this.getCustomTag());
 					if (publishCode === 0) {
 						console.log('接口调用成功');
 					}
@@ -655,7 +731,7 @@
 			setCustomVideoView() {
 				// 调用自组建的方法，获取组件内部的原生窗口 ref
 				let ref = this.$refs.customStreamView.getVideoViewRef();
-				RCRTCEngine.setLocalCustomStreamView(this.getCustomTag(), ref, code => {
+				this.rtcEngine.setLocalCustomStreamView(this.getCustomTag(), ref, code => {
 					if (code === 0) {
 						console.log('设置customVideoView成功');
 					} else {
@@ -668,7 +744,7 @@
 			},
 			removeCustomVideoView() {
 				let ref = this.$refs.customStreamView.getVideoViewRef();
-				RCRTCEngine.removeLocalCustomStreamView(this.getCustomTag(), code => {
+				this.rtcEngine.removeLocalCustomStreamView(this.getCustomTag(), code => {
 					if (code === 0) {
 						console.log('移除customVideoView成功');
 					} else {
@@ -684,7 +760,7 @@
 			},
 			setCustomVideoConfig(config) {
 				console.log(config);
-				RCRTCEngine.setCustomStreamVideoConfig(this.getCustomTag(), config);
+				this.rtcEngine.setCustomStreamVideoConfig(this.getCustomTag(), config);
 			},
 
 			/* 菜单栏操作 */
@@ -695,6 +771,14 @@
 			},
 
 			cdnClick() {
+				if (!this.publishVideo) {
+					uni.showToast({
+						icon: 'none',
+						title: '需要先发布视频',
+						duration: 2000
+					});
+					return;
+				}
 				uni.navigateTo({
 					url: `./cdnConfig`
 				});
@@ -753,7 +837,7 @@
 						maxBitrate: this.maxVideoKbps[this.currentMaxVideoKbpsIndex],
 					};
 				}
-				RCRTCEngine.setVideoConfig(config, this.isShowTiny);
+				this.rtcEngine.setVideoConfig(config, this.isShowTiny);
 			},
 
 			updateJoinableSubRooms() {
@@ -777,7 +861,7 @@
 					});
 					return;
 				}
-				let users = this.usersInfo;
+				let users = getApp().globalData.roomUsers;
 				let index = users.findIndex(user => user.userId === userId);
 				if (index === -1) return;
 				let user = users[index];
@@ -822,7 +906,7 @@
 					});
 					return;
 				}
-				let users = this.usersInfo;
+				let users = getApp().globalData.roomUsers;
 				let index = users.findIndex(user => user.userId === userId);
 				if (index === -1) return;
 				let user = users[index];
@@ -914,7 +998,7 @@
 				} else {
 					this.initialConfig();
 					// 将本地用户保存
-					this.usersInfo.push({ userId: this.localUserId, tag: null, customs:[] });
+					getApp().globalData.roomUsers.push({ userId: this.localUserId, tag: null, customs:[] });
 				}
 			},
 
@@ -963,71 +1047,31 @@
 			},
 
 			onUserJoinedCallback(res) {
-				console.log('host OnUserJoined', res);
-				let { userId, roomId } = res;
-				// 添加用户
-				let user = {
-					roomId,
-					userId,
-					isPublishAudio: false,
-					isPublishVideo: false,
-					isSubscribedVideo: false,
-					isSubscribedAudio: false,
-					videoStats: null,
-					// customs 内部保存的是 
-					// {tag: null,
-					// isPublishAudio: false,
-					// isPublishVideo: false,
-					// isSubscribedVideo: false,
-					// isSubscribedAudio: false,
-					// videoStats: null,}
-					customs: [],
-				};
-				let users = this.usersInfo;
-				let findIndex = users.findIndex(user => user.userId === userId);
-				if (findIndex === -1) {
-					users.push(user);
-				}
-				if (roomId != this.roomId) {
-					//更新跨房间的用户信息
-					let joinedSubRooms = this.getGlobalData().joinedSubRooms;
-					if (!joinedSubRooms.includes(roomId)) {
-						joinedSubRooms.push(roomId);
-					}
-					this.updateJoinableSubRooms();
-				}
+				console.log('onUserJoinedCallback------',res)
+				this.usersInfo = getApp().globalData.roomUsers
+				// this.userJoined(res)
+				
 			},
 			onUserLeftCallback(res) {
-				console.log('host OnUserLeft', res);
-				let { userId, roomId } = res;
-				let users = this.usersInfo;
-				let findIndex = users.findIndex(user => user.userId === userId);
-				if (findIndex != -1) {
-					users.splice(findIndex, 1);
-				}
-				// 处理子房间用户的离开
-				// let joinedSubRooms = this.getGlobalData().joinedSubRooms;
-				// let joinedIndex = joinedSubRooms.indexOf(roomId);
-				// joinedSubRooms.splice(joinedIndex, 1);
-				// this.updateJoinableSubRooms();
+				this.usersInfo = getApp().globalData.roomUsers
+				// this.userLeft(res)
+
 			},
 			onUserOfflineCallback(res) {
-				console.log('host OnUserOffline', res);
-				let { userId, roomId } = res;
-				let users = this.usersInfo;
-				let findIndex = users.findIndex(user => user.userId === userId);
-				if (findIndex != -1) {
-					users.splice(findIndex, 1);
-				}
+				this.usersInfo = getApp().globalData.roomUsers
+				// this.userOffline(res)
+				
 			},
 			onRemotePublishedCallback(res) {
-				let { userId, roomId, type } = res;
-				this.updateUserPublishedState(userId, type, true);
+				this.usersInfo = getApp().globalData.roomUsers;
+				// this.remotePublished(res)
+				
 			},
 
 			onRemoteUnpublishedCallback(res) {
-				let { userId, roomId, type } = res;
-				this.updateUserPublishedState(userId, type, false);
+				this.usersInfo = getApp().globalData.roomUsers;
+				// this.remoteUnpublished(res)
+				
 			},
 
 			onSubscribedCallback(res) {
@@ -1054,12 +1098,13 @@
 						title: `发布失败：${code}-${message}`
 					});
 				}
-				// 更新保存的用户
-				let users = this.usersInfo;
-				let index = users.findIndex(user => user.userId === this.localUserId);
-				let user = users[index];
-				user.tag = tag;
-				users.splice(index, 1, user);
+				this.usersInfo = getApp().globalData.roomUsers;
+				// // 更新保存的用户
+				// let users = getApp().globalData.roomUsers;
+				// let index = users.findIndex(user => user.userId === this.localUserId);
+				// let user = users[index];
+				// user.tag = tag;
+				// users.splice(index, 1, user);
 
 			},
 
@@ -1075,12 +1120,13 @@
 						title: `取消发布失败：${code}-${message}`
 					});
 				}
-				// 更新保存的用户
-				let users = this.usersInfo;
-				let userIndex = users.findIndex(user => user.userId === this.localUserId);
-				let user = users[userIndex];
-				user.tag = null;
-				users.splice(userIndex, 1, user);
+				this.usersInfo = getApp().globalData.roomUsers;
+				// // 更新保存的用户
+				// let users = getApp().globalData.roomUsers;
+				// let userIndex = users.findIndex(user => user.userId === this.localUserId);
+				// let user = users[userIndex];
+				// user.tag = null;
+				// users.splice(userIndex, 1, user);
 			},
 
 			onRemoteCustomStreamPublishedCallback(res) {
@@ -1129,7 +1175,7 @@
 				let { roomId, userId, code, agree, message } = res;
 				if (agree) {
 					if (code === 0) {
-						RCRTCEngine.joinSubRoom(roomId);
+						this.rtcEngine.joinSubRoom(roomId);
 					} else {
 						uni.showToast({
 							icon: 'none',
@@ -1150,9 +1196,9 @@
 					success: res => {
 						console.log(res);
 						if (res.confirm) {
-							RCRTCEngine.responseJoinSubRoomRequest(roomId, userId, true, true);
+							this.rtcEngine.responseJoinSubRoomRequest(roomId, userId, true, true);
 						} else if (res.cancel) {
-							RCRTCEngine.responseJoinSubRoomRequest(roomId, userId, false, true);
+							this.rtcEngine.responseJoinSubRoomRequest(roomId, userId, false, true);
 						}
 					},
 				});
@@ -1169,7 +1215,7 @@
 			onJoinSubRoomRequestResponseReceivedCallback(res) {
 				let { roomId, userId, agree, extra } = res;
 				if (agree) {
-					RCRTCEngine.joinSubRoom(roomId);
+					this.rtcEngine.joinSubRoom(roomId);
 				} else {
 					uni.showToast({
 						icon: 'none',
@@ -1264,27 +1310,98 @@
 			},
 
 			onRemoteVideoStatsCallback(res) {
-				let { userId, roomId, stats } = res;
-				let users = this.usersInfo;
-				let index = users.findIndex(user => user.userId === userId);
-				if (index === -1) return;
-				let user = users[index];
-				user.videoStats = stats;
-				users.splice(index, 1, user);
+				this.usersInfo = getApp().globalData.roomUsers;
+				// let { userId, roomId, stats } = res;
+				// let users = getApp().globalData.roomUsers;
+				// let index = users.findIndex(user => user.userId === userId);
+				// if (index === -1) return;
+				// let user = users[index];
+				// user.videoStats = stats;
+				// users.splice(index, 1, user);
 			},
 
 			onRemoteCustomVideoStatsCallback(res) {
-				let { userId, roomId, tag, stats } = res;
-				let users = this.usersInfo;
-				let index = users.findIndex(user => user.userId === userId);
-				if (index === -1) return;
-				let user = users[index];
-				let custom = user.customs.find(item => item.tag === tag);
-				if (custom) {
-					custom.videoStats = stats;
-				}
-				users.splice(index, 1, user);
+				this.usersInfo = getApp().globalData.roomUsers;
+				// let { userId, roomId, tag, stats } = res;
+				// let users = getApp().globalData.roomUsers;
+				// let index = users.findIndex(user => user.userId === userId);
+				// if (index === -1) return;
+				// let user = users[index];
+				// let custom = user.customs.find(item => item.tag === tag);
+				// if (custom) {
+				// 	custom.videoStats = stats;
+				// }
+				// users.splice(index, 1, user);
 			},
+			
+			onLiveMixInnerCdnStreamEnabledCallback(res) {
+				console.log('onLiveMixInnerCdnStreamEnabledCallback---',res)
+				if (res.code == 0){
+					this.cdnChecked = !this.cdnChecked
+				}else {
+					console.log('res.code != 0')
+					uni.showToast({
+						title: 'code:' + res.code,
+						icon: 'error'
+					});
+				}
+			},
+			onLiveRoleSwitchedCallback(res){
+				console.log('onLiveRoleSwitchedCallback---',res)
+				uni.$off("IRCRTCIWListener:onLiveRoleSwitched");
+				let roomSetup = {
+					type: JSON.parse(this.tempRoomSetup).type,
+					role: 1,
+				};
+				uni.redirectTo({url:`../audience/audience?isSwitchLiveRole=true&roomId=${this.roomId}&roomSetup=${JSON.stringify(roomSetup)}&userId=${this.localUserId}&enableTinyStream=${this.enableTinyStream}`})
+			},
+			onRemoteLiveRoleSwitchedCallback(res){
+				this.usersInfo = getApp().globalData.roomUsers
+				console.log('onRemoteLiveRoleSwitchedCallback---',res)
+			},
+			
+			// 打开窗口
+			showDrawer(e) {
+				this.$refs[e].open()
+			},
+			// 关闭窗口
+			closeDrawer(e) {
+				this.$refs[e].close()
+			},
+			// 抽屉状态发生变化触发
+			change(e, type) {
+				console.log((type === 'showLeft' ? '左窗口' : '右窗口') + (e ? '打开' : '关闭'));
+				this[type] = e
+			},
+			cdnMentionClick(){
+				console.log('cdnMentionClick-this.cdnChange---',!this.cdnChecked)
+				if (!this.publishVideo) {
+					uni.showToast({
+						icon:"none",
+						title: '需要先发布视频',
+						duration: 2000
+					})
+					return
+				}
+				let code = this.rtcEngine.enableLiveMixInnerCdnStream(!this.cdnChecked)
+				if (code != 0) {
+					uni.showToast({
+						title: 'code:' + code,
+						icon: 'error'
+					})
+				}
+			},
+			setWatermark(){
+				uni.navigateTo({url: './watermark'})
+			},
+			seiPage(){
+				uni.navigateTo({url: './sei'})
+			},
+			changeRole(){
+				let code = this.rtcEngine.switchLiveRole(2)
+				// uni.redirectTo({url:`../audience/audience?isSwitchLiveRole=true&roomId=${this.roomId}&roomSetup=${this.tempRoomSetup}`})
+			}
+			
 		}
 	}
 </script>
@@ -1375,5 +1492,39 @@
 		top: 10rpx;
 		right: 10rpx;
 		padding: 20rpx;
+	}
+	
+	.scroll-view {
+		/* #ifndef APP-NVUE */
+		width: 100%;
+		height: 100%;
+		/* #endif */
+		flex:1
+	}
+	// 处理抽屉内容滚动
+	.scroll-view-box {
+		flex: 1;
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+	}
+	
+	.info-content {
+		padding: 5px;
+	}
+	
+	.btnItem {
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
+		align-items: center;
+	}
+	
+	.setText {
+		font-size: 16px;
+		color: #666;
+		padding: 10px;
 	}
 </style>

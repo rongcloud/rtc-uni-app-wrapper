@@ -1,3 +1,11 @@
+## 5.2.5（2022-10-17）
+1.生命周期更改
+2.新增功能
+1)新增水印功能
+2)新增融云内置 CDN 功能
+3)新增网络检测、麦克风检测功能
+4)新增房间内主播观众角色切换功能
+5)新增 sei 功能
 ## 5.1.17（2022-03-22）
 1.修改onEnableCamera回调接口为onCameraEnabled
 2.修改onSwitchCamera回调接口为onCameraSwitched

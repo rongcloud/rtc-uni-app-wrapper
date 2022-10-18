@@ -29,16 +29,17 @@
                     "<uses-permission android:name=\"android.permission.ACCESS_WIFI_STATE\"/>",
                     "<uses-permission android:name=\"android.permission.CAMERA\"/>",
                     "<uses-permission android:name=\"android.permission.CHANGE_NETWORK_STATE\"/>",
-                    "<uses-permission android:name=\"android.permission.CHANGE_WIFI_STATE\"/>",
                     "<uses-permission android:name=\"android.permission.FLASHLIGHT\"/>",
                     "<uses-permission android:name=\"android.permission.GET_ACCOUNTS\"/>",
                     "<uses-permission android:name=\"android.permission.MODIFY_AUDIO_SETTINGS\"/>",
                     "<uses-permission android:name=\"android.permission.MOUNT_UNMOUNT_FILESYSTEMS\"/>",
+                    "<uses-permission android:name=\"android.permission.READ_EXTERNAL_STORAGE\"/>",
                     "<uses-permission android:name=\"android.permission.READ_LOGS\"/>",
                     "<uses-permission android:name=\"android.permission.READ_PHONE_STATE\"/>",
                     "<uses-permission android:name=\"android.permission.RECORD_AUDIO\"/>",
                     "<uses-permission android:name=\"android.permission.VIBRATE\"/>",
                     "<uses-permission android:name=\"android.permission.WAKE_LOCK\"/>",
+                    "<uses-permission android:name=\"android.permission.WRITE_EXTERNAL_STORAGE\"/>",
                     "<uses-permission android:name=\"android.permission.WRITE_SETTINGS\"/>"
                 ],
                 "minSdkVersion" : 21
@@ -74,20 +75,6 @@
                     "parameters" : {}
                 }
             },
-            "RongCloud-RTC" : {
-                "__plugin_info__" : {
-                    "name" : "RCUniRtc",
-                    "description" : "融云 RTC SDK uni-app 原生插件",
-                    "platforms" : "Android,iOS",
-                    "url" : "https://ext.dcloud.net.cn/plugin?id=7418",
-                    "android_package_name" : "cn.rongcloud.rtc.uni.example",
-                    "ios_bundle_id" : "cn.rongcloud.rtc.uni.example",
-                    "isCloud" : true,
-                    "bought" : 1,
-                    "pid" : "7418",
-                    "parameters" : {}
-                }
-            },
             "RongCloud-Beauty" : {
                 "__plugin_info__" : {
                     "name" : "RCUniBeauty",
@@ -102,20 +89,6 @@
                     "parameters" : {}
                 }
             },
-            "RongCloud-IM" : {
-                "__plugin_info__" : {
-                    "name" : "RCUniIM",
-                    "description" : "融云即时通讯 SDK uni 原生插件",
-                    "platforms" : "Android,iOS",
-                    "url" : "https://ext.dcloud.net.cn/plugin?id=6120",
-                    "android_package_name" : "cn.rongcloud.rtc.uni.example",
-                    "ios_bundle_id" : "cn.rongcloud.rtc.uni.example",
-                    "isCloud" : true,
-                    "bought" : 1,
-                    "pid" : "6120",
-                    "parameters" : {}
-                }
-            },
             "RongCloud-FUBeauty" : {
                 "__plugin_info__" : {
                     "name" : "RCUniFUBeauty",
@@ -127,6 +100,34 @@
                     "isCloud" : true,
                     "bought" : 1,
                     "pid" : "8349",
+                    "parameters" : {}
+                }
+            },
+            "RongCloud-IM-V2" : {
+                "__plugin_info__" : {
+                    "name" : "RCUniIMV2",
+                    "description" : "融云即时通讯 SDK uni 原生插件V2",
+                    "platforms" : "Android,iOS",
+                    "url" : "https://ext.dcloud.net.cn/plugin?id=9227",
+                    "android_package_name" : "cn.rongcloud.rtc.uni.example",
+                    "ios_bundle_id" : "cn.rongcloud.rtc.uni.example",
+                    "isCloud" : true,
+                    "bought" : 1,
+                    "pid" : "9227",
+                    "parameters" : {}
+                }
+            },
+            "RongCloud-RTC" : {
+                "__plugin_info__" : {
+                    "name" : "RCUniRtc",
+                    "description" : "Rongcloud RTCLib sdk for uni-app",
+                    "platforms" : "Android,iOS",
+                    "url" : "",
+                    "android_package_name" : "",
+                    "ios_bundle_id" : "",
+                    "isCloud" : false,
+                    "bought" : -1,
+                    "pid" : "",
                     "parameters" : {}
                 }
             }

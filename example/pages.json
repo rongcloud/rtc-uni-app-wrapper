@@ -32,15 +32,15 @@
 				"app-plus": {
 					"popGesture": "none",
 					"titleNView": {
-						"buttons": [ //原生标题栏按钮配置,
-							{ //原生标题栏增加分享按钮，点击事件可通过页面的 onNavigationBarButtonTap 函数进行监听
-								"text": "💬",
-								"fontSize": "14"
-							}
-						],
-						"backButton": { //自定义 backButton
-							"background": "#FFFFFF"
-						}
+						// "buttons": [ //原生标题栏按钮配置,
+						// 	{ //原生标题栏增加分享按钮，点击事件可通过页面的 onNavigationBarButtonTap 函数进行监听
+						// 		"text": "💬",
+						// 		"fontSize": "14"
+						// 	}
+						// ],
+						// "backButton": { //自定义 backButton
+						// 	"background": "#FFFFFF"
+						// }
 					}
 				}
 			}
@@ -95,7 +95,43 @@
 				"enablePullDownRefresh": false
 			}
 		}
-	],
+	    ,{
+            "path" : "pages/NetworkProbe",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "网络探测",
+                "enablePullDownRefresh": false
+            }
+            
+        }
+        ,{
+            "path" : "pages/host/watermark",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "设置水印",
+                "enablePullDownRefresh": false
+            }
+            
+        }
+        ,{
+            "path" : "pages/MicrophoneDetection",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "麦克风&扬声器检测",
+                "enablePullDownRefresh": false
+            }
+            
+        }
+        ,{
+            "path" : "pages/host/sei",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "SEI功能配置",
+                "enablePullDownRefresh": false
+            }
+            
+        }
+    ],
 	"globalStyle": {
 		"navigationBarTextStyle": "white",
 		"navigationBarTitleText": "RTC-RN-TEST-DEMO",

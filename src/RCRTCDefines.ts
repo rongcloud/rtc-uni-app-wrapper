@@ -2,7 +2,6 @@
  * 引擎初始配置
  */
 export interface RCRTCEngineSetup {
-
     /**
      * 连接断开后是否 SDK 内部重连
      * 默认: false 不重连
@@ -36,7 +35,6 @@ export interface RCRTCEngineSetup {
  * 音频配置
  */
 export interface RCRTCAudioSetup {
-
     /**
      * 音频编译类型
      * 默认: RCRTCIWAudioCodecTypeOPUS
@@ -100,7 +98,6 @@ export interface RCRTCVideoSetup {
  * 房间配置
  */
 export interface RCRTCRoomSetup {
-
     /**
      * 音视频类型
      * 默认 AudioVideo
@@ -118,7 +115,6 @@ export interface RCRTCRoomSetup {
  * 音频配置
  */
 export interface RCRTCAudioConfig {
-
     /**
      * 音频通话质量类型
      * 默认值：Speech
@@ -136,7 +132,6 @@ export interface RCRTCAudioConfig {
  * 视频配置
  */
 export interface RCRTCVideoConfig {
-
     /**
      * 视频最小码率, 默认值: 0
      */
@@ -164,7 +159,6 @@ export interface RCRTCVideoConfig {
 }
 
 export interface RCRTCCustomLayout {
-
     /**
      * 流类型, 默认: Normal
      */
@@ -290,17 +284,13 @@ export interface RCRTCLocalVideoStats {
     rtt: number;
 }
 
-export interface RCRTCRemoteAudioStats extends RCRTCLocalAudioStats {
-    
-}
+export interface RCRTCRemoteAudioStats extends RCRTCLocalAudioStats {}
 
 /**
  * Omit<RCRTCLocalVideoStats, 'tiny'>： 去除 tiny 属性，生成一个新类型
  * RCRTCRemoteVideoStats 包含 RCRTCLocalVideoStats 中除了 tiny 之外的所有属性，
  */
-export interface RCRTCRemoteVideoStats extends Omit<RCRTCLocalVideoStats, 'tiny'> {
-    
-}
+export interface RCRTCRemoteVideoStats extends Omit<RCRTCLocalVideoStats, 'tiny'> {}
 
 export type BaseCallback<T> = (result: T) => void;
 
@@ -627,7 +617,7 @@ export interface OnRemotePublishedResult {
  * 远端用户取消发布资源操作回调参数
  * @param userId 远端用户 userId
  * @param roomId 房间 id
- * @param type 媒体类型 
+ * @param type 媒体类型
  */
 export interface OnRemoteUnpublishedResult {
     userId: string;
@@ -692,9 +682,9 @@ export interface OnRemoteLiveMixFirstFrameResult {
  * @param message
  */
 export interface OnCustomStreamPublishedResult {
-    tag: string,
-    code: number,
-    message: string,
+    tag: string;
+    code: number;
+    message: string;
 }
 
 /**
@@ -704,9 +694,9 @@ export interface OnCustomStreamPublishedResult {
  * @param message
  */
 export interface OnCustomStreamUnpublishedResult {
-    tag: string,
-    code: number,
-    message: string,
+    tag: string;
+    code: number;
+    message: string;
 }
 
 /**
@@ -714,7 +704,7 @@ export interface OnCustomStreamUnpublishedResult {
  * @param tag
  */
 export interface OnCustomStreamPublishFinishedResult {
-    tag: string,
+    tag: string;
 }
 
 /**
@@ -725,10 +715,10 @@ export interface OnCustomStreamPublishFinishedResult {
  * @param type
  */
 export interface OnRemoteCustomStreamPublishedResult {
-    roomId: string,
-    userId: string,
-    tag: string,
-    type: RCRTCMediaType
+    roomId: string;
+    userId: string;
+    tag: string;
+    type: RCRTCMediaType;
 }
 
 /**
@@ -739,10 +729,10 @@ export interface OnRemoteCustomStreamPublishedResult {
  * @param type
  */
 export interface OnRemoteCustomStreamUnpublishedResult {
-    roomId: string,
-    userId: string,
-    tag: string,
-    type: RCRTCMediaType
+    roomId: string;
+    userId: string;
+    tag: string;
+    type: RCRTCMediaType;
 }
 
 /**
@@ -755,11 +745,11 @@ export interface OnRemoteCustomStreamUnpublishedResult {
  *
  */
 export interface OnRemoteCustomStreamStateChangedResult {
-    roomId: string,
-    userId: string,
-    tag: string,
-    type: RCRTCMediaType,
-    disabled: boolean,
+    roomId: string;
+    userId: string;
+    tag: string;
+    type: RCRTCMediaType;
+    disabled: boolean;
 }
 
 /**
@@ -770,10 +760,10 @@ export interface OnRemoteCustomStreamStateChangedResult {
  * @param type
  */
 export interface OnRemoteCustomStreamFirstFrameResult {
-    roomId: string,
-    userId: string,
-    tag: string,
-    type: RCRTCMediaType,
+    roomId: string;
+    userId: string;
+    tag: string;
+    type: RCRTCMediaType;
 }
 
 /**
@@ -785,11 +775,11 @@ export interface OnRemoteCustomStreamFirstFrameResult {
  * @param message
  */
 export interface OnCustomStreamSubscribedResult {
-    userId: string,
-    tag: string,
-    type: RCRTCMediaType,
-    code: number,
-    message: string,
+    userId: string;
+    tag: string;
+    type: RCRTCMediaType;
+    code: number;
+    message: string;
 }
 
 /**
@@ -801,11 +791,11 @@ export interface OnCustomStreamSubscribedResult {
  * @param message
  */
 export interface OnCustomStreamUnsubscribedResult {
-    userId: string,
-    tag: string,
-    type: RCRTCMediaType,
-    code: number,
-    message: string,
+    userId: string;
+    tag: string;
+    type: RCRTCMediaType;
+    code: number;
+    message: string;
 }
 
 /**
@@ -816,10 +806,10 @@ export interface OnCustomStreamUnsubscribedResult {
  * @param message
  */
 export interface OnJoinSubRoomRequestedResult {
-    roomId: string,
-    userId: string,
-    code: number,
-    message: string,
+    roomId: string;
+    userId: string;
+    code: number;
+    message: string;
 }
 
 /**
@@ -830,10 +820,10 @@ export interface OnJoinSubRoomRequestedResult {
  * @param message
  */
 export interface OnJoinSubRoomRequestCanceledResult {
-    roomId: string,
-    userId: string,
-    code: number,
-    message: string,
+    roomId: string;
+    userId: string;
+    code: number;
+    message: string;
 }
 
 /**
@@ -845,11 +835,11 @@ export interface OnJoinSubRoomRequestCanceledResult {
  * @param message
  */
 export interface OnJoinSubRoomRequestRespondedResult {
-    roomId: string,
-    userId: string,
-    agree: boolean,
-    code: number,
-    message: string,
+    roomId: string;
+    userId: string;
+    agree: boolean;
+    code: number;
+    message: string;
 }
 
 /**
@@ -859,9 +849,9 @@ export interface OnJoinSubRoomRequestRespondedResult {
  * @param extra
  */
 export interface OnJoinSubRoomRequestReceivedResult {
-    roomId: string,
-    userId: string,
-    extra: string,
+    roomId: string;
+    userId: string;
+    extra: string;
 }
 
 /**
@@ -871,9 +861,9 @@ export interface OnJoinSubRoomRequestReceivedResult {
  * @param extra
  */
 export interface OnCancelJoinSubRoomRequestReceivedResult {
-    roomId: string,
-    userId: string,
-    extra: string,
+    roomId: string;
+    userId: string;
+    extra: string;
 }
 
 /**
@@ -884,10 +874,10 @@ export interface OnCancelJoinSubRoomRequestReceivedResult {
  * @param extra
  */
 export interface OnJoinSubRoomRequestResponseReceivedResult {
-    roomId: string,
-    userId: string,
-    agree: boolean,
-    extra: string,
+    roomId: string;
+    userId: string;
+    agree: boolean;
+    extra: string;
 }
 
 /**
@@ -897,9 +887,9 @@ export interface OnJoinSubRoomRequestResponseReceivedResult {
  * @param message
  */
 export interface OnSubRoomJoinedResult {
-    roomId: string,
-    code: number,
-    message: string,
+    roomId: string;
+    code: number;
+    message: string;
 }
 /**
  * 离开子房间回调参数
@@ -908,16 +898,16 @@ export interface OnSubRoomJoinedResult {
  * @param message
  */
 export interface OnSubRoomLeftResult {
-    roomId: string,
-    code: number,
-    message: string,
+    roomId: string;
+    code: number;
+    message: string;
 }
 /**
  * 连麦中的子房间回调参数
  * @param roomId
  */
 export interface OnSubRoomBandedResult {
-    roomId: string,
+    roomId: string;
 }
 /**
  * 子房间结束连麦回调参数
@@ -925,10 +915,9 @@ export interface OnSubRoomBandedResult {
  * @param userId
  */
 export interface OnSubRoomDisbandResult {
-    roomId: string,
-    userId: string,
+    roomId: string;
+    userId: string;
 }
-
 
 /**
  * 远端音频统计信息回调参数
@@ -940,7 +929,7 @@ export interface OnSubRoomDisbandResult {
 export interface OnRemoteAudioStatsResult {
     roomId: string;
     userId: string;
-    stats: RCRTCRemoteAudioStats
+    stats: RCRTCRemoteAudioStats;
 }
 
 /**
@@ -953,7 +942,7 @@ export interface OnRemoteAudioStatsResult {
 export interface OnRemoteVideoStatsResult {
     roomId: string;
     userId: string;
-    stats: RCRTCRemoteVideoStats
+    stats: RCRTCRemoteVideoStats;
 }
 
 export interface OnLiveMixMemberAudioStatsResult {
@@ -981,14 +970,39 @@ export interface OnRemoteCustomAudioStatsResult {
     roomId: string;
     userId: string;
     tag: string;
-    stats: RCRTCRemoteAudioStats
+    stats: RCRTCRemoteAudioStats;
 }
 
 export interface OnRemoteCustomVideoStatsResult {
     roomId: string;
     userId: string;
     tag: string;
-    stats: RCRTCRemoteVideoStats
+    stats: RCRTCRemoteVideoStats;
+}
+
+export interface OnNetworkProbeFinishedResult {
+    i: number;
+    s: string;
+}
+
+export interface OnNetworkProbeUpLinkStatsResult {
+    stats: RCRTCNetworkProbeStats;
+}
+
+export interface OnNetworkProbeDownLinkStatsResult {
+    stats: RCRTCNetworkProbeStats;
+}
+
+export interface OnLiveRoleSwitchedResult {
+    current: RCRTCRole;
+    code: number;
+    errMsg: string;
+}
+
+export interface OnRemoteLiveRoleSwitchedResult {
+    roomId: string;
+    userId: string;
+    role: RCRTCRole;
 }
 
 /** 以下是枚举值的定义 */
@@ -1043,7 +1057,7 @@ export enum RCRTCAudioSampleRate {
     Type8000 = 8000,
     Type16000 = 16000,
     Type32000 = 32000,
-    Type44100 = 44100, 
+    Type44100 = 44100,
     Type48000 = 48000,
 }
 
@@ -1054,11 +1068,11 @@ export enum RCRTCMediaType {
     /**
      * 仅音频
      */
-    Audio = 0, 
+    Audio = 0,
     /**
      * 仅视频
      */
-    Video,          
+    Video,
     /**
      * 音频 + 视频
      */
@@ -1068,15 +1082,15 @@ export enum RCRTCMediaType {
 /**
  * 角色类型
  */
-export enum RCRTCRole {          
+export enum RCRTCRole {
     /**
      * 会议类型房间中用户
      */
-    MeetingMember = 0,          
+    MeetingMember = 0,
     /**
      * 直播类型房间中主播
      */
-    LiveBroadcaster,          
+    LiveBroadcaster,
     /**
      * 直播类型房间中观众
      */
@@ -1087,7 +1101,6 @@ export enum RCRTCRole {
  * 音频通话质量类型
  */
 export enum RCRTCAudioQuality {
-
     /**
      * 人声音质，编码码率最大值为 32Kbps
      */
@@ -1108,7 +1121,6 @@ export enum RCRTCAudioQuality {
  * 音频通话模式
  */
 export enum RCRTCAudioScenario {
-    
     /**
      * 普通通话模式(普通音质模式), 满足正常音视频场景
      */
@@ -1129,7 +1141,6 @@ export enum RCRTCAudioScenario {
  * 视频帧率
  */
 export enum RCRTCVideoFps {
-    
     /**
      * 每秒 10 帧
      */
@@ -1178,7 +1189,6 @@ export enum RCRTCVideoResolution {
  * 视频填充模式
  */
 export enum RCRTCViewFitType {
-
     /**
      * 满屏显示, 等比例填充, 直到填充满整个视图区域, 其中一个维度的部分区域会被裁剪
      */
@@ -1194,7 +1204,6 @@ export enum RCRTCViewFitType {
  * 摄像头类型
  */
 export enum RCRTCCamera {
-
     /**
      * 无
      */
@@ -1215,7 +1224,6 @@ export enum RCRTCCamera {
  * 摄像头采集方向
  */
 export enum RCRTCCameraCaptureOrientation {
-
     /**
      * 竖直, home 键在下部
      */
@@ -1241,7 +1249,6 @@ export enum RCRTCCameraCaptureOrientation {
  * 合流布局模式
  */
 export enum RCRTCLiveMixLayoutMode {
-
     /**
      * 自定义布局
      */
@@ -1262,7 +1269,6 @@ export enum RCRTCLiveMixLayoutMode {
  * 输出视频流的裁剪模式
  */
 export enum RCRTCLiveMixRenderMode {
-
     /**
      * 自适应裁剪
      */
@@ -1278,7 +1284,6 @@ export enum RCRTCLiveMixRenderMode {
  *  混音行为模式
  */
 export enum RCRTCAudioMixingMode {
-
     /**
      * 对端只能听见麦克风采集的声音
      */
@@ -1292,7 +1297,7 @@ export enum RCRTCAudioMixingMode {
     /**
      * 对端只能听到音频文件的声音
      */
-    Replace, 
+    Replace,
 }
 
 export enum RCRTCNetworkType {
@@ -1302,7 +1307,7 @@ export enum RCRTCNetworkType {
 }
 
 export enum RCRTCVideoCodecType {
-    H264
+    H264,
 }
 
 /**
@@ -1413,4 +1418,166 @@ export enum RCRTCStatsEventsName {
     OnLocalCustomVideoStats = 'OnLocalCustomVideoStats',
     OnRemoteCustomAudioStats = 'OnRemoteCustomAudioStats',
     OnRemoteCustomVideoStats = 'OnRemoteCustomVideoStats',
+}
+
+export interface RCRTCNetworkProbeStats {
+    qualityLevel?: RCRTCNetworkQualityLevel;
+
+    rtt?: number;
+
+    packetLostRate?: number;
+}
+
+export enum RCRTCNetworkQualityLevel {
+    qualityExcellent = 0,
+    qualityGood = 1,
+    qualityPoor = 2,
+    qualityBad = 3,
+    qualityVeryBad = 4,
+    qualityDown = 5,
+}
+
+export enum RCRTCRole {
+    meetingMember = 0,
+    liveBroadcaster = 1,
+    liveAudience = 2,
+}
+
+/**
+ * 开启直播内置 cdn 结果回调
+ * @param enable    是否开启
+ * @param code      错误码
+ * @param errMsg    错误消息
+ */
+export interface OnLiveMixInnerCdnStreamEnabledResult {
+    enable: boolean;
+    code: number;
+    errMsg: string;
+}
+
+/**
+ * 直播内置 cdn 资源发布回调
+ */
+export interface OnRemoteLiveMixInnerCdnStreamPublishedResult {}
+
+/**
+ * 直播内置 cdn 资源取消发布回调
+ */
+export interface OnRemoteLiveMixInnerCdnStreamUnpublishedResult {}
+
+/**
+ * 订阅直播内置 cdn 资源回调
+ * @param code      错误码
+ * @param errMsg    错误消息
+ */
+export interface OnLiveMixInnerCdnStreamSubscribedResult {
+    code: number;
+    errMsg: string;
+}
+
+/**
+ * 取消订阅直播内置 cdn 资源回调
+ * @param code      错误码
+ * @param errMsg    错误消息
+ */
+export interface OnLiveMixInnerCdnStreamUnsubscribedResult {
+    code: number;
+    errMsg: string;
+}
+
+/**
+ * 观众端设置订阅 cdn 流的分辨率的回调
+ * @param code      错误码
+ * @param errMsg    错误消息
+ */
+export interface OnLocalLiveMixInnerCdnVideoResolutionSetResult {
+    code: number;
+    errMsg: string;
+}
+
+/**
+ * 观众端 设置订阅 cdn 流的帧率的回调
+ * @param code      错误码
+ * @param errMsg    错误消息
+ */
+export interface OnLocalLiveMixInnerCdnVideoFpsSetResult {
+    code: number;
+    errMsg: string;
+}
+
+/**
+ * 设置水印的回调
+ * @param code      错误码
+ * @param errMsg    错误消息
+ */
+export interface OnWatermarkSetResult {
+    code: number;
+    errMsg: string;
+}
+
+/**
+ * 移除水印的回调
+ * @param code      错误码
+ * @param errMsg    错误消息
+ */
+export interface OnWatermarkRemovedResult {
+    code: number;
+    errMsg: string;
+}
+
+/**
+ * 开启网络探测结果回调
+ * @param code      错误码
+ * @param errMsg    错误消息
+ */
+export interface OnNetworkProbeStartedResult {
+    code: number;
+    errMsg: string;
+}
+
+/**
+ * 关闭网络探测结果回调
+ * @param code      错误码
+ * @param errMsg    错误消息
+ */
+export interface OnNetworkProbeStoppedResult {
+    code: number;
+    errMsg: string;
+}
+
+/**
+ * 开启 SEI 功能结果回调
+ * @param enable 是否开启
+ * @param code      错误码
+ * @param errMsg    错误消息
+ */
+export interface OnSeiEnabledResult {
+    enable: boolean;
+    code: number;
+    errMsg: string;
+}
+
+/**
+ * 收到 SEI 信息回调
+ * @param roomId 房间 id
+ * @param userId 远端用户 id
+ * @param sei SEI 信息
+ */
+export interface OnSeiReceivedResult {
+    roomId: string;
+    userId: string;
+    sei: string;
+}
+
+/**
+ * 观众收到合流 SEI 信息回调
+ * @param sei SEI 信息
+ */
+export interface OnLiveMixSeiReceivedResult {
+    sei: string;
+}
+
+export interface OnNetworkProbeFinishedResult {
+    code: number;
+    errMsg: string;
 }

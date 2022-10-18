@@ -64,6 +64,7 @@
 	export default {
 		data() {
 			return {
+				rtcEngine: null,
 				audiosSrc: '/static/audio/music_0.mp3',
 				// 混音行为模式
 				modes: [{
@@ -91,9 +92,10 @@
 			}
 		},
 		onLoad() {
+			this.rtcEngine = getApp().globalData.rtcEngine;
 			this.addListeners();
 			// 设置混音输入音量, 包含本地播放和发送音量
-			RCRTCEngine.adjustAudioMixingVolume(50);
+			this.rtcEngine.adjustAudioMixingVolume(50);
 		},
 		onUnload() {
 			this.removeListeners();
@@ -140,19 +142,19 @@
 				this.localVolume = value;
 				this.publishVolume = value;
 				// 设置混音输入音量, 包含本地播放和发送音量
-				RCRTCEngine.adjustAudioMixingVolume(value);
+				this.rtcEngine.adjustAudioMixingVolume(value);
 			},
 			changeLocalVolume(e) {
 				let value = e.detail.value;
 				this.localVolume = value;
 				// 设置混音本地播放音量
-				RCRTCEngine.adjustAudioMixingPlaybackVolume(value);
+				this.rtcEngine.adjustAudioMixingPlaybackVolume(value);
 			},
 			changePublishVolume(e) {
 				let value = e.detail.value;
 				this.publishVolume = value;
 				// 设置混音发送音量
-				RCRTCEngine.adjustAudioMixingPublishVolume(value);
+				this.rtcEngine.adjustAudioMixingPublishVolume(value);
 			},
 			changeLoop() {
 				let value = e.detail.value;
@@ -160,16 +162,16 @@
 			},
 			play() {
 				let path = plus.io.convertLocalFileSystemURL(this.audiosSrc);
-				RCRTCEngine.startAudioMixing(path, this.mode, this.playback, this.loop);
+				this.rtcEngine.startAudioMixing(path, this.mode, this.playback, this.loop);
 			},
 			pause() {
-				RCRTCEngine.pauseAudioMixing();
+				this.rtcEngine.pauseAudioMixing();
 			},
 			resume() {
-				RCRTCEngine.resumeAudioMixing();
+				this.rtcEngine.resumeAudioMixing();
 			},
 			stop() {
-				RCRTCEngine.stopAudioMixing();
+				this.rtcEngine.stopAudioMixing();
 			},
 		}
 	}

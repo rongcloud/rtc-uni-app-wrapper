@@ -37,11 +37,11 @@
 </template>
 
 <script>
-	import RCRTCEngine from '@/uni_modules/RongCloud-RTCWrapper/lib/RCRTCEngine';
 
 	export default {
 		data() {
 			return {
+				rtcEngine: null,
 				effects: [{
 						name: '反派大笑',
 						volume: 50,
@@ -67,48 +67,49 @@
 			}
 		},
 		onLoad() {
+			this.rtcEngine = getApp().globalData.rtcEngine;
 			// 创建音效文件缓存
 			this.effects.forEach(effect => {
 				// 注意！！！ 需要将本地URL路径转换成平台绝对路径
 				let path = plus.io.convertLocalFileSystemURL(effect.src);
-				RCRTCEngine.createAudioEffect(path, effect.effectId);
+				this.rtcEngine.createAudioEffect(path, effect.effectId);
 			})
 		},
 		onBackPress() {
 			// 释放音效文件缓存
 			this.effects.forEach(effect => {
-				RCRTCEngine.releaseAudioEffect(effect.effectId);
+				this.rtcEngine.releaseAudioEffect(effect.effectId);
 			})
 		},
 		methods: {
 			play(index) {
 				let effect = this.effects[index];
 				let { effectId, volume, loop } = effect;
-				RCRTCEngine.playAudioEffect(effectId, volume, loop);
+				this.rtcEngine.playAudioEffect(effectId, volume, loop);
 			},
 			pause(index) {
 				let effect = this.effects[index];
 				let { effectId } = effect;
-				RCRTCEngine.pauseAudioEffect(effectId);
+				this.rtcEngine.pauseAudioEffect(effectId);
 			},
 			resume(index) {
 				let effect = this.effects[index];
 				let { effectId } = effect;
-				RCRTCEngine.resumeAudioEffect(effectId);
+				this.rtcEngine.resumeAudioEffect(effectId);
 			},
 			stop(index) {
 				let effect = this.effects[index];
 				let { effectId } = effect;
-				RCRTCEngine.stopAudioEffect(effectId);
+				this.rtcEngine.stopAudioEffect(effectId);
 			},
 			pauseAll() {
-				RCRTCEngine.pauseAllAudioEffects();
+				this.rtcEngine.pauseAllAudioEffects();
 			},
 			resumeAll() {
-				RCRTCEngine.resumeAllAudioEffects();
+				this.rtcEngine.resumeAllAudioEffects();
 			},
 			stopAll() {
-				RCRTCEngine.stopAllAudioEffects();
+				this.rtcEngine.stopAllAudioEffects();
 			},
 			changeVolume(e, index) {
 				let value = e.detail.value;

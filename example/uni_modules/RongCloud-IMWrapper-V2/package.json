@@ -1,12 +1,10 @@
 {
-  "id": "RongCloud-RTCWrapper",
-  "displayName": "RongCloud-RTCWrapper",
-  "version": "5.2.5",
-  "description": "融云实时音视频 SDK uni js层 插件, 需要依赖 RongCloud-RTC 原生插件",
+  "id": "RongCloud-IMWrapper-V2",
+  "displayName": "RongCloud-IMWrapper-V2",
+  "version": "5.2.4",
+  "description": "融云IM原生插件包装层",
   "keywords": [
-    "RongCloud",
-    "RTC",
-    "音视频"
+    "RongCloud-IMWrapper-V2"
 ],
   "repository": "",
   "engines": {

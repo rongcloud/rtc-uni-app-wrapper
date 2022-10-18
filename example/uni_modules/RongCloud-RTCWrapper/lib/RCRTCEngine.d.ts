@@ -1,8 +1,15 @@
-import { RCRTCAudioConfig, RCRTCCustomLayout, RCRTCEngineSetup, RCRTCLocalAudioStats, RCRTCLocalVideoStats, RCRTCNetworkStats, RCRTCRemoteAudioStats, RCRTCRemoteVideoStats, RCRTCRoomSetup, RCRTCVideoConfig, RCRTCAudioMixingMode, RCRTCCamera, RCRTCCameraCaptureOrientation, RCRTCLiveMixLayoutMode, RCRTCLiveMixRenderMode, RCRTCMediaType, RCRTCVideoFps, OnAudioEffectCreatedResult, OnAudioEffectFinishedResult, OnCancelJoinSubRoomRequestReceivedResult, OnCustomStreamPublishedResult, OnCustomStreamPublishFinishedResult, OnCustomStreamSubscribedResult, OnCustomStreamUnpublishedResult, OnCustomStreamUnsubscribedResult, OnCameraEnabledResult, OnErrorResult, OnJoinSubRoomRequestCanceledResult, OnJoinSubRoomRequestedResult, OnJoinSubRoomRequestReceivedResult, OnJoinSubRoomRequestRespondedResult, OnJoinSubRoomRequestResponseReceivedResult, OnKickedResult, OnLiveCdnAddedResult, OnLiveCdnRemovedResult, OnLiveMixAudioBitrateSetResult, OnLiveMixCustomAudiosSetResult, OnLiveMixCustomLayoutsSetResult, OnLiveMixLayoutModeSetResult, OnLiveMixMemberAudioStatsResult, OnLiveMixMemberCustomAudioStatsResult, OnLiveMixRenderModeSetResult, OnLiveMixSubscribedResult, OnLiveMixUnsubscribedResult, OnLiveMixVideoBitrateSetResult, OnLiveMixVideoFpsSetResult, OnLiveMixVideoResolutionSetResult, OnLocalCustomAudioStatsResult, OnLocalCustomVideoStatsResult, OnPublishedResult, OnRemoteAudioStatsResult, OnRemoteCustomAudioStatsResult, OnRemoteCustomStreamFirstFrameResult, OnRemoteCustomStreamPublishedResult, OnRemoteCustomStreamUnpublishedResult, OnRemoteCustomVideoStatsResult, OnRemoteFirstFrameResult, OnRemoteLiveMixFirstFrameResult, OnRemoteLiveMixPublishedResult, OnRemoteLiveMixUnpublishedResult, OnRemotePublishedResult, OnRemoteStateChangedResult, OnRemoteUnpublishedResult, OnRemoteVideoStatsResult, OnRoomJoinedResult, OnRoomLeftResult, OnSubRoomBandedResult, OnSubRoomDisbandResult, OnSubRoomJoinedResult, OnSubRoomLeftResult, OnSubscribedResult, OnCameraSwitchedResult, OnUnpublishedResult, OnUnsubscribedResult, OnUserJoinedResult, OnUserLeftResult, OnUserOfflineResult, OnRemoteCustomStreamStateChangedResult, BaseCallback, OnLiveMixBackgroundColorSetResult } from './RCRTCDefines';
+import { RCRTCAudioConfig, RCRTCCustomLayout, RCRTCEngineSetup, RCRTCLocalAudioStats, RCRTCLocalVideoStats, RCRTCNetworkStats, RCRTCRemoteAudioStats, RCRTCRemoteVideoStats, RCRTCRoomSetup, RCRTCVideoConfig, RCRTCAudioMixingMode, RCRTCCamera, RCRTCCameraCaptureOrientation, RCRTCLiveMixLayoutMode, RCRTCLiveMixRenderMode, RCRTCMediaType, OnAudioEffectCreatedResult, OnAudioEffectFinishedResult, OnCancelJoinSubRoomRequestReceivedResult, OnCustomStreamPublishedResult, OnCustomStreamPublishFinishedResult, OnCustomStreamSubscribedResult, OnCustomStreamUnpublishedResult, OnCustomStreamUnsubscribedResult, OnCameraEnabledResult, OnErrorResult, OnJoinSubRoomRequestCanceledResult, OnJoinSubRoomRequestedResult, OnJoinSubRoomRequestReceivedResult, OnJoinSubRoomRequestRespondedResult, OnJoinSubRoomRequestResponseReceivedResult, OnKickedResult, OnLiveCdnAddedResult, OnLiveCdnRemovedResult, OnLiveMixAudioBitrateSetResult, OnLiveMixCustomAudiosSetResult, OnLiveMixCustomLayoutsSetResult, OnLiveMixLayoutModeSetResult, OnLiveMixMemberAudioStatsResult, OnLiveMixMemberCustomAudioStatsResult, OnLiveMixRenderModeSetResult, OnLiveMixSubscribedResult, OnLiveMixUnsubscribedResult, OnLiveMixVideoBitrateSetResult, OnLiveMixVideoFpsSetResult, OnLiveMixVideoResolutionSetResult, OnLocalCustomAudioStatsResult, OnLocalCustomVideoStatsResult, OnPublishedResult, OnRemoteAudioStatsResult, OnRemoteCustomAudioStatsResult, OnRemoteCustomStreamFirstFrameResult, OnRemoteCustomStreamPublishedResult, OnRemoteCustomStreamUnpublishedResult, OnRemoteCustomVideoStatsResult, OnRemoteFirstFrameResult, OnRemoteLiveMixFirstFrameResult, OnRemoteLiveMixPublishedResult, OnRemoteLiveMixUnpublishedResult, OnRemotePublishedResult, OnRemoteStateChangedResult, OnRemoteUnpublishedResult, OnRemoteVideoStatsResult, OnRoomJoinedResult, OnRoomLeftResult, OnSubRoomBandedResult, OnSubRoomDisbandResult, OnSubRoomJoinedResult, OnSubRoomLeftResult, OnSubscribedResult, OnCameraSwitchedResult, OnUnpublishedResult, OnUnsubscribedResult, OnUserJoinedResult, OnUserLeftResult, OnUserOfflineResult, OnRemoteCustomStreamStateChangedResult, BaseCallback, OnLiveMixBackgroundColorSetResult, OnNetworkProbeUpLinkStatsResult, OnNetworkProbeDownLinkStatsResult, OnLiveRoleSwitchedResult, OnRemoteLiveRoleSwitchedResult, RCRTCVideoFps } from './RCRTCDefines';
 import { RCRTCEngineEventsInterface, RCRTCStatsEventsInterface } from './RCRTCEvents';
-declare class RCRTCEngineImpl implements RCRTCEngineInterface, RCRTCEngineEventsInterface, RCRTCStatsEventsInterface {
-    init(setup: RCRTCEngineSetup): void;
-    unInit(): void;
+import { OnLiveMixInnerCdnStreamEnabledResult, OnLiveMixInnerCdnStreamSubscribedResult, OnLiveMixInnerCdnStreamUnsubscribedResult, OnLiveMixSeiReceivedResult, OnLocalLiveMixInnerCdnVideoFpsSetResult, OnLocalLiveMixInnerCdnVideoResolutionSetResult, OnNetworkProbeFinishedResult, OnNetworkProbeStartedResult, OnNetworkProbeStoppedResult, OnRemoteLiveMixInnerCdnStreamPublishedResult, OnRemoteLiveMixInnerCdnStreamUnpublishedResult, OnSeiEnabledResult, OnSeiReceivedResult, OnWatermarkRemovedResult, OnWatermarkSetResult, RCRTCRole } from './RCRTCDefines';
+export default class RCRTCEngine implements RCRTCEngineInterface, RCRTCEngineEventsInterface, RCRTCStatsEventsInterface {
+    /**
+     * 初始化
+     *
+     * @param setup 配置项
+     * @memberof RCRTCEngineInterface
+     */
+    static create(setup: RCRTCEngineSetup): RCRTCEngine | null;
+    destroy(): number;
     joinRoom(roomId: string, setup: RCRTCRoomSetup): number;
     leaveRoom(): number;
     publish(type: RCRTCMediaType): number;
@@ -88,7 +95,11 @@ declare class RCRTCEngineImpl implements RCRTCEngineInterface, RCRTCEngineEvents
     responseJoinSubRoomRequest(roomId: string, userId: string, agree: boolean, autoLayout: boolean, extra?: string): number;
     joinSubRoom(roomId: string): number;
     leaveSubRoom(roomId: string, disband: boolean): number;
+    setLiveMixInnerCdnStreamView(ref: string, callback: (code: number) => {}): void;
+    setWatermark(path: string, positionX: number, positionY: number, zoom: number): number;
+    startNetworkProbe(): number;
     private _getFullEventName;
+    private _invokeMethod;
     private _setListener;
     setOnErrorListener(callback?: (result: OnErrorResult) => void): void;
     setOnKickedListener(callback?: (result: OnKickedResult) => void): void;
@@ -161,9 +172,173 @@ declare class RCRTCEngineImpl implements RCRTCEngineInterface, RCRTCEngineEvents
     setOnLocalCustomVideoStatsListener(callback?: (result: OnLocalCustomVideoStatsResult) => void): void;
     setOnRemoteCustomAudioStatsListener(callback?: (result: OnRemoteCustomAudioStatsResult) => void): void;
     setOnRemoteCustomVideoStatsListener(callback?: (result: OnRemoteCustomVideoStatsResult) => void): void;
+    /**
+     * 网络检测上行回调
+     */
+    setOnNetworkProbeUpLinkStatsListener(callback?: (res: OnNetworkProbeUpLinkStatsResult) => void): void;
+    /**
+     * 网络检测下行回调
+     */
+    setOnNetworkProbeDownLinkStatsListener(callback?: (res: OnNetworkProbeDownLinkStatsResult) => void): void;
+    /**
+     * 角色切换回调
+     */
+    setOnLiveRoleSwitchedListener(callback?: (res: OnLiveRoleSwitchedResult) => void): void;
+    /**
+     * 远端角色切换回调
+     */
+    setOnRemoteLiveRoleSwitchedListener(callback?: (res: OnRemoteLiveRoleSwitchedResult) => void): void;
+    /**
+     * 停止所有远端音频数据渲染
+     * @param mute   true: 不渲染 false: 渲染
+     * @return 0: 成功, 非0: 失败
+     */
+    muteAllRemoteAudioStreams(mute: boolean): number;
+    /**
+     * 切换直播角色
+     * @return 0: 成功, 非0: 失败
+     */
+    switchLiveRole(role: RCRTCRole): number;
+    /**
+     * 开启直播内置 cdn 功能
+     * @param enable
+     * @return 0: 成功, 非0: 失败
+     */
+    enableLiveMixInnerCdnStream(enable: boolean): number;
+    /**
+     * 订阅直播内置 cdn 流
+     * @return 0: 成功, 非0: 失败
+     */
+    subscribeLiveMixInnerCdnStream(): number;
+    /**
+     * 取消订阅直播内置 cdn 流
+     * @return 0: 成功, 非0: 失败
+     */
+    unsubscribeLiveMixInnerCdnStream(): number;
+    /**
+     * 移除直播内置 cdn 流预览窗口
+     * @return 0: 成功, 非0: 失败
+     */
+    removeLiveMixInnerCdnStreamView(): number;
+    /**
+     * 观众端 设置订阅 cdn 流的分辨率
+     * @param width    分辨率宽
+     * @param height   高
+     * @return 接口调用状态码 0: 成功, 非0: 失败
+     */
+    setLocalLiveMixInnerCdnVideoResolution(width: number, height: number): number;
+    /**
+     * 观众端设置订阅 cdn 流的帧率
+     * @param fps   帧率
+     * @return 接口调用状态码 0: 成功, 非0: 失败
+     */
+    setLocalLiveMixInnerCdnVideoFps(fps: RCRTCVideoFps): number;
+    /**
+     * 观众端禁用或启用融云内置 CDN 流
+     * @param mute  true: 停止资源渲染，false: 恢复资源渲染
+     * @return 接口调用状态码 0: 成功, 非0: 失败
+     */
+    muteLiveMixInnerCdnStream(mute: boolean): number;
+    /**
+     * 移除水印
+     * @return 接口调用状态码 0: 成功, 非0: 失败
+     */
+    removeWatermark(): number;
+    /**
+     * 停止网络探测
+     * @return 接口调用状态码 0: 成功, 非0: 失败
+     */
+    stopNetworkProbe(): number;
+    /**
+     * 开始麦克风&扬声器检测
+     * @param timeInterval 麦克风录制时间
+     * @return 接口调用状态码 0: 成功, 非0: 失败
+     */
+    startEchoTest(timeInterval: number): number;
+    /**
+     * 停止麦克风&扬声器检测，结束检测后必须手动调用停止方法
+     * @return 接口调用状态码 0: 成功, 非0: 失败
+     */
+    stopEchoTest(): number;
+    /**
+     * 开启 SEI 功能，观众身份调用无效
+     * @param enable 是否开启
+     * @return 接口调用状态码 0: 成功, 非0: 失败
+     */
+    enableSei(enable: boolean): number;
+    /**
+     * 发送 SEI 信息，需开启 SEI 功能之后调用
+     * @param sei SEI 信息
+     * @return 接口调用状态码 0: 成功, 非0: 失败
+     */
+    sendSei(sei: string): number;
+    /**
+     * 预链接到媒体服务器
+     * @return 接口调用状态码 0: 成功, 非0: 失败
+     */
+    preconnectToMediaServer(): number;
+    /**
+     * 开启直播内置 cdn 结果回调
+     */
+    setOnLiveMixInnerCdnStreamEnabledListener(callback?: (res: OnLiveMixInnerCdnStreamEnabledResult) => void): void;
+    /**
+ *
+      直播内置 cdn 资源发布回调
+     
+ */
+    setOnRemoteLiveMixInnerCdnStreamPublishedListener(callback?: (res: OnRemoteLiveMixInnerCdnStreamPublishedResult) => void): void;
+    /**
+ *
+      直播内置 cdn 资源取消发布回调
+     
+ */
+    setOnRemoteLiveMixInnerCdnStreamUnpublishedListener(callback?: (res: OnRemoteLiveMixInnerCdnStreamUnpublishedResult) => void): void;
+    /**
+     * 订阅直播内置 cdn 资源回调
+     */
+    setOnLiveMixInnerCdnStreamSubscribedListener(callback?: (res: OnLiveMixInnerCdnStreamSubscribedResult) => void): void;
+    /**
+     * 取消订阅直播内置 cdn 资源回调
+     */
+    setOnLiveMixInnerCdnStreamUnsubscribedListener(callback?: (res: OnLiveMixInnerCdnStreamUnsubscribedResult) => void): void;
+    /**
+     * 观众端设置订阅 cdn 流的分辨率的回调
+     */
+    setOnLocalLiveMixInnerCdnVideoResolutionSetListener(callback?: (res: OnLocalLiveMixInnerCdnVideoResolutionSetResult) => void): void;
+    /**
+     * 观众端 设置订阅 cdn 流的帧率的回调
+     */
+    setOnLocalLiveMixInnerCdnVideoFpsSetListener(callback?: (res: OnLocalLiveMixInnerCdnVideoFpsSetResult) => void): void;
+    /**
+     * 设置水印的回调
+     */
+    setOnWatermarkSetListener(callback?: (res: OnWatermarkSetResult) => void): void;
+    /**
+     * 移除水印的回调
+     */
+    setOnWatermarkRemovedListener(callback?: (res: OnWatermarkRemovedResult) => void): void;
+    /**
+     * 开启网络探测结果回调
+     */
+    setOnNetworkProbeStartedListener(callback?: (res: OnNetworkProbeStartedResult) => void): void;
+    /**
+     * 关闭网络探测结果回调
+     */
+    setOnNetworkProbeStoppedListener(callback?: (res: OnNetworkProbeStoppedResult) => void): void;
+    /**
+     * 开启 SEI 功能结果回调
+     */
+    setOnSeiEnabledListener(callback?: (res: OnSeiEnabledResult) => void): void;
+    /**
+     * 收到 SEI 信息回调
+     */
+    setOnSeiReceivedListener(callback?: (res: OnSeiReceivedResult) => void): void;
+    /**
+     * 观众收到合流 SEI 信息回调
+     */
+    setOnLiveMixSeiReceivedListener(callback?: (res: OnLiveMixSeiReceivedResult) => void): void;
+    setOnNetworkProbeFinishedListener(callback?: (res: OnNetworkProbeFinishedResult) => void): void;
 }
-declare const RCRTCEngine: RCRTCEngineImpl;
-export default RCRTCEngine;
 /**
  * Engine 方法定义
  *
@@ -171,18 +346,11 @@ export default RCRTCEngine;
  */
 export interface RCRTCEngineInterface {
     /**
-     * 初始化
-     *
-     * @param setup 配置项
+     * 销毁实例
+     * @return {*}  {number} 错误码
      * @memberof RCRTCEngineInterface
      */
-    init(setup: RCRTCEngineSetup): void;
-    /**
-     * 反初始化
-     *
-     * @memberof RCRTCEngineInterface
-     */
-    unInit(): void;
+    destroy(): number;
     /**
      * 加入房间
      *
@@ -897,4 +1065,27 @@ export interface RCRTCEngineInterface {
      * @memberof RCRTCEngineInterface
      */
     leaveSubRoom(roomId: string, disband: boolean): number;
+    /**
+     * 设置直播内置 cdn 流预览窗口
+     *
+     * @param {string} ref 视频预览组件的 ref 值
+     * @param {(code: number) => {}} callback 调用完成的回调
+     * @return 0: 成功, 非0: 失败
+     */
+    setLiveMixInnerCdnStreamView(ref: string, callback: (code: number) => {}): void;
+    /**
+     * 设置水印
+     * @param path 水印图片
+     * @param positionX  水印的位置,x坐标,参数取值范围 0 ~ 1，浮点型
+     * @param positionY  水印的位置,y坐标,参数取值范围 0 ~ 1，浮点型
+     * @param zoom  图片缩放系数,参数取值范围 0 ~ 1
+     * SDK 内部会根据视频分辨率计算水印实际的像素位置和尺寸。
+     * @return 接口调用状态码 0: 成功, 非0: 失败
+     */
+    setWatermark(path: string, positionX: number, positionY: number, zoom: number): number;
+    /**
+     * 开始网络探测
+     * @return 接口调用状态码 0: 成功, 非0: 失败
+     */
+    startNetworkProbe(): number;
 }

@@ -15,7 +15,6 @@ import {
     RCRTCLiveMixLayoutMode,
     RCRTCLiveMixRenderMode,
     RCRTCMediaType,
-    RCRTCVideoFps,
     RCRTCVideoResolution,
     RCRTCEngineEventsName,
     RCRTCStatsEventsName,
@@ -81,29 +80,68 @@ import {
     OnUserOfflineResult,
     OnRemoteCustomStreamStateChangedResult,
     BaseCallback,
-    OnLiveMixBackgroundColorSetResult
+    OnLiveMixBackgroundColorSetResult,
+    OnNetworkProbeUpLinkStatsResult,
+    OnNetworkProbeDownLinkStatsResult,
+    OnLiveRoleSwitchedResult,
+    OnRemoteLiveRoleSwitchedResult,
+    RCRTCVideoFps,
 } from './RCRTCDefines';
 
+import { RCRTCEngineEventsInterface, RCRTCStatsEventsInterface } from './RCRTCEvents';
+
 import {
-    RCRTCEngineEventsInterface,
-    RCRTCStatsEventsInterface,
-} from './RCRTCEvents';
+    OnLiveMixInnerCdnStreamEnabledResult,
+    OnLiveMixInnerCdnStreamSubscribedResult,
+    OnLiveMixInnerCdnStreamUnsubscribedResult,
+    OnLiveMixSeiReceivedResult,
+    OnLocalLiveMixInnerCdnVideoFpsSetResult,
+    OnLocalLiveMixInnerCdnVideoResolutionSetResult,
+    OnNetworkProbeFinishedResult,
+    OnNetworkProbeStartedResult,
+    OnNetworkProbeStoppedResult,
+    OnRemoteLiveMixInnerCdnStreamPublishedResult,
+    OnRemoteLiveMixInnerCdnStreamUnpublishedResult,
+    OnSeiEnabledResult,
+    OnSeiReceivedResult,
+    OnWatermarkRemovedResult,
+    OnWatermarkSetResult,
+    RCRTCRole,
+} from './RCRTCDefines';
 
 const RCUniRtc = uni.requireNativePlugin('RongCloud-RTC-RCUniRtc');
 const Platform = uni.getSystemInfoSync().platform;
-const EngineEventsPrefix = 'Engine:'
-const StatsEventsPrefix = 'Stats:'
-class RCRTCEngineImpl implements
-    RCRTCEngineInterface,
-    RCRTCEngineEventsInterface,
-    RCRTCStatsEventsInterface {
+const EngineEventsPrefix = 'Engine:';
+const StatsEventsPrefix = 'Stats:';
+let engineInstance: RCRTCEngine | null;
 
-    init(setup: RCRTCEngineSetup): void {
-        RCUniRtc.init(setup);
+export default class RCRTCEngine
+    implements RCRTCEngineInterface, RCRTCEngineEventsInterface, RCRTCStatsEventsInterface
+{
+    /**
+     * 初始化
+     *
+     * @param setup 配置项
+     * @memberof RCRTCEngineInterface
+     */
+    static create(setup: RCRTCEngineSetup): RCRTCEngine | null {
+        if (!engineInstance) {
+            let code: number = RCUniRtc.create(setup);
+            if (code === 0) {
+                engineInstance = new RCRTCEngine();
+            }
+        }
+        return engineInstance;
     }
-    unInit(): void {
-        RCUniRtc.unInit();
+
+    destroy(): number {
+        let code: number = RCUniRtc.destroy();
+        if (code === 0) {
+            engineInstance = null;
+        }
+        return code;
     }
+
     joinRoom(roomId: string, setup: RCRTCRoomSetup): number {
         return RCUniRtc.joinRoom(roomId, setup);
     }
@@ -227,7 +265,7 @@ class RCRTCEngineImpl implements
     setLiveMixVideoBitrate(bitrate: number, tiny: false): number {
         return RCUniRtc.setLiveMixVideoBitrate(bitrate, tiny);
     }
-    setLiveMixVideoResolution(width:number, height: number, tiny: false): number {
+    setLiveMixVideoResolution(width: number, height: number, tiny: false): number {
         return RCUniRtc.setLiveMixVideoResolution(width, height, tiny);
     }
     setLiveMixVideoFps(fps: RCRTCVideoFps, tiny: false): number {
@@ -350,7 +388,13 @@ class RCRTCEngineImpl implements
     cancelJoinSubRoomRequest(roomId: string, userId: string, extra?: string): number {
         return RCUniRtc.cancelJoinSubRoomRequest(roomId, userId, extra);
     }
-    responseJoinSubRoomRequest(roomId: string, userId: string, agree: boolean, autoLayout: boolean, extra?: string): number {
+    responseJoinSubRoomRequest(
+        roomId: string,
+        userId: string,
+        agree: boolean,
+        autoLayout: boolean,
+        extra?: string
+    ): number {
         return RCUniRtc.responseJoinSubRoomRequest(roomId, userId, agree, autoLayout, extra);
     }
     joinSubRoom(roomId: string): number {
@@ -359,10 +403,22 @@ class RCRTCEngineImpl implements
     leaveSubRoom(roomId: string, disband: boolean): number {
         return RCUniRtc.leaveSubRoom(roomId, disband);
     }
+    setLiveMixInnerCdnStreamView(ref: string, callback: (code: number) => {}): void {
+        return RCUniRtc.setLiveMixInnerCdnStreamView(ref, callback);
+    }
+    setWatermark(path: string, positionX: number, positionY: number, zoom: number): number {
+        return RCUniRtc.setWatermark(path, positionX, positionY, zoom);
+    }
+    startNetworkProbe(): number {
+        return RCUniRtc.startNetworkProbe();
+    }
 
     /*  以下是事件回调相关的方法  */
 
-    private _getFullEventName(event: RCRTCEngineEventsName | RCRTCStatsEventsName): string {
+    private _getFullEventName(event: string): string {
+        if (event.includes(':')) {
+            return event;
+        }
         let prefix = '';
         if (Object.keys(RCRTCEngineEventsName).includes(event)) {
             prefix = EngineEventsPrefix;
@@ -371,16 +427,23 @@ class RCRTCEngineImpl implements
         } else {
             throw new Error('EventName not support.');
         }
-        return (prefix + event);
+        return prefix + event;
     }
 
-    private _setListener(
-        event: RCRTCEngineEventsName | RCRTCStatsEventsName,
-        callback?: (result: any) => void): void {
+    private _invokeMethod(name: string, params?: object): any {
+        console.log(`invokeMethod methodName: ${name}, params:${params}`);
+        return new Promise((resolve, _) => {
+            RCUniRtc.invokeMethod({ name, params }, (res: any) => {
+                resolve(res);
+            });
+        });
+    }
+
+    private _setListener(event: string, callback?: (result: any) => void): void {
         // 因为单个事件名只支持设置一个监听，所以要先移除已有的监听。
         RCUniRtc.removeAllEventListeners(this._getFullEventName(event));
         if (callback) {
-            let listener = (res: {module: string ,type: string, data: any}) => {
+            let listener = (res: { module: string; type: string; data: any }) => {
                 callback(res.data);
             };
             RCUniRtc.addEventListener(this._getFullEventName(event), listener);
@@ -388,7 +451,7 @@ class RCRTCEngineImpl implements
     }
 
     // 以下为设置事件回调的方法
-    
+
     setOnErrorListener(callback?: (result: OnErrorResult) => void): void {
         this._setListener(RCRTCEngineEventsName.OnError, callback);
     }
@@ -518,10 +581,14 @@ class RCRTCEngineImpl implements
     setOnRemoteCustomStreamPublishedListener(callback?: (result: OnRemoteCustomStreamPublishedResult) => void): void {
         this._setListener(RCRTCEngineEventsName.OnRemoteCustomStreamPublished, callback);
     }
-    setOnRemoteCustomStreamUnpublishedListener(callback?: (result: OnRemoteCustomStreamUnpublishedResult) => void): void {
+    setOnRemoteCustomStreamUnpublishedListener(
+        callback?: (result: OnRemoteCustomStreamUnpublishedResult) => void
+    ): void {
         this._setListener(RCRTCEngineEventsName.OnRemoteCustomStreamUnpublished, callback);
     }
-    setOnRemoteCustomStreamStateChangedListener(callback?: (result: OnRemoteCustomStreamStateChangedResult) => void): void {
+    setOnRemoteCustomStreamStateChangedListener(
+        callback?: (result: OnRemoteCustomStreamStateChangedResult) => void
+    ): void {
         this._setListener(RCRTCEngineEventsName.OnRemoteCustomStreamStateChanged, callback);
     }
     setOnRemoteCustomStreamFirstFrameListener(callback?: (result: OnRemoteCustomStreamFirstFrameResult) => void): void {
@@ -545,10 +612,14 @@ class RCRTCEngineImpl implements
     setOnJoinSubRoomRequestReceivedListener(callback?: (result: OnJoinSubRoomRequestReceivedResult) => void): void {
         this._setListener(RCRTCEngineEventsName.OnJoinSubRoomRequestReceived, callback);
     }
-    setOnCancelJoinSubRoomRequestReceivedListener(callback?: (result: OnCancelJoinSubRoomRequestReceivedResult) => void): void {
+    setOnCancelJoinSubRoomRequestReceivedListener(
+        callback?: (result: OnCancelJoinSubRoomRequestReceivedResult) => void
+    ): void {
         this._setListener(RCRTCEngineEventsName.OnCancelJoinSubRoomRequestReceived, callback);
     }
-    setOnJoinSubRoomRequestResponseReceivedListener(callback?: (result: OnJoinSubRoomRequestResponseReceivedResult) => void): void {
+    setOnJoinSubRoomRequestResponseReceivedListener(
+        callback?: (result: OnJoinSubRoomRequestResponseReceivedResult) => void
+    ): void {
         this._setListener(RCRTCEngineEventsName.OnJoinSubRoomRequestResponseReceived, callback);
     }
     setOnSubRoomJoinedListener(callback?: (result: OnSubRoomJoinedResult) => void): void {
@@ -563,7 +634,6 @@ class RCRTCEngineImpl implements
     setOnSubRoomDisbandListener(callback?: (result: OnSubRoomDisbandResult) => void): void {
         this._setListener(RCRTCEngineEventsName.OnSubRoomDisband, callback);
     }
-    
 
     /* 以下是 状态回调 */
 
@@ -591,7 +661,9 @@ class RCRTCEngineImpl implements
     setOnLiveMixMemberAudioStatsListener(callback?: (result: OnLiveMixMemberAudioStatsResult) => void): void {
         this._setListener(RCRTCStatsEventsName.OnLiveMixMemberAudioStats, callback);
     }
-    setOnLiveMixMemberCustomAudioStatsListener(callback?: (result: OnLiveMixMemberCustomAudioStatsResult) => void): void {
+    setOnLiveMixMemberCustomAudioStatsListener(
+        callback?: (result: OnLiveMixMemberCustomAudioStatsResult) => void
+    ): void {
         this._setListener(RCRTCStatsEventsName.OnLiveMixMemberCustomAudioStats, callback);
     }
     setOnLocalCustomAudioStatsListener(callback?: (result: OnLocalCustomAudioStatsResult) => void): void {
@@ -606,10 +678,309 @@ class RCRTCEngineImpl implements
     setOnRemoteCustomVideoStatsListener(callback?: (result: OnRemoteCustomVideoStatsResult) => void): void {
         this._setListener(RCRTCStatsEventsName.OnRemoteCustomVideoStats, callback);
     }
-}
 
-const RCRTCEngine = new RCRTCEngineImpl();
-export default RCRTCEngine;
+    /**
+     * 网络检测上行回调
+     */
+    setOnNetworkProbeUpLinkStatsListener(callback?: (res: OnNetworkProbeUpLinkStatsResult) => void): void {
+        const eventName = 'IRCRTCIWNetworkProbeListener:onNetworkProbeUpLinkStats';
+        this._setListener(eventName, callback);
+    }
+
+    /**
+     * 网络检测下行回调
+     */
+    setOnNetworkProbeDownLinkStatsListener(callback?: (res: OnNetworkProbeDownLinkStatsResult) => void): void {
+        const eventName = 'IRCRTCIWNetworkProbeListener:onNetworkProbeDownLinkStats';
+        this._setListener(eventName, callback);
+    }
+
+    /**
+     * 角色切换回调
+     */
+    setOnLiveRoleSwitchedListener(callback?: (res: OnLiveRoleSwitchedResult) => void): void {
+        const eventName = 'IRCRTCIWListener:onLiveRoleSwitched';
+        this._setListener(eventName, callback);
+    }
+
+    /**
+     * 远端角色切换回调
+     */
+    setOnRemoteLiveRoleSwitchedListener(callback?: (res: OnRemoteLiveRoleSwitchedResult) => void): void {
+        const eventName = 'IRCRTCIWListener:onRemoteLiveRoleSwitched';
+        this._setListener(eventName, callback);
+    }
+
+    /**
+     * 停止所有远端音频数据渲染
+     * @param mute   true: 不渲染 false: 渲染
+     * @return 0: 成功, 非0: 失败
+     */
+    muteAllRemoteAudioStreams(mute: boolean): number {
+        return RCUniRtc.muteAllRemoteAudioStreams(mute);
+    }
+
+    /**
+     * 切换直播角色
+     * @return 0: 成功, 非0: 失败
+     */
+    switchLiveRole(role: RCRTCRole): number {
+        return RCUniRtc.switchLiveRole(role);
+    }
+
+    /**
+     * 开启直播内置 cdn 功能
+     * @param enable
+     * @return 0: 成功, 非0: 失败
+     */
+    enableLiveMixInnerCdnStream(enable: boolean): number {
+        return RCUniRtc.enableLiveMixInnerCdnStream(enable);
+    }
+
+    /**
+     * 订阅直播内置 cdn 流
+     * @return 0: 成功, 非0: 失败
+     */
+    subscribeLiveMixInnerCdnStream(): number {
+        return RCUniRtc.subscribeLiveMixInnerCdnStream();
+    }
+
+    /**
+     * 取消订阅直播内置 cdn 流
+     * @return 0: 成功, 非0: 失败
+     */
+    unsubscribeLiveMixInnerCdnStream(): number {
+        return RCUniRtc.unsubscribeLiveMixInnerCdnStream();
+    }
+
+    /**
+     * 移除直播内置 cdn 流预览窗口
+     * @return 0: 成功, 非0: 失败
+     */
+    removeLiveMixInnerCdnStreamView(): number {
+        return RCUniRtc.removeLiveMixInnerCdnStreamView();
+    }
+
+    /**
+     * 观众端 设置订阅 cdn 流的分辨率
+     * @param width    分辨率宽
+     * @param height   高
+     * @return 接口调用状态码 0: 成功, 非0: 失败
+     */
+    setLocalLiveMixInnerCdnVideoResolution(width: number, height: number): number {
+        return RCUniRtc.setLocalLiveMixInnerCdnVideoResolution(width, height);
+    }
+
+    /**
+     * 观众端设置订阅 cdn 流的帧率
+     * @param fps   帧率
+     * @return 接口调用状态码 0: 成功, 非0: 失败
+     */
+    setLocalLiveMixInnerCdnVideoFps(fps: RCRTCVideoFps): number {
+        return RCUniRtc.setLocalLiveMixInnerCdnVideoFps(fps);
+    }
+
+    /**
+     * 观众端禁用或启用融云内置 CDN 流
+     * @param mute  true: 停止资源渲染，false: 恢复资源渲染
+     * @return 接口调用状态码 0: 成功, 非0: 失败
+     */
+    muteLiveMixInnerCdnStream(mute: boolean): number {
+        return RCUniRtc.muteLiveMixInnerCdnStream(mute);
+    }
+
+    /**
+     * 移除水印
+     * @return 接口调用状态码 0: 成功, 非0: 失败
+     */
+    removeWatermark(): number {
+        return RCUniRtc.removeWatermark();
+    }
+
+    /**
+     * 停止网络探测
+     * @return 接口调用状态码 0: 成功, 非0: 失败
+     */
+    stopNetworkProbe(): number {
+        return RCUniRtc.stopNetworkProbe();
+    }
+
+    /**
+     * 开始麦克风&扬声器检测
+     * @param timeInterval 麦克风录制时间
+     * @return 接口调用状态码 0: 成功, 非0: 失败
+     */
+    startEchoTest(timeInterval: number): number {
+        return RCUniRtc.startEchoTest(timeInterval);
+    }
+
+    /**
+     * 停止麦克风&扬声器检测，结束检测后必须手动调用停止方法
+     * @return 接口调用状态码 0: 成功, 非0: 失败
+     */
+    stopEchoTest(): number {
+        return RCUniRtc.stopEchoTest();
+    }
+
+    /**
+     * 开启 SEI 功能，观众身份调用无效
+     * @param enable 是否开启
+     * @return 接口调用状态码 0: 成功, 非0: 失败
+     */
+    enableSei(enable: boolean): number {
+        return RCUniRtc.enableSei(enable);
+    }
+
+    /**
+     * 发送 SEI 信息，需开启 SEI 功能之后调用
+     * @param sei SEI 信息
+     * @return 接口调用状态码 0: 成功, 非0: 失败
+     */
+    sendSei(sei: string): number {
+        return RCUniRtc.sendSei(sei);
+    }
+
+    /**
+     * 预链接到媒体服务器
+     * @return 接口调用状态码 0: 成功, 非0: 失败
+     */
+    preconnectToMediaServer(): number {
+        return RCUniRtc.preconnectToMediaServer();
+    }
+
+    /**
+     * 开启直播内置 cdn 结果回调
+     */
+    setOnLiveMixInnerCdnStreamEnabledListener(callback?: (res: OnLiveMixInnerCdnStreamEnabledResult) => void): void {
+        const eventName = 'IRCRTCIWListener:onLiveMixInnerCdnStreamEnabled';
+        this._setListener(eventName, callback);
+    }
+
+    /**
+ * 
+      直播内置 cdn 资源发布回调
+     
+ */
+    setOnRemoteLiveMixInnerCdnStreamPublishedListener(
+        callback?: (res: OnRemoteLiveMixInnerCdnStreamPublishedResult) => void
+    ): void {
+        const eventName = 'IRCRTCIWListener:onRemoteLiveMixInnerCdnStreamPublished';
+        this._setListener(eventName, callback);
+    }
+
+    /**
+ * 
+      直播内置 cdn 资源取消发布回调
+     
+ */
+    setOnRemoteLiveMixInnerCdnStreamUnpublishedListener(
+        callback?: (res: OnRemoteLiveMixInnerCdnStreamUnpublishedResult) => void
+    ): void {
+        const eventName = 'IRCRTCIWListener:onRemoteLiveMixInnerCdnStreamUnpublished';
+        this._setListener(eventName, callback);
+    }
+
+    /**
+     * 订阅直播内置 cdn 资源回调
+     */
+    setOnLiveMixInnerCdnStreamSubscribedListener(
+        callback?: (res: OnLiveMixInnerCdnStreamSubscribedResult) => void
+    ): void {
+        const eventName = 'IRCRTCIWListener:onLiveMixInnerCdnStreamSubscribed';
+        this._setListener(eventName, callback);
+    }
+
+    /**
+     * 取消订阅直播内置 cdn 资源回调
+     */
+    setOnLiveMixInnerCdnStreamUnsubscribedListener(
+        callback?: (res: OnLiveMixInnerCdnStreamUnsubscribedResult) => void
+    ): void {
+        const eventName = 'IRCRTCIWListener:onLiveMixInnerCdnStreamUnsubscribed';
+        this._setListener(eventName, callback);
+    }
+
+    /**
+     * 观众端设置订阅 cdn 流的分辨率的回调
+     */
+    setOnLocalLiveMixInnerCdnVideoResolutionSetListener(
+        callback?: (res: OnLocalLiveMixInnerCdnVideoResolutionSetResult) => void
+    ): void {
+        const eventName = 'IRCRTCIWListener:onLocalLiveMixInnerCdnVideoResolutionSet';
+        this._setListener(eventName, callback);
+    }
+
+    /**
+     * 观众端 设置订阅 cdn 流的帧率的回调
+     */
+    setOnLocalLiveMixInnerCdnVideoFpsSetListener(
+        callback?: (res: OnLocalLiveMixInnerCdnVideoFpsSetResult) => void
+    ): void {
+        const eventName = 'IRCRTCIWListener:onLocalLiveMixInnerCdnVideoFpsSet';
+        this._setListener(eventName, callback);
+    }
+
+    /**
+     * 设置水印的回调
+     */
+    setOnWatermarkSetListener(callback?: (res: OnWatermarkSetResult) => void): void {
+        const eventName = 'IRCRTCIWListener:onWatermarkSet';
+        this._setListener(eventName, callback);
+    }
+
+    /**
+     * 移除水印的回调
+     */
+    setOnWatermarkRemovedListener(callback?: (res: OnWatermarkRemovedResult) => void): void {
+        const eventName = 'IRCRTCIWListener:onWatermarkRemoved';
+        this._setListener(eventName, callback);
+    }
+
+    /**
+     * 开启网络探测结果回调
+     */
+    setOnNetworkProbeStartedListener(callback?: (res: OnNetworkProbeStartedResult) => void): void {
+        const eventName = 'IRCRTCIWListener:onNetworkProbeStarted';
+        this._setListener(eventName, callback);
+    }
+
+    /**
+     * 关闭网络探测结果回调
+     */
+    setOnNetworkProbeStoppedListener(callback?: (res: OnNetworkProbeStoppedResult) => void): void {
+        const eventName = 'IRCRTCIWListener:onNetworkProbeStopped';
+        this._setListener(eventName, callback);
+    }
+
+    /**
+     * 开启 SEI 功能结果回调
+     */
+    setOnSeiEnabledListener(callback?: (res: OnSeiEnabledResult) => void): void {
+        const eventName = 'IRCRTCIWListener:onSeiEnabled';
+        this._setListener(eventName, callback);
+    }
+
+    /**
+     * 收到 SEI 信息回调
+     */
+    setOnSeiReceivedListener(callback?: (res: OnSeiReceivedResult) => void): void {
+        const eventName = 'IRCRTCIWListener:onSeiReceived';
+        this._setListener(eventName, callback);
+    }
+
+    /**
+     * 观众收到合流 SEI 信息回调
+     */
+    setOnLiveMixSeiReceivedListener(callback?: (res: OnLiveMixSeiReceivedResult) => void): void {
+        const eventName = 'IRCRTCIWListener:onLiveMixSeiReceived';
+        this._setListener(eventName, callback);
+    }
+
+    setOnNetworkProbeFinishedListener(callback?: (res: OnNetworkProbeFinishedResult) => void): void {
+        const eventName = 'IRCRTCIWNetworkProbeListener:onNetworkProbeFinished';
+        this._setListener(eventName, callback);
+    }
+}
 
 /**
  * Engine 方法定义
@@ -617,29 +988,20 @@ export default RCRTCEngine;
  * @interface RCRTCEngineInterface
  */
 export interface RCRTCEngineInterface {
-
     /**
-     * 初始化
-     * 
-     * @param setup 配置项
+     * 销毁实例
+     * @return {*}  {number} 错误码
      * @memberof RCRTCEngineInterface
      */
-    init(setup: RCRTCEngineSetup): void;
-
-    /**
-     * 反初始化
-     *
-     * @memberof RCRTCEngineInterface
-     */
-    unInit(): void;
+    destroy(): number;
 
     /**
      * 加入房间
-     * 
+     *
      * @param {string} roomId 房间id
      * @param {RCRTCRoomSetup} setup 房间配置
      * @return {*}  {number} 错误码
-     * @memberof RCRTCEngineInterface 
+     * @memberof RCRTCEngineInterface
      */
     joinRoom(roomId: string, setup: RCRTCRoomSetup): number;
 
@@ -647,7 +1009,7 @@ export interface RCRTCEngineInterface {
      * 离开房间
      *
      * @return {*}  {number} 错误码
-     * @memberof RCRTCEngineInterface 
+     * @memberof RCRTCEngineInterface
      */
     leaveRoom(): number;
 
@@ -656,7 +1018,7 @@ export interface RCRTCEngineInterface {
      *
      * @param {RCRTCMediaType} type 媒体资源类型
      * @return {*}  {number} 错误码
-     * @memberof RCRTCEngineInterface 
+     * @memberof RCRTCEngineInterface
      */
     publish(type: RCRTCMediaType): number;
 
@@ -681,7 +1043,7 @@ export interface RCRTCEngineInterface {
 
     /**
      * 加入房间后, 订阅远端多个用户发布的资源
-     * 
+     *
      * @param {string[]} userIds 远端用户 userId 数组
      * @param {RCRTCMediaType} type 媒体资源类型
      * @param {boolean} tiny 是否视频小流 true:订阅视频小流 false:订阅视频大流
@@ -760,18 +1122,18 @@ export interface RCRTCEngineInterface {
     /**
      * 打开/关闭外放
      *
-     * @param {boolean} enable true 打开, false 关闭 
+     * @param {boolean} enable true 打开, false 关闭
      * @return {*}  {number} 错误码
-     * @memberof RCRTCEngineInterface 
+     * @memberof RCRTCEngineInterface
      */
     enableSpeaker(enable: boolean): number;
 
     /**
-     * 设置麦克风的音量 
+     * 设置麦克风的音量
      *
      * @param {number} volume 0 ~ 100, 默认值: 100
      * @return {*}  {number} 错误码
-     * @memberof RCRTCEngineInterface 
+     * @memberof RCRTCEngineInterface
      */
     adjustLocalVolume(volume: number): number;
 
@@ -952,7 +1314,7 @@ export interface RCRTCEngineInterface {
      *
      * @param {RCRTCLiveMixRenderMode} mode 填充类型
      * @return {*}  {number} 错误码
-     * @memberof RCRTCEngineInterface 
+     * @memberof RCRTCEngineInterface
      * @memberof RCRTCEngineInterface
      */
     setLiveMixRenderMode(mode: RCRTCLiveMixRenderMode): number;
@@ -967,7 +1329,7 @@ export interface RCRTCEngineInterface {
      * @memberof RCRTCEngineInterface
      */
     setLiveMixBackgroundColor(red: number, green: number, blue: number): number;
-    
+
     /**
      * 设置直播混流布局配置, 仅供直播主播用户使用
      *
@@ -1014,7 +1376,7 @@ export interface RCRTCEngineInterface {
      * @return {*}  {number}
      * @memberof RCRTCEngineInterface
      */
-    setLiveMixVideoResolution(width:number, height: number, tiny: false): number;
+    setLiveMixVideoResolution(width: number, height: number, tiny: false): number;
 
     /**
      * 设置直播合流视频帧率, 仅供直播主播用户使用
@@ -1341,7 +1703,7 @@ export interface RCRTCEngineInterface {
      * @param {(code: number) => {}} callback 调用完成的回调
      * @memberof RCRTCEngineInterface
      */
-    setRemoteCustomStreamView( userId: string, tag: string, ref: string, callback: (code: number) => {}): void;
+    setRemoteCustomStreamView(userId: string, tag: string, ref: string, callback: (code: number) => {}): void;
 
     /**
      * 移除远端自定义流View
@@ -1410,7 +1772,13 @@ export interface RCRTCEngineInterface {
      * @return {*}  {number} 错误码
      * @memberof RCRTCEngineInterface
      */
-    responseJoinSubRoomRequest(roomId: string, userId: string, agree: boolean, autoLayout: boolean, extra?: string): number;
+    responseJoinSubRoomRequest(
+        roomId: string,
+        userId: string,
+        agree: boolean,
+        autoLayout: boolean,
+        extra?: string
+    ): number;
 
     /**
      * 连麦邀请后加入副房间
@@ -1430,4 +1798,30 @@ export interface RCRTCEngineInterface {
      * @memberof RCRTCEngineInterface
      */
     leaveSubRoom(roomId: string, disband: boolean): number;
+
+    /**
+     * 设置直播内置 cdn 流预览窗口
+     *
+     * @param {string} ref 视频预览组件的 ref 值
+     * @param {(code: number) => {}} callback 调用完成的回调
+     * @return 0: 成功, 非0: 失败
+     */
+    setLiveMixInnerCdnStreamView(ref: string, callback: (code: number) => {}): void;
+
+    /**
+     * 设置水印
+     * @param path 水印图片
+     * @param positionX  水印的位置,x坐标,参数取值范围 0 ~ 1，浮点型
+     * @param positionY  水印的位置,y坐标,参数取值范围 0 ~ 1，浮点型
+     * @param zoom  图片缩放系数,参数取值范围 0 ~ 1
+     * SDK 内部会根据视频分辨率计算水印实际的像素位置和尺寸。
+     * @return 接口调用状态码 0: 成功, 非0: 失败
+     */
+    setWatermark(path: string, positionX: number, positionY: number, zoom: number): number;
+
+    /**
+     * 开始网络探测
+     * @return 接口调用状态码 0: 成功, 非0: 失败
+     */
+    startNetworkProbe(): number;
 }

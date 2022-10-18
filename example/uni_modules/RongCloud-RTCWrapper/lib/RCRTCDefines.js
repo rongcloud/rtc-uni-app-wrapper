@@ -394,3 +394,17 @@ export var RCRTCStatsEventsName;
     RCRTCStatsEventsName["OnRemoteCustomAudioStats"] = "OnRemoteCustomAudioStats";
     RCRTCStatsEventsName["OnRemoteCustomVideoStats"] = "OnRemoteCustomVideoStats";
 })(RCRTCStatsEventsName || (RCRTCStatsEventsName = {}));
+export var RCRTCNetworkQualityLevel;
+(function (RCRTCNetworkQualityLevel) {
+    RCRTCNetworkQualityLevel[RCRTCNetworkQualityLevel["qualityExcellent"] = 0] = "qualityExcellent";
+    RCRTCNetworkQualityLevel[RCRTCNetworkQualityLevel["qualityGood"] = 1] = "qualityGood";
+    RCRTCNetworkQualityLevel[RCRTCNetworkQualityLevel["qualityPoor"] = 2] = "qualityPoor";
+    RCRTCNetworkQualityLevel[RCRTCNetworkQualityLevel["qualityBad"] = 3] = "qualityBad";
+    RCRTCNetworkQualityLevel[RCRTCNetworkQualityLevel["qualityVeryBad"] = 4] = "qualityVeryBad";
+    RCRTCNetworkQualityLevel[RCRTCNetworkQualityLevel["qualityDown"] = 5] = "qualityDown";
+})(RCRTCNetworkQualityLevel || (RCRTCNetworkQualityLevel = {}));
+(function (RCRTCRole) {
+    RCRTCRole[RCRTCRole["meetingMember"] = 0] = "meetingMember";
+    RCRTCRole[RCRTCRole["liveBroadcaster"] = 1] = "liveBroadcaster";
+    RCRTCRole[RCRTCRole["liveAudience"] = 2] = "liveAudience";
+})(RCRTCRole || (RCRTCRole = {}));

@@ -106,8 +106,7 @@
 		RCRTCAudioSampleRate,
 		RCRTCEngineEventsName,
 		RCRTCStatsEventsName,
-	} from '@/uni_modules/RongCloud-RTCWrapper/lib/RCRTCDefines';
-	
+	} from '@/uni_modules/RongCloud-RTCWrapper/lib/RCRTCDefines';	
 	import * as Constants from '../../common/constants.js';
 	import RCRTCEngine from '@/uni_modules/RongCloud-RTCWrapper/lib/RCRTCEngine';
 	import fuiDropdownList from "@/components/fui-dropdown-list/fui-dropdown-list";
@@ -118,6 +117,7 @@
 		},
 		data() {
 			return {
+				rtcEngine: null,
 				users: [],
 				layoutModes: [{
 						label: '自定义',
@@ -176,6 +176,7 @@
 			},
 		},
 		onLoad(option) {
+			this.rtcEngine = getApp().globalData.rtcEngine;
 			this.fpsTitles = Object.keys(RCRTCVideoFps).filter((item) => {
 				return isNaN(Number(item));
 			}).map((item, index) => {
@@ -195,13 +196,12 @@
 			this.tinyVideoBitrateTitles = this.tinyVideoBitrate.map(item => item + 'kbps');
 			this.videoParams = this.getVideoParams(false);
 			this.tinyVideoParams = this.getVideoParams(true);
-			this.users = this.getGlobalData().users.filter(user => user.userId != this.getGlobalLocalUserId()).map(
-			user => {
-				return {
-					userId: user.userId,
-					checked: false
-				}
-			});
+			this.users = this.getGlobalData().users.map(user => {
+					return {
+						userId: user.userId,
+						checked: false
+					}
+				});
 			// 初始化设置
 			let layoutMode = this.getGlobalLayoutMode();
 			if (layoutMode) {
@@ -280,7 +280,7 @@
 					this.toCustomLayout();
 				} else {
 					this.tempLayoutMode = value;
-					let code = RCRTCEngine.setLiveMixLayoutMode(value);
+					let code = this.rtcEngine.setLiveMixLayoutMode(value);
 					if (code === 0) {
 						console.log('setLiveMixLayoutMode 调用成功');
 					}
@@ -291,7 +291,7 @@
 			},
 			changeRenderMode(value) {
 				this.tempRenderMode = value;
-				let code = RCRTCEngine.setLiveMixRenderMode(value);
+				let code = this.rtcEngine.setLiveMixRenderMode(value);
 				if (code === 0) {
 					console.log('setLiveMixRenderMode 调用成功');
 				}
@@ -332,13 +332,13 @@
 			// 视频 fps
 			fpsItemClick(e) {
 				this.currentVideoParams.fps = e.index;
-				RCRTCEngine.setLiveMixVideoFps(e.index, this.isShowTiny);
+				this.rtcEngine.setLiveMixVideoFps(e.index, this.isShowTiny);
 				this.updateGlobalVideoParams();
 			},
 			// 视频 码率
 			videoBitrateItemClick(e) {
 				this.currentVideoParams.bitrate = e.index;
-				RCRTCEngine.setLiveMixVideoBitrate(this.videoBitrates[e.index], this.isShowTiny);
+				this.rtcEngine.setLiveMixVideoBitrate(this.videoBitrates[e.index], this.isShowTiny);
 				this.updateGlobalVideoParams();
 			},
 			// 视频 分辨率
@@ -348,13 +348,13 @@
 				let size = resolution.split('x');
 				let width = parseInt(size[0]);
 				let height = parseInt(size[1]);
-				RCRTCEngine.setLiveMixVideoResolution(width, height, this.isShowTiny);
+				this.rtcEngine.setLiveMixVideoResolution(width, height, this.isShowTiny);
 				this.updateGlobalVideoParams();
 			},
 			// 音频码率
 			audioBitrateItemClick(e) {
 				this.currentAudioBitrate = e.index;
-				let code = RCRTCEngine.setLiveMixAudioBitrate(this.audioBitrates[e.index]);
+				let code = this.rtcEngine.setLiveMixAudioBitrate(this.audioBitrates[e.index]);
 				if (code === 0) {
 					uni.showToast({
 						icon: 'none',
@@ -384,7 +384,7 @@
 				});
 				//设置 合流
 				let userIds = this.selectedAudioMixUsers.map(user => user.userId);
-				let code = RCRTCEngine.setLiveMixCustomAudios(userIds);
+				let code = this.rtcEngine.setLiveMixCustomAudios(userIds);
 				// 详细 code值 可以参考官网文档的状态码
 				if (code === 0) {
 					uni.showToast({
@@ -408,10 +408,10 @@
 				if (layouts.length > 0) {
 					this.tempLayoutMode = RCRTCLiveMixLayoutMode.Custom;
 					// 设置 自定义布局
-					RCRTCEngine.setLiveMixCustomLayouts(layouts);
+					this.rtcEngine.setLiveMixCustomLayouts(layouts);
 				} else {
 					this.tempLayoutMode = RCRTCLiveMixLayoutMode.Suspension;
-					RCRTCEngine.setLiveMixLayoutMode(RCRTCLiveMixLayoutMode.Suspension);
+					this.rtcEngine.setLiveMixLayoutMode(RCRTCLiveMixLayoutMode.Suspension);
 				}
 				this.tempCustomLayouts = layouts;
 
@@ -424,6 +424,8 @@
 				if (code === 0) {
 					// 保存数据到全局，二次打开自定义布局界面回显使用
 					this.setGlobalCustomLayouts(this.tempCustomLayouts);
+					this.currentLayoutMode = RCRTCLiveMixLayoutMode.Custom;
+					this.setGlobalLayoutMode(this.currentLayoutMode);
 					uni.showToast({
 						icon: 'none',
 						title: '自定义布局设置成功',

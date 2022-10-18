@@ -11,7 +11,6 @@
 		<view class="buttons">
 			<button @click="createLayout"><text>新增</text></button>
 			<button @click="commit"><text>提交</text></button>
-			<button><text>取消</text></button>
 		</view>
 		<uni-popup ref="layoutPopup" type="center">
 			<view class="popup">
@@ -118,6 +117,7 @@
 			},
 			deleteLayout(index) {
 				this.layouts.splice(index, 1);
+				this.$forceUpdate();
 			},
 			selectUser() {
 				this.$refs.userList.show();
@@ -157,6 +157,7 @@
 					// 否则更新内容
 					this.layouts.splice(findIndex, 1, layout);
 				}
+				this.$forceUpdate();
 				this.popupClose();
 			},
 			popupClose() {
