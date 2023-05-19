@@ -1244,14 +1244,14 @@
 					});
 				}
 			},
-
+			// 自己本端离开副房间成功的回调（无论 disband true 和 false 都会触发）
 			onSubRoomLeftCallback(res) {
 				console.log('onSubRoomLeftCallback', res);
 				let { roomId, code, message } = res;
-				// // 删除保存的用户
-				// let users = this.usersInfo;
-				// let uIndex = users.findIndex(user => user.roomId === roomId);
-				// users.splice(uIndex, 1);
+				// 如果本端暂时离开副房间，需要删除副房间的用户（去除在远端用户列表中的显示）
+				let users = this.usersInfo;
+				let uIndex = users.findIndex(user => user.roomId === roomId);
+				users.splice(uIndex, 1);
 
 				let joinedSubRooms = this.getGlobalData().joinedSubRooms;
 				let joinedIndex = joinedSubRooms.indexOf(roomId);

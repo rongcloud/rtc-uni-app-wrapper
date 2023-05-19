@@ -1,7 +1,7 @@
 {
     "name" : "rtc-example",
     "appid" : "__UNI__3EA2307",
-    "description" : "",
+    "description" : "RTC Test Demo",
     "versionName" : "1.0.0",
     "versionCode" : "100",
     "transformPx" : false,
@@ -154,5 +154,6 @@
     },
     "uniStatistics" : {
         "enable" : false
-    }
+    },
+    "vueVersion" : "2"
 }

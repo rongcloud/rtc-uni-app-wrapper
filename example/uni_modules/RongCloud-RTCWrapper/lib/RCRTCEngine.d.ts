@@ -14,18 +14,18 @@ export default class RCRTCEngine implements RCRTCEngineInterface, RCRTCEngineEve
     leaveRoom(): number;
     publish(type: RCRTCMediaType): number;
     unpublish(type: RCRTCMediaType): number;
-    subscribe(userId: string, type: RCRTCMediaType, tiny: true): number;
-    subscribes(userIds: string[], type: RCRTCMediaType, tiny: true): number;
+    subscribe(userId: string, type: RCRTCMediaType, tiny?: boolean): number;
+    subscribes(userIds: string[], type: RCRTCMediaType, tiny?: boolean): number;
     unsubscribe(userId: string, type: RCRTCMediaType): number;
     unsubscribes(userIds: string[], type: RCRTCMediaType): number;
-    subscribeLiveMix(type: RCRTCMediaType, tiny: true): number;
+    subscribeLiveMix(type: RCRTCMediaType, tiny?: boolean): number;
     unsubscribeLiveMix(type: RCRTCMediaType): number;
     setAudioConfig(config: RCRTCAudioConfig): number;
-    setVideoConfig(config: RCRTCVideoConfig, tiny: false): number;
+    setVideoConfig(config: RCRTCVideoConfig, tiny?: boolean): number;
     enableMicrophone(enable: boolean): number;
     enableSpeaker(enable: boolean): number;
     adjustLocalVolume(volume: number): number;
-    enableCamera(enable: boolean, camera: RCRTCCamera.Front): number;
+    enableCamera(enable: boolean, camera?: RCRTCCamera): number;
     switchCamera(): number;
     whichCamera(): RCRTCCamera;
     isCameraFocusSupported(): boolean;
@@ -50,12 +50,12 @@ export default class RCRTCEngine implements RCRTCEngineInterface, RCRTCEngineEve
     setLiveMixCustomLayouts(layouts: RCRTCCustomLayout[]): number;
     setLiveMixCustomAudios(userIds: string[]): number;
     setLiveMixAudioBitrate(bitrate: number): number;
-    setLiveMixVideoBitrate(bitrate: number, tiny: false): number;
-    setLiveMixVideoResolution(width: number, height: number, tiny: false): number;
-    setLiveMixVideoFps(fps: RCRTCVideoFps, tiny: false): number;
+    setLiveMixVideoBitrate(bitrate: number, tiny?: boolean): number;
+    setLiveMixVideoResolution(width: number, height: number, tiny?: boolean): number;
+    setLiveMixVideoFps(fps: RCRTCVideoFps, tiny?: boolean): number;
     createAudioEffect(path: string, effectId: number): number;
     releaseAudioEffect(effectId: number): number;
-    playAudioEffect(effectId: number, volume: number, loop: 1): number;
+    playAudioEffect(effectId: number, volume: number, loop?: number): number;
     pauseAudioEffect(effectId: number): number;
     pauseAllAudioEffects(): number;
     resumeAudioEffect(effectId: number): number;
@@ -65,7 +65,7 @@ export default class RCRTCEngine implements RCRTCEngineInterface, RCRTCEngineEve
     adjustAudioEffectVolume(effectId: number, volume: number): number;
     getAudioEffectVolume(effectId: number): number;
     adjustAllAudioEffectsVolume(volume: number): number;
-    startAudioMixing(path: string, mode: RCRTCAudioMixingMode, playback: true, loop: 1): number;
+    startAudioMixing(path: string, mode: RCRTCAudioMixingMode, playback?: boolean, loop?: number): number;
     stopAudioMixing(): number;
     pauseAudioMixing(): number;
     resumeAudioMixing(): number;
@@ -453,7 +453,7 @@ export interface RCRTCEngineInterface {
      * @return {*}  {number} 错误码
      * @memberof RCRTCEngineInterface
      */
-    setVideoConfig(config: RCRTCVideoConfig, tiny: false): number;
+    setVideoConfig(config: RCRTCVideoConfig, tiny: boolean): number;
     /**
      * 打开/关闭麦克风
      *
@@ -682,7 +682,7 @@ export interface RCRTCEngineInterface {
      * @return {*}  {number}
      * @memberof RCRTCEngineInterface
      */
-    setLiveMixVideoBitrate(bitrate: number, tiny: false): number;
+    setLiveMixVideoBitrate(bitrate: number, tiny: boolean): number;
     /**
      * 设置直播合流视频分辨率, 仅供直播主播用户使用
      *
@@ -692,7 +692,7 @@ export interface RCRTCEngineInterface {
      * @return {*}  {number}
      * @memberof RCRTCEngineInterface
      */
-    setLiveMixVideoResolution(width: number, height: number, tiny: false): number;
+    setLiveMixVideoResolution(width: number, height: number, tiny: boolean): number;
     /**
      * 设置直播合流视频帧率, 仅供直播主播用户使用
      *
@@ -701,7 +701,7 @@ export interface RCRTCEngineInterface {
      * @return {*}  {number}
      * @memberof RCRTCEngineInterface
      */
-    setLiveMixVideoFps(fps: RCRTCVideoFps, tiny: false): number;
+    setLiveMixVideoFps(fps: RCRTCVideoFps, tiny: boolean): number;
     /**
      * 创建音效文件缓存, 仅供会议用户或直播主播用户使用
      *
@@ -728,7 +728,7 @@ export interface RCRTCEngineInterface {
      * @return {*}  {number}
      * @memberof RCRTCEngineInterface
      */
-    playAudioEffect(effectId: number, volume: number, loop: 1): number;
+    playAudioEffect(effectId: number, volume: number, loop: number): number;
     /**
      * 暂停音效文件播放, 仅供会议用户或直播主播用户使用
      *
@@ -810,7 +810,7 @@ export interface RCRTCEngineInterface {
      * @memberof RCRTCEngineInterface
      * @category 混音
      */
-    startAudioMixing(path: string, mode: RCRTCAudioMixingMode, playback: true, loop: 1): number;
+    startAudioMixing(path: string, mode: RCRTCAudioMixingMode, playback: boolean, loop: number): number;
     /**
      * 停止混音, 仅供会议用户或直播主播用户使用
      *

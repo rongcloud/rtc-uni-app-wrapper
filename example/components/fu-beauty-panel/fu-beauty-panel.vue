@@ -266,10 +266,12 @@
 						break;
 				}
 			},
-			setBeautyEnable(enable) {
-				RCFUBeautyEngine.setBeautyEnable(enable);
-				this.beautyEnable = enable;
-				getApp().globalData.fuBeautyData.enable = enable;
+			async setBeautyEnable(enable) {
+				let code = await RCFUBeautyEngine.setBeautyEnable(enable);
+				if (code === 0) {
+					this.beautyEnable = enable;
+					getApp().globalData.fuBeautyData.enable = enable;
+				}
 			},
 			getBeautyEnable() {
 				return getApp().globalData.fuBeautyData.enable === true;

@@ -1,4 +1,4 @@
-import { RCRTCEngineEventsName, RCRTCStatsEventsName, } from './RCRTCDefines';
+import { RCRTCCamera, RCRTCEngineEventsName, RCRTCStatsEventsName, } from './RCRTCDefines';
 const RCUniRtc = uni.requireNativePlugin('RongCloud-RTC-RCUniRtc');
 const Platform = uni.getSystemInfoSync().platform;
 const EngineEventsPrefix = 'Engine:';
@@ -39,10 +39,10 @@ export default class RCRTCEngine {
     unpublish(type) {
         return RCUniRtc.unpublish(type);
     }
-    subscribe(userId, type, tiny) {
+    subscribe(userId, type, tiny = true) {
         return RCUniRtc.subscribe(userId, type, tiny);
     }
-    subscribes(userIds, type, tiny) {
+    subscribes(userIds, type, tiny = true) {
         return RCUniRtc.subscribe(userIds, type, tiny);
     }
     unsubscribe(userId, type) {
@@ -51,7 +51,7 @@ export default class RCRTCEngine {
     unsubscribes(userIds, type) {
         return RCUniRtc.unsubscribes(userIds, type);
     }
-    subscribeLiveMix(type, tiny) {
+    subscribeLiveMix(type, tiny = true) {
         return RCUniRtc.subscribeLiveMix(type, tiny);
     }
     unsubscribeLiveMix(type) {
@@ -60,7 +60,7 @@ export default class RCRTCEngine {
     setAudioConfig(config) {
         return RCUniRtc.setAudioConfig(config);
     }
-    setVideoConfig(config, tiny) {
+    setVideoConfig(config, tiny = false) {
         return RCUniRtc.setVideoConfig(config, tiny);
     }
     enableMicrophone(enable) {
@@ -72,7 +72,7 @@ export default class RCRTCEngine {
     adjustLocalVolume(volume) {
         return RCUniRtc.adjustLocalVolume(volume);
     }
-    enableCamera(enable, camera) {
+    enableCamera(enable, camera = RCRTCCamera.Front) {
         return RCUniRtc.enableCamera(enable, camera);
     }
     switchCamera() {
@@ -96,8 +96,8 @@ export default class RCRTCEngine {
     setCameraCaptureOrientation(orientation) {
         return RCUniRtc.setCameraCaptureOrientation(orientation);
     }
-    setLocalView(instanceId, ref, callback) {
-        RCUniRtc.setLocalView(instanceId, ref, callback);
+    setLocalView(ref, callback) {
+        RCUniRtc.setLocalView(ref, callback);
     }
     removeLocalView(callback) {
         RCUniRtc.removeLocalView(callback);
@@ -147,13 +147,13 @@ export default class RCRTCEngine {
     setLiveMixAudioBitrate(bitrate) {
         return RCUniRtc.setLiveMixAudioBitrate(bitrate);
     }
-    setLiveMixVideoBitrate(bitrate, tiny) {
+    setLiveMixVideoBitrate(bitrate, tiny = false) {
         return RCUniRtc.setLiveMixVideoBitrate(bitrate, tiny);
     }
-    setLiveMixVideoResolution(width, height, tiny) {
+    setLiveMixVideoResolution(width, height, tiny = false) {
         return RCUniRtc.setLiveMixVideoResolution(width, height, tiny);
     }
-    setLiveMixVideoFps(fps, tiny) {
+    setLiveMixVideoFps(fps, tiny = false) {
         return RCUniRtc.setLiveMixVideoFps(fps, tiny);
     }
     createAudioEffect(path, effectId) {
@@ -162,7 +162,7 @@ export default class RCRTCEngine {
     releaseAudioEffect(effectId) {
         return RCUniRtc.releaseAudioEffect(effectId);
     }
-    playAudioEffect(effectId, volume, loop) {
+    playAudioEffect(effectId, volume, loop = 1) {
         return RCUniRtc.playAudioEffect(effectId, volume, loop);
     }
     pauseAudioEffect(effectId) {
@@ -192,7 +192,7 @@ export default class RCRTCEngine {
     adjustAllAudioEffectsVolume(volume) {
         return RCUniRtc.adjustAllAudioEffectsVolume(volume);
     }
-    startAudioMixing(path, mode, playback, loop) {
+    startAudioMixing(path, mode, playback = true, loop = 1) {
         return RCUniRtc.startAudioMixing(path, mode, playback, loop);
     }
     stopAudioMixing() {
@@ -323,7 +323,6 @@ export default class RCRTCEngine {
             let listener = (res) => {
                 callback(res.data);
             };
-			console.log('this._getFullEventName(event)---',this._getFullEventName(event))
             RCUniRtc.addEventListener(this._getFullEventName(event), listener);
         }
     }

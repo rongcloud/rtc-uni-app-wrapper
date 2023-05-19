@@ -284,7 +284,10 @@
 		},
 		
 		onResize() {
-			this.updateScreenOrientation();
+			// 开启摄像头之后才能设置方向
+			if (this.enableCamera) {
+				this.updateScreenOrientation();
+			}
 		},
 
 		onLoad(option) {
@@ -378,6 +381,8 @@
 				uni.$on(RCRTCEngineEventsName.OnKicked, this.onKickedCallback.bind(this));
 				// 本地用户开关相机回调
 				uni.$on(RCRTCEngineEventsName.OnCameraEnabled, this.onEnableCameraCallback.bind(this));
+				// 本地用户切换摄像头
+				uni.$on(RCRTCEngineEventsName.OnCameraSwitched, this.OnCameraSwitchedCallback.bind(this))
 				// 本地用户发布资源回调
 				uni.$on(RCRTCEngineEventsName.OnPublished, this.onPublishedCallback.bind(this));
 				// 本地用户取消发布资源回调
@@ -404,6 +409,7 @@
 				uni.$off(RCRTCEngineEventsName.OnRoomLeft);
 				uni.$off(RCRTCEngineEventsName.OnKicked);
 				uni.$off(RCRTCEngineEventsName.OnCameraEnabled);
+				uni.$off(RCRTCEngineEventsName.OnCameraSwitched);
 				uni.$off(RCRTCEngineEventsName.OnPublished);
 				uni.$off(RCRTCEngineEventsName.OnUnpublished);
 				uni.$off(RCRTCEngineEventsName.OnUserJoined);
@@ -503,8 +509,6 @@
 			changeFrontCamera(event) {
 				this.frontCamera = !this.frontCamera;
 				let code = this.rtcEngine.switchCamera();
-				// RCFUBeautyEngine.setDisplayOrientation(7);
-				RCFUBeautyEngine.setIsFrontCamera(this.frontCamera);
 				console.log('changeFrontCamera code = ', code);
 			},
 			changePublishAudio() {
@@ -619,15 +623,15 @@
 					});
 				}
 			},
-			fuBeautyClick(){
+			async fuBeautyClick(){
 				let fuBeautyRegisterCode = getApp().globalData.fuBeautyRegisterCode;
-				if (fuBeautyRegisterCode != 1) {
-					let code = RCFUBeautyEngine.register(Config.g_auth_package);
+				if (fuBeautyRegisterCode != 0) {
+					let code = await RCFUBeautyEngine.register(Config.g_auth_package);
 					getApp().globalData.fuBeautyRegisterCode = code;
-					// code === 1 注册成功
+					// code === 0 注册成功
 					uni.showToast({
 						icon: 'none',
-						title: '相芯注册' + (code === 1 ? '成功' : '失败'),
+						title: '相芯注册' + (code === 0 ? '成功' : '失败'),
 						duration: 2000
 					});
 					console.log('相芯注册状态码：', code);
@@ -828,15 +832,17 @@
 				this.buffingVal = beautyOption.smoothLevel;
 				this.brightnessVal = beautyOption.brightLevel;
 			},
-			resetFUBeautyData() {
+			async resetFUBeautyData() {
 				if (getApp().globalData.fuBeautyRegisterCode === 1) {
 					RCFUBeautyEngine.reset();
-					RCFUBeautyEngine.setBeautyEnable(false);
-					getApp().globalData.fuBeautyData.enable = false;
-					getApp().globalData.fuBeautyData.skinBeautyValues = null;
-					getApp().globalData.fuBeautyData.faceShapeValues = null;
-					getApp().globalData.fuBeautyData.filterBeautyValues = null;
-					getApp().globalData.fuBeautyData.currentSkinBlurType = 0;
+					let code = await RCFUBeautyEngine.setBeautyEnable(false);
+					if (code === 0) {
+						getApp().globalData.fuBeautyData.enable = false;
+						getApp().globalData.fuBeautyData.skinBeautyValues = null;
+						getApp().globalData.fuBeautyData.faceShapeValues = null;
+						getApp().globalData.fuBeautyData.filterBeautyValues = null;
+						getApp().globalData.fuBeautyData.currentSkinBlurType = 0;
+					}
 				}
 			},
 			updateScreenOrientation() {
@@ -941,6 +947,15 @@
 				} = res;
 				this.enableCamera = enable;
 				this.setupLocalView();
+			},
+			
+			OnCameraSwitchedCallback(res) {
+				let {
+					camera,
+					code,
+					message
+				} = res;
+				RCFUBeautyEngine.setIsFrontCamera(camera === RCRTCCamera.Front);
 			},
 
 			onPublishedCallback(res) {

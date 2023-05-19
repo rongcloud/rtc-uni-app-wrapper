@@ -3,9 +3,9 @@ export default class RCFUBeautyEngine {
      * 注册相信美颜
      * 需要拥有相芯颁发的鉴权证书才能正常使用SDK的功能
      * @param authPackage 相芯提供的鉴权数据，将 iOS 鉴权数据 {} 内的所有数据复制到 js 的数组中，然后传入
-     * @returns
+     * @returns Promise 中返回 0 代表成功，1 代表失败
      */
-    static register(authPackage: []): number;
+    static register(authPackage: []): Promise<number>;
     /**
      * 重置美颜参数
      */
@@ -13,7 +13,7 @@ export default class RCFUBeautyEngine {
     /**
      * 开启/关闭美颜
      */
-    static setBeautyEnable(enable: boolean): void;
+    static setBeautyEnable(enable: boolean): Promise<number>;
     /**
      * 设置显示角度
      * @param orientation 0:home键在下方, 1:home键在右侧, 2:home键在上方, 3:home键在左侧

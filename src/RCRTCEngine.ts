@@ -154,10 +154,10 @@ export default class RCRTCEngine
     unpublish(type: RCRTCMediaType): number {
         return RCUniRtc.unpublish(type);
     }
-    subscribe(userId: string, type: RCRTCMediaType, tiny: true): number {
+    subscribe(userId: string, type: RCRTCMediaType, tiny: boolean = true): number {
         return RCUniRtc.subscribe(userId, type, tiny);
     }
-    subscribes(userIds: string[], type: RCRTCMediaType, tiny: true): number {
+    subscribes(userIds: string[], type: RCRTCMediaType, tiny: boolean = true): number {
         return RCUniRtc.subscribe(userIds, type, tiny);
     }
     unsubscribe(userId: string, type: RCRTCMediaType): number {
@@ -166,7 +166,7 @@ export default class RCRTCEngine
     unsubscribes(userIds: string[], type: RCRTCMediaType): number {
         return RCUniRtc.unsubscribes(userIds, type);
     }
-    subscribeLiveMix(type: RCRTCMediaType, tiny: true): number {
+    subscribeLiveMix(type: RCRTCMediaType, tiny: boolean = true): number {
         return RCUniRtc.subscribeLiveMix(type, tiny);
     }
     unsubscribeLiveMix(type: RCRTCMediaType): number {
@@ -175,7 +175,7 @@ export default class RCRTCEngine
     setAudioConfig(config: RCRTCAudioConfig): number {
         return RCUniRtc.setAudioConfig(config);
     }
-    setVideoConfig(config: RCRTCVideoConfig, tiny: false): number {
+    setVideoConfig(config: RCRTCVideoConfig, tiny: boolean = false): number {
         return RCUniRtc.setVideoConfig(config, tiny);
     }
     enableMicrophone(enable: boolean): number {
@@ -187,7 +187,7 @@ export default class RCRTCEngine
     adjustLocalVolume(volume: number): number {
         return RCUniRtc.adjustLocalVolume(volume);
     }
-    enableCamera(enable: boolean, camera: RCRTCCamera.Front): number {
+    enableCamera(enable: boolean, camera:RCRTCCamera = RCRTCCamera.Front): number {
         return RCUniRtc.enableCamera(enable, camera);
     }
     switchCamera(): number {
@@ -262,13 +262,13 @@ export default class RCRTCEngine
     setLiveMixAudioBitrate(bitrate: number): number {
         return RCUniRtc.setLiveMixAudioBitrate(bitrate);
     }
-    setLiveMixVideoBitrate(bitrate: number, tiny: false): number {
+    setLiveMixVideoBitrate(bitrate: number, tiny: boolean = false): number {
         return RCUniRtc.setLiveMixVideoBitrate(bitrate, tiny);
     }
-    setLiveMixVideoResolution(width: number, height: number, tiny: false): number {
+    setLiveMixVideoResolution(width: number, height: number, tiny: boolean = false): number {
         return RCUniRtc.setLiveMixVideoResolution(width, height, tiny);
     }
-    setLiveMixVideoFps(fps: RCRTCVideoFps, tiny: false): number {
+    setLiveMixVideoFps(fps: RCRTCVideoFps, tiny: boolean = false): number {
         return RCUniRtc.setLiveMixVideoFps(fps, tiny);
     }
     createAudioEffect(path: string, effectId: number): number {
@@ -277,7 +277,7 @@ export default class RCRTCEngine
     releaseAudioEffect(effectId: number): number {
         return RCUniRtc.releaseAudioEffect(effectId);
     }
-    playAudioEffect(effectId: number, volume: number, loop: 1): number {
+    playAudioEffect(effectId: number, volume: number, loop: number = 1): number {
         return RCUniRtc.playAudioEffect(effectId, volume, loop);
     }
     pauseAudioEffect(effectId: number): number {
@@ -307,7 +307,7 @@ export default class RCRTCEngine
     adjustAllAudioEffectsVolume(volume: number): number {
         return RCUniRtc.adjustAllAudioEffectsVolume(volume);
     }
-    startAudioMixing(path: string, mode: RCRTCAudioMixingMode, playback: true, loop: 1): number {
+    startAudioMixing(path: string, mode: RCRTCAudioMixingMode, playback: boolean = true, loop: number = 1): number {
         return RCUniRtc.startAudioMixing(path, mode, playback, loop);
     }
     stopAudioMixing(): number {
@@ -1108,7 +1108,7 @@ export interface RCRTCEngineInterface {
      * @return {*}  {number} 错误码
      * @memberof RCRTCEngineInterface
      */
-    setVideoConfig(config: RCRTCVideoConfig, tiny: false): number;
+    setVideoConfig(config: RCRTCVideoConfig, tiny: boolean): number;
 
     /**
      * 打开/关闭麦克风
@@ -1365,7 +1365,7 @@ export interface RCRTCEngineInterface {
      * @return {*}  {number}
      * @memberof RCRTCEngineInterface
      */
-    setLiveMixVideoBitrate(bitrate: number, tiny: false): number;
+    setLiveMixVideoBitrate(bitrate: number, tiny: boolean): number;
 
     /**
      * 设置直播合流视频分辨率, 仅供直播主播用户使用
@@ -1376,7 +1376,7 @@ export interface RCRTCEngineInterface {
      * @return {*}  {number}
      * @memberof RCRTCEngineInterface
      */
-    setLiveMixVideoResolution(width: number, height: number, tiny: false): number;
+    setLiveMixVideoResolution(width: number, height: number, tiny: boolean): number;
 
     /**
      * 设置直播合流视频帧率, 仅供直播主播用户使用
@@ -1386,7 +1386,7 @@ export interface RCRTCEngineInterface {
      * @return {*}  {number}
      * @memberof RCRTCEngineInterface
      */
-    setLiveMixVideoFps(fps: RCRTCVideoFps, tiny: false): number;
+    setLiveMixVideoFps(fps: RCRTCVideoFps, tiny: boolean): number;
 
     /**
      * 创建音效文件缓存, 仅供会议用户或直播主播用户使用
@@ -1416,7 +1416,7 @@ export interface RCRTCEngineInterface {
      * @return {*}  {number}
      * @memberof RCRTCEngineInterface
      */
-    playAudioEffect(effectId: number, volume: number, loop: 1): number;
+    playAudioEffect(effectId: number, volume: number, loop: number): number;
 
     /**
      * 暂停音效文件播放, 仅供会议用户或直播主播用户使用
@@ -1508,7 +1508,7 @@ export interface RCRTCEngineInterface {
      * @memberof RCRTCEngineInterface
      * @category 混音
      */
-    startAudioMixing(path: string, mode: RCRTCAudioMixingMode, playback: true, loop: 1): number;
+    startAudioMixing(path: string, mode: RCRTCAudioMixingMode, playback: boolean, loop: number): number;
 
     /**
      * 停止混音, 仅供会议用户或直播主播用户使用

@@ -7,7 +7,11 @@ export default class RCFUBeautyEngine {
      * @returns
      */
     static register(authPackage) {
-        return RCUniFUBeauty.registerBeauty(authPackage);
+        return new Promise((resolve) => {
+            RCUniFUBeauty.registerBeauty(authPackage, (code) => {
+                resolve(code);
+            });
+        });
     }
     /**
      * 重置美颜参数
@@ -19,7 +23,11 @@ export default class RCFUBeautyEngine {
      * 开启/关闭美颜
      */
     static setBeautyEnable(enable) {
-        RCUniFUBeauty.setBeautyEnable(enable);
+        return new Promise((resolve) => {
+            RCUniFUBeauty.setBeautyEnable(enable, (code) => {
+                resolve(code);
+            });
+        });
     }
     /**
      * 设置显示角度

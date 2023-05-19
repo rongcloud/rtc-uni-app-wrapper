@@ -353,13 +353,13 @@
 					videoSetup: videoSetup
 				};
 				console.log(setup);
-				// RCRTCEngine.unInit();
-				// // 初始化引擎
-				// RCRTCEngine.init(setup);
-				getApp().globalData.rtcEngine = RCRTCEngine.create(setup)
-				this.rtcEngine = getApp().globalData.rtcEngine
-				console.log('this.rtcEngine---',this.rtcEngine)
-				this.addListeners()
+				getApp().globalData.rtcEngine = RCRTCEngine.create(setup);
+				this.rtcEngine = getApp().globalData.rtcEngine;
+				console.log('this.rtcEngine---',this.rtcEngine);
+				getApp().globalData.roomUsers = [];
+				
+				this.removeListeners();
+				this.addListeners();
 
 				let roomSetup = {
 					type: this.currentMedia,
@@ -522,14 +522,14 @@
 				});
 			
 				this.rtcEngine.setOnCustomStreamPublishedListener((res) => {
-					// 更新保存的用户
+					uni.$emit(RCRTCEngineEventsName.OnCustomStreamPublished, res);
+					// 更新保存的用户\
+					let {tag} = res;
 					let users = getApp().globalData.roomUsers;
 					let index = users.findIndex(user => user.userId === this.localUserId);
 					let user = users[index];
 					user.tag = tag;
 					users.splice(index, 1, user);
-					
-					uni.$emit(RCRTCEngineEventsName.OnCustomStreamPublished, res);
 				});
 				this.rtcEngine.setOnCustomStreamUnpublishedListener((res) => {
 					// 更新保存的用户
@@ -675,7 +675,10 @@
 					console.log('connect-setOnRemoteLiveRoleSwitchedListener---',res)
 					if (res.role == 1){
 						//房间中有观众切换为了主播
-						this.addUser(res.userId,res.roomId)
+						this.addUser(res.userId,res.roomId);
+					} else if (res.role == 2) {
+						// 房间中有主播切换为观众
+						this.userLeft({userId: res.userId, roomId: res.roomId});
 					}
 					uni.$emit('IRCRTCIWListener:onRemoteLiveRoleSwitched', res);
 				});
@@ -688,6 +691,90 @@
 				this.rtcEngine.setOnLiveMixSeiReceivedListener((res) => {
 					uni.$emit('IRCRTCIWListener:onLiveMixSeiReceived', res);
 				});
+			},
+			removeListeners() {
+				this.rtcEngine.setOnErrorListener();
+				this.rtcEngine.setOnKickedListener();
+				this.rtcEngine.setOnRoomJoinedListener();
+				this.rtcEngine.setOnRoomLeftListener();
+				this.rtcEngine.setOnPublishedListener();
+				this.rtcEngine.setOnUnpublishedListener();
+				this.rtcEngine.setOnSubscribedListener();
+				this.rtcEngine.setOnUnsubscribedListener();
+				this.rtcEngine.setOnLiveMixSubscribedListener();
+				this.rtcEngine.setOnLiveMixUnsubscribedListener();
+				this.rtcEngine.setOnCameraEnabledListener();
+				this.rtcEngine.setOnCameraSwitchedListener();
+				this.rtcEngine.setOnLiveCdnAddedListener();
+				this.rtcEngine.setOnLiveCdnRemovedListener();
+				this.rtcEngine.setOnLiveMixLayoutModeSetListener();
+				this.rtcEngine.setOnLiveMixRenderModeSetListener();
+				this.rtcEngine.setOnLiveMixCustomAudiosSetListener();
+				this.rtcEngine.setOnLiveMixCustomLayoutsSetListener();
+				this.rtcEngine.setOnLiveMixAudioBitrateSetListener();
+				this.rtcEngine.setOnLiveMixVideoBitrateSetListener();
+				this.rtcEngine.setOnLiveMixVideoResolutionSetListener();
+				this.rtcEngine.setOnLiveMixVideoFpsSetListener();
+				this.rtcEngine.setOnAudioEffectCreatedListener();
+				this.rtcEngine.setOnAudioEffectFinishedListener();
+				this.rtcEngine.setOnAudioMixingStartedListener();
+				this.rtcEngine.setOnAudioMixingPausedListener();
+				this.rtcEngine.setOnAudioMixingStoppedListener();
+				this.rtcEngine.setOnAudioMixingFinishedListener();
+				this.rtcEngine.setOnUserJoinedListener();
+				this.rtcEngine.setOnUserOfflineListener();
+				this.rtcEngine.setOnUserLeftListener();
+				this.rtcEngine.setOnRemotePublishedListener();
+				this.rtcEngine.setOnRemoteUnpublishedListener();
+				this.rtcEngine.setOnRemoteLiveMixPublishedListener();
+				this.rtcEngine.setOnRemoteLiveMixUnpublishedListener();
+				this.rtcEngine.setOnRemoteStateChangedListener();
+				this.rtcEngine.setOnRemoteFirstFrameListener();
+				this.rtcEngine.setOnRemoteLiveMixFirstFrameListener();
+			
+				this.rtcEngine.setOnCustomStreamPublishedListener();
+				this.rtcEngine.setOnCustomStreamUnpublishedListener();
+				this.rtcEngine.setOnRemoteCustomStreamPublishedListener();
+				this.rtcEngine.setOnRemoteCustomStreamUnpublishedListener();
+				this.rtcEngine.setOnCustomStreamSubscribedListener();
+				this.rtcEngine.setOnCustomStreamUnsubscribedListener();
+				this.rtcEngine.setOnCustomStreamPublishFinishedListener();
+				this.rtcEngine.setOnJoinSubRoomRequestedListener();
+				this.rtcEngine.setOnJoinSubRoomRequestCanceledListener();
+				this.rtcEngine.setOnJoinSubRoomRequestRespondedListener();
+				this.rtcEngine.setOnJoinSubRoomRequestReceivedListener();
+				this.rtcEngine.setOnCancelJoinSubRoomRequestReceivedListener();
+				this.rtcEngine.setOnJoinSubRoomRequestResponseReceivedListener();
+				this.rtcEngine.setOnSubRoomJoinedListener();
+				this.rtcEngine.setOnSubRoomLeftListener();
+				this.rtcEngine.setOnSubRoomBandedListener();
+				this.rtcEngine.setOnSubRoomDisbandListener();
+				
+				// 状态监听
+				this.rtcEngine.setOnNetworkStatsListener();
+				this.rtcEngine.setOnLocalAudioStatsListener();
+				this.rtcEngine.setOnLocalVideoStatsListener();
+				this.rtcEngine.setOnRemoteAudioStatsListener();
+				this.rtcEngine.setOnRemoteVideoStatsListener();
+				this.rtcEngine.setOnLiveMixAudioStatsListener();
+				this.rtcEngine.setOnLiveMixVideoStatsListener();
+				this.rtcEngine.setOnLiveMixMemberAudioStatsListener();
+				this.rtcEngine.setOnLiveMixMemberCustomAudioStatsListener();
+				this.rtcEngine.setOnLocalCustomAudioStatsListener();
+				this.rtcEngine.setOnLocalCustomVideoStatsListener();
+				this.rtcEngine.setOnRemoteCustomAudioStatsListener();
+				this.rtcEngine.setOnRemoteCustomVideoStatsListener();
+				
+				this.rtcEngine.setOnLiveMixInnerCdnStreamSubscribedListener();
+				this.rtcEngine.setOnLiveMixInnerCdnStreamUnsubscribedListener();
+				this.rtcEngine.setOnLocalLiveMixInnerCdnVideoResolutionSetListener();
+				this.rtcEngine.setOnLocalLiveMixInnerCdnVideoFpsSetListener();
+				this.rtcEngine.setOnLiveMixInnerCdnStreamEnabledListener();
+				this.rtcEngine.setOnLiveRoleSwitchedListener();
+				this.rtcEngine.setOnRemoteLiveRoleSwitchedListener();
+				this.rtcEngine.setOnSeiEnabledListener();
+				this.rtcEngine.setOnSeiReceivedListener();
+				this.rtcEngine.setOnLiveMixSeiReceivedListener();
 			},
 			addUser(userId,roomId){
 				let user = {
@@ -714,14 +801,14 @@
 					users.push(user);
 				}
 				console.log('getApp().globalData.roomUsers2---',getApp().globalData.roomUsers)
-				if (roomId != this.roomId) {
-					//更新跨房间的用户信息
-					let joinedSubRooms = this.getGlobalData().joinedSubRooms;
-					if (!joinedSubRooms.includes(roomId)) {
-						joinedSubRooms.push(roomId);
-					}
-					this.updateJoinableSubRooms();
-				}
+				// if (roomId != this.roomId) {
+				// 	//更新跨房间的用户信息
+				// 	let joinedSubRooms = this.getGlobalData().joinedSubRooms;
+				// 	if (joinedSubRooms && !joinedSubRooms.includes(roomId)) {
+				// 		joinedSubRooms.push(roomId);
+				// 	}
+				// 	this.updateJoinableSubRooms();
+				// }
 			},
 			userJoined(res){
 				console.log('host OnUserJoined', res);
@@ -732,7 +819,7 @@
 			userLeft(res){
 				console.log('host OnUserLeft', res);
 				let { userId, roomId } = res;
-				let users = this.usersInfo;
+				let users = getApp().globalData.roomUsers;
 				let findIndex = users.findIndex(user => user.userId === userId);
 				if (findIndex != -1) {
 					users.splice(findIndex, 1);
@@ -741,7 +828,7 @@
 			userOffline(res){
 				console.log('host OnUserOffline', res);
 				let { userId, roomId } = res;
-				let users = this.usersInfo;
+				let users = getApp().globalData.roomUsers;
 				let findIndex = users.findIndex(user => user.userId === userId);
 				if (findIndex != -1) {
 					users.splice(findIndex, 1);
@@ -832,18 +919,19 @@
 						break;
 				}
 			},
-			updateJoinableSubRooms() {
-				let joinableSubRooms = this.getGlobalData().joinableSubRooms;
-				// 提前清空，下面重新组装 (通过splice直接修改原数组)
-				joinableSubRooms.splice(0, joinableSubRooms.length);
-				let bandedSubRooms = this.getGlobalData().bandedSubRooms;
-				let joinedSubRooms = this.getGlobalData().joinedSubRooms;
-				bandedSubRooms.forEach(roomId => {
-					if (!joinedSubRooms.includes(roomId)) {
-						joinableSubRooms.push(roomId);
-					}
-				});
-			},
+			// updateJoinableSubRooms() {
+			// 	let joinableSubRooms = this.getGlobalData().joinableSubRooms;
+			// 	if (!joinableSubRooms) return;
+			// 	// 提前清空，下面重新组装 (通过splice直接修改原数组)
+			// 	joinableSubRooms.splice(0, joinableSubRooms.length);
+			// 	let bandedSubRooms = this.getGlobalData().bandedSubRooms;
+			// 	let joinedSubRooms = this.getGlobalData().joinedSubRooms;
+			// 	bandedSubRooms.forEach(roomId => {
+			// 		if (!joinedSubRooms.includes(roomId)) {
+			// 			joinableSubRooms.push(roomId);
+			// 		}
+			// 	});
+			// },
 			inintialGlobalData() {
 				getApp().globalData.hostPageData = {
 					// 用户列表 元素为 {userId, tag}

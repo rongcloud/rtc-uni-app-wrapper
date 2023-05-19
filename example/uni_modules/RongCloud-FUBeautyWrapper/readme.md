@@ -1,1 +1,1 @@
-# RongCloud-XXBeauty
+# RongCloud-FUBeauty
