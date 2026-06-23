@@ -1,5 +1,7 @@
 # 融云 uni-app RTC
 
+本项目为融云音视频能力库（RTCLib）的 uni-app 示例 Demo，旨在帮助开发者快速集成并全面掌握融云 RTC 的核心功能。
+
 本文档主要讲解了如何使用融云  uni-app RTC SDK，基于 融云 iOS/Android 平台的  RTCLib  SDK
 
 [uni-app 官网](https://uniapp.dcloud.io/)
@@ -398,4 +400,3 @@ RCRTCEngine.setRemoteView(userId, this.$refs.remoteView.getNativeViewRef(), (cod
 ```js
 RCRTCEngine.leaveRoom();
 ```
-
